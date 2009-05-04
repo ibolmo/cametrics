@@ -43,49 +43,6 @@ Use Cases
             value = db.StringPropety(required = True)
             statistics = AgentStatistics
 
-### Expected Classes (untested)
-    class Datum (db.Model):
-    
-    class Statistics (db.Model):
-        hits = HitsHistogram()
-    
-    class FloatStatistics (Statistics):
-        first = db.ReferenceProperty(FloatProperty)
-        last = db.ReferenceProperty(FloatProperty)
-        min = db.FloatProperty()
-        max = db.FloatProperty()
-        mean = db.FloatProperty()
-        sum = db.FloatProperty()
-        # ...
-    
-    class StringStatistics (Statistics):
-        first = db.ReferenceProperty(StringProperty)
-        last = db.ReferenceProperty(StringProperty)
-    
-    class FloatDatum(Datum):
-        value = db.FloatPropety(required = True)
-    
-    class StringDatum(Datum):
-        value = db.StringProperty(required = True)
-
-    # Generated/looked-up
-    VisitorStatistics = FloatStatistics()
-    
-    class Vistor (FloatDatum):
-        statistics = VisitorStastistics()
-    
-    ClickStatistics = FloatStatistics()
-    class Click (FloatDatum):
-        statistics = ClickStastistics()
-    
-    XStatistics = FloatStatistics()
-    class X (FloatDatum):
-        statistics = XStastistics()
-    
-    AgentStatistics = StringStatistics()
-    class Agent (StringDatum):
-        statistics = AgentStatistics()
-
 ### (Tested) Expected Classes
     class Datum (db.Model):
         created_at = db.DateTimeProperty(auto_now = True)
