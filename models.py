@@ -9,8 +9,7 @@ class Campaign(db.Model):
 class Storage(db.Expando):
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
-  value = db.StringProperty(required = True)
-  type = db.StringProperty(required = True)
+  type = db.StringProperty(required = True, choices = ('string', 'number', 'datetime'))
   created_on = db.DateTimeProperty(auto_now_add = 1)
 
 class Histogram (db.Expando):

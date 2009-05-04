@@ -4,7 +4,7 @@ Need to test for:
 @see notes.md
 '''
 
-import os, util
+import os, util, logging
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp.util import run_wsgi_app
 
