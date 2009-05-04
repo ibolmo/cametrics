@@ -20,6 +20,14 @@ class ModelTest(unittest.TestCase):
   def tearDown(self):
     # There is no need to delete test entities.
     pass
+    
+  def test_kind_entities_can_be_different(self):
+    entity = self.Visitor1()
+    entity.value = 'olmo'
+    self.setup_key2 = entity.put()
+    
+    entity = db.get(self.setup_key2)
+    self.assertEqual('olmo', entity.value)
 
   def test_entity_saved(self):
     entity = db.get(self.setup_key1)
