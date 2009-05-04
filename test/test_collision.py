@@ -10,6 +10,7 @@ from models import *
   # Campaign 2
   measure('visitor', 'olmo', 'string')
 '''
+'''
 class ModelTest(unittest.TestCase):
   def setUp(self):
     # Generate 
@@ -43,3 +44,4 @@ class ModelTest(unittest.TestCase):
     entity2 = db.get(self.setup_key2)
     self.assertEqual(1, entity1.value)
     self.assertEqual('olmo', entity2.value)
+'''

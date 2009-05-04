@@ -1,32 +1,37 @@
 from google.appengine.ext import db
 
+class Campaign(db.Model):
+  name = db.StringProperty(required = True)
+  owner = db.UserProperty(required = True)
+  homepage = db.StringProperty()
+  created_on = db.DateTimeProperty(auto_now_add = 1)
+    
+class Storage(db.Expando):
+  campaign = db.ReferenceProperty(Campaign)
+  namespace = db.StringProperty(required = True)
+  value = db.StringProperty(required = True)
+  type = db.StringProperty(required = True)
+  created_on = db.DateTimeProperty(auto_now_add = 1)
+
 class Histogram (db.Expando):
-    pass
-    
+  pass
+  
 class HitsHistogram (Histogram):
-    pass
-    
+  pass
+  
 class Statistics (db.Model):
-    first = db.ReferenceProperty(collection_name = "first")
-    last = db.ReferenceProperty(collection_name = "last")
-    hits = db.ReferenceProperty(HitsHistogram, collection_name = "hits")
-    
+  campaign = db.ReferenceProperty(Campaign)
+  namespace = db.StringProperty(required = True)
+  first = db.ReferenceProperty(collection_name = "first")
+  last = db.ReferenceProperty(collection_name = "last")
+  hits = db.ReferenceProperty(HitsHistogram, collection_name = "hits")
+  
 class FloatStatistics (Statistics):
-    min = db.FloatProperty()
-    max = db.FloatProperty()
-    mean = db.FloatProperty()
-    sum = db.FloatProperty()
-    # ...
+  min = db.FloatProperty()
+  max = db.FloatProperty()
+  mean = db.FloatProperty()
+  sum = db.FloatProperty()
+  # ...
 
 class StringStatistics (Statistics):
-    pass
-
-class Datum (db.Model):
-    created_at = db.DateTimeProperty(auto_now = True)
-    statistics = db.ReferenceProperty()
-
-class FloatDatum(Datum):
-    value = db.FloatProperty(required = True)
-
-class StringDatum(Datum):
-    value = db.StringProperty(required = True)
+  pass
