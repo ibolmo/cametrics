@@ -4,12 +4,12 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /
-  script: main.py
-        
 - url: /test.*
   script: gaeunit.py
  
 - url: /favicon.ico
   static_files: static/images/favicon.ico
   upload: static/images/favicon.ico
+
+- url: /.*
+  script: main.py
