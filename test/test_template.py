@@ -1,5 +1,4 @@
-import unittest
-import logging
+import unittest, logging
 from google.appengine.ext import db
 
 class SuccessFailError(unittest.TestCase):

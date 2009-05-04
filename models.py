@@ -1,3 +1,5 @@
+from google.appengine.ext import db
+
 class Histogram (db.Expando):
     pass
     
@@ -28,20 +30,3 @@ class FloatDatum(Datum):
 
 class StringDatum(Datum):
     value = db.StringProperty(required = True)
-
-
-''' Generated Models
-
-The following will eventually be generated on-the-fly and saved/retrieved from data store for each organizer
-'''
-class Vistor (FloatDatum):
-    pass
-    
-class Click (FloatDatum):
-    pass
-
-class X (FloatDatum):
-    pass
-
-class Agent (StringDatum):
-    pass
