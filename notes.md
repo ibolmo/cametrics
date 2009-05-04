@@ -93,6 +93,14 @@ Questions
 ---------
 
 ### Will I get datastore collisions for same kind for different campaigns?
+For example,
+    
+    # Campaign 1
+    measure('visitor', 1)
+        
+    # Campaign 2
+    measure('visitor', 'olmo')
+
 
 ### Can I set the parent/(entity group) within the class definition?
 
@@ -108,5 +116,5 @@ Questions
 
 ### What is the correct way to hook into the insert/update/etc so for the statistics and histograms?
 
-### Do I need to save the classes to the datastore? 
+### Do I need to save the classes to the datastore?
     Yes, for retrieving using the namespace, you will lose the type for the namespace/val. 
