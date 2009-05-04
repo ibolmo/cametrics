@@ -16,15 +16,23 @@ class MainPage(webapp.RequestHandler):
         
 class ActionPage(webapp.RequestHandler):
   def get(self, key, path):
-    logging.info('get: %s, %s' % (key, path))
+    ns, value = self.getParameters(path)
+    logging.info('get: %s, %s' % (ns, value))
     self.post(key, path)
 
   def post(self, key, path):
-    #ns, value = util.getParts(path)
-    #if (not ns or not value and value is not 0):
-    #  this.error(500)
+    ns, value = self.getParameters(path)
+    logging.info('post: %s, %s' % (ns, value))
+  
+  def getParameters(self, path):
+    ns, value = util.getParts(path)
+    if (not ns):
+      self.error(500)
+    if (not value and value is not 0):
+      if (not self.request.get('type')):
+        value = 1
+    return (ns, value)
     
-    logging.info('post: %s, %s' % (key, path))
     
 application = webapp.WSGIApplication(debug = os.environ['SERVER_SOFTWARE'].startswith('Dev'), url_mapping = [
   (r'/([^/]+)/(.*)', ActionPage),
