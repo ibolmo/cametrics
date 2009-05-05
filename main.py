@@ -45,15 +45,33 @@ class ActionPage(webapp.RequestHandler):
     else:
       self.response.set_status(201)
   
+  ''' getParameters
+  Parses and has necessary logic for creating namespace and value pair with default value and type
+  
+  Input:
+    path - The path needed to be parsed into namespace and value pair
+    
+  Returns:
+    (tuple) ns, value, v_type - namespace, value, and type of the value posted/requested
+  '''
   def getParameters(self, path):
     ns, value = util.getParts(path)
-    v_type = self.request.get('type')
     if (not ns):
       self.error(500)
-    if (not value and value is not 0):
-      if (not v_type): # Todo, default_values_dict
+      
+    v_type = self.request.get('type')
+    if (not v_type):
+      v_type = 'number'
+      if (not value and value is not 0):
         value = 1
-        v_type = 'number'
+      elif (not value.isdigit()):
+        ns += '.%s' % value
+        value = 1
+        
+    else:
+      # Todo, check value and grab default for non-numeric input
+      self.error(500)
+      
     return (ns, value, v_type)
     
     
