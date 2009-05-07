@@ -146,6 +146,8 @@ def get_targets(combine_media=settings.COMBINE_MEDIA, **kwargs):
     """Returns all files that must be combined."""
     targets = []
     for target in sorted(combine_media.keys()):
+        import logging
+        logging.info('Target: %s' % target)
         group = combine_media[target]
         if '.site_data.js' in group:
             index = list(group).index('.site_data.js')

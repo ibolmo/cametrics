@@ -5,6 +5,7 @@ from ragendja.settings_pre import *
 # don't have to refresh their cache. By setting this your MEDIA_URL
 # automatically becomes /media/MEDIA_VERSION/
 MEDIA_VERSION = 1
+SITE_NAME = 'Campaign Metrics'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '1234567890'
@@ -34,12 +35,16 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    
     # Django authentication
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #'django.contrib.auth.middleware.AuthenticationMiddleware',
+    
     # Google authentication
     #'ragendja.auth.middleware.GoogleAuthenticationMiddleware',
+    
     # Hybrid Django/Google authentication
-    #'ragendja.auth.middleware.HybridAuthenticationMiddleware',
+    'ragendja.auth.middleware.HybridAuthenticationMiddleware',
+    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'ragendja.sites.dynamicsite.DynamicSiteIDMiddleware',
@@ -50,12 +55,15 @@ MIDDLEWARE_CLASSES = (
 # Google authentication
 #AUTH_USER_MODULE = 'ragendja.auth.google_models'
 #AUTH_ADMIN_MODULE = 'ragendja.auth.google_admin'
+
 # Hybrid Django/Google authentication
-#AUTH_USER_MODULE = 'ragendja.auth.hybrid_models'
+AUTH_USER_MODULE = 'ragendja.auth.hybrid_models'
 
 GLOBALTAGS = (
     'ragendja.templatetags.ragendjatags',
     'django.templatetags.i18n',
+
+    'ragendja.templatetags.googletags',
 )
 
 LOGIN_URL = '/account/login/'
@@ -71,9 +79,9 @@ INSTALLED_APPS = (
     'django.contrib.redirects',
     'django.contrib.sites',
     'appenginepatcher',
+    #'mediautils',
     'myapp',
     'registration',
-    'mediautils',
 )
 
 # List apps which should be left out from app settings and urlsauto loading
