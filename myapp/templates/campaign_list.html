@@ -8,8 +8,8 @@
 <ul>
   {% for campaign in object_list %}
     <li>
-      <a href="{% url myapp.views.show_campaign key=campaign.key %}">{{ campaign.title }} {{ campaign.description }}</a>
-      <a href="{% url myapp.views.edit_campaign key=campaign.key %}">Edit</a>
+      <a href="{% url myapp.views.show_campaign key=campaign.key %}">{{ campaign.title }} {{ campaign.description }}</a> |
+      <a href="{% url myapp.views.edit_campaign key=campaign.key %}">Edit</a> |
       <a href="{% url myapp.views.delete_campaign key=campaign.key %}">Delete</a>
     </li>
   {% endfor %}
