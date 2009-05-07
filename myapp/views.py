@@ -41,6 +41,10 @@ def create_new_user(request):
             return HttpResponseRedirect('/login')
     return render_to_response(request, 'myapp/user_create_form.html', {'form': form, 'heading': 'Register' })
 
+def campaigns(request, key):
+    if request.method == 'GET':
+        return render_to_response(request, 'myapp/list_my_campaigns.html')
+
 def measurements(request, key, path):
     if (not key):
       return HttpResponse('Invalid service usage', status = 500)

@@ -64,6 +64,7 @@ GLOBALTAGS = (
     'django.templatetags.i18n',
 
     'ragendja.templatetags.googletags',
+    'myapp.templatetags.tags',
 )
 
 LOGIN_URL = '/account/login/'

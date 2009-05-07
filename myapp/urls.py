@@ -7,6 +7,7 @@ urlpatterns = patterns('',
     (r'^create_admin_user/?$', 'create_admin_user'),
     (r'^register/?$', 'create_new_user'),
     (r'^$', 'list_measurements'),
+    (r'^campaign/?(?P<key>(.+))?$', 'campaigns'),
     (r'^about/?', 'about'),
     (r'^(?P<key>([^/]+))/(?P<path>(.*))$', 'measurements')
 )
