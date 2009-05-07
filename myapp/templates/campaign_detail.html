@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Campaign Details{% endblock %}
+
+{% block content %}
+<h2>Campaign Details</h2>
+<a href="{% url myapp.views.list_campaigns %}">Back to listing</a>
+<a href="{% url myapp.views.edit_campaign key=object.key %}">Edit</a>
+<a href="{% url myapp.views.delete_campaign key=object.key %}">Delete</a>
+
+<ul>
+  <li>Title: {{ object.title }}</li>
+  <li>Description: {{ object.description }}</li>
+</ul>
+{% endblock %}

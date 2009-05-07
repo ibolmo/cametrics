@@ -1,14 +1,18 @@
+from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views.generic.list_detail import object_list, object_detail
+from django.views.generic.create_update import create_object, delete_object, \
+    update_object
     
 from google.appengine.ext import db
 from ragendja.template import render_to_response
 
-#from myapp.forms import PersonForm
 import os, util, logging
-from models import *
+from myapp.forms import CampaignForm
+from myapp.models import *
 
 def list_measurements(request):
     pass #return object_list(request, Person.all(), paginate_by=10)
@@ -40,10 +44,6 @@ def create_new_user(request):
             user.put()
             return HttpResponseRedirect('/login')
     return render_to_response(request, 'myapp/user_create_form.html', {'form': form, 'heading': 'Register' })
-
-def campaigns(request, key):
-    if request.method == 'GET':
-        return render_to_response(request, 'myapp/list_my_campaigns.html')
 
 def measurements(request, key, path):
     if (not key):
@@ -84,3 +84,21 @@ def measurements(request, key, path):
         return HttpResponse('Ok')
         
     return HttpResponse('Internal Error', status = 500)
+
+def list_campaigns(request):
+    return object_list(request, Campaign.all(), paginate_by=10)
+
+def show_campaign(request, key):
+    return object_detail(request, Campaign.all(), key)
+
+def add_campaign(request):
+    return create_object(request,
+        form_class = CampaignForm,
+        post_save_redirect = reverse('myapp.views.show_campaign', kwargs = dict(key = '%(key)s'))
+    )
+
+def edit_campaign(request, key):
+    return update_object(request, object_id = key, form_class = CampaignForm)
+
+def delete_campaign(request, key):
+    return HttpResponseNotModified() #return delete_object(request, Campaign, object_id = key,post_delete_redirect = reverse('myapp.views.list_campaign'))

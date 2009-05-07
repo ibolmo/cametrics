@@ -1,11 +1,13 @@
 from django.db.models import permalink, signals
 from google.appengine.ext import db
 from ragendja.dbutils import cleanup_relations
+from ragendja.auth.hybrid_models import User
 
 class Campaign(db.Model):
-  name = db.StringProperty(required = True)
-  owner = db.UserProperty(required = True)
+  title = db.StringProperty(required = True)
+  description = db.StringProperty(multiline = True)
   homepage = db.StringProperty()
+  owner = db.ReferenceProperty(User)
   created_on = db.DateTimeProperty(auto_now_add = 1)
     
 class Storage(db.Expando):

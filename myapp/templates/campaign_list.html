@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Campaign Listing{% endblock %}
+
+{% block content %}
+<h2>Campaign Listing</h2>
+<a href="{% url myapp.views.add_campaign %}">Create Campaign</a>
+
+<ul>
+  {% for campaign in object_list %}
+    <li>
+      <a href="{% url myapp.views.show_campaign key=campaign.key %}">{{ campaign.title }} {{ campaign.description }}</a>
+      <a href="{% url myapp.views.edit_campaign key=campaign.key %}">Edit</a>
+      <a href="{% url myapp.views.delete_campaign key=campaign.key %}">Delete</a>
+    </li>
+  {% endfor %}
+</ul>
+
+<div>
+  {% if has_previous %}
+    <a href="{% url myapp.views.list_campaigns %}?page={{ previous }}">&lt;-previous</a>
+  {% endif %}
+  {% if has_next %}
+    <a href="{% url myapp.views.list_campaigns %}?page={{ next }}">next-&gt;</a>
+  {% endif %}
+</div>
+{% endblock %}

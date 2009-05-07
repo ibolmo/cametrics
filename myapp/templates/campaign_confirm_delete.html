@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Delete Campaign{% endblock %}
+
+{% block content %}
+<h2>Delete Campaign</h2>
+<a href="{% url myapp.views.list_campaigns %}">Back to listing</a>
+<a href="{% url myapp.views.show_campaign key=object.key %}">Back to campaign</a>
+
+<p>
+Do you really want to delete {{ object.title }}?
+
+<form action="" method="post">
+  <input type="submit" name="delete" value="Delete" />
+</form>
+</p>
+
+{% endblock %}

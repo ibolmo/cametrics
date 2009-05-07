@@ -29,9 +29,9 @@
 	    		<div id="menu" class="column span-24"> 
                     <ul class="tabs"> 
                         <li><a class="{% active request '^/$|home' %}" href="/">Home</a></li> 
-                        <li><a class="{% active request 'about' %}"  href="{% url myapp.views.about %}">About</a></li>
+                        <li><a class="{% active request 'about' %}"  href="/about">About</a></li>
                         {% if user.is_authenticated %}
-                        <li><a class="{% active request 'campaign' %}"href="{% url myapp.views.campaigns %}">Campaigns</a></li>
+                        <li><a class="{% active request 'campaign' %}"href="{% url myapp.views.list_campaigns %}">Campaigns</a></li>
                         {% endif %}
                     </ul> 
 	    		</div>
