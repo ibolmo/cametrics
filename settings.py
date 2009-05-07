@@ -80,7 +80,6 @@ INSTALLED_APPS = (
     'appenginepatcher',
     #'mediautils',
     'myapp',
-    'registration',
 )
 
 # List apps which should be left out from app settings and urlsauto loading

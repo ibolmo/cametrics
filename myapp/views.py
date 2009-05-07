@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.http import HttpResponse, Http404
-from django.views.generic.list_detail import object_list, object_detail
-from django.views.generic.create_update import create_object, delete_object, \
-    update_object
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render_to_response
+from django.http import HttpResponse, HttpResponseRedirect
+    
 from google.appengine.ext import db
-from mimetypes import guess_type
-from ragendja.dbutils import get_object_or_404
 from ragendja.template import render_to_response
 
 #from myapp.forms import PersonForm
@@ -31,6 +27,19 @@ def create_admin_user(request):
         user.set_password('admin')
         user.put()
     return render_to_response(request, 'myapp/admin_created.html')
+
+def create_new_user(request):
+    form = UserCreationForm()
+    # if form was submitted, bind form instance.
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            # user must be active for login to work
+            user.is_active = True
+            user.put()
+            return HttpResponseRedirect('/login')
+    return render_to_response(request, 'myapp/user_create_form.html', {'form': form, 'heading': 'Register' })
 
 def measurements(request, key, path):
     if (not key):

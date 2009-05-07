@@ -20,9 +20,9 @@
 	    		</div> 
 		    	<div id="top_nav" class="column last span-4 right"> 
                     {% if user.is_authenticated %}
-                        Welcome, {{ user.username }} <a href="{% google_logout_url request.get_full_path %}">Logout</a>
+                        Welcome, {{ user.username }} {% if user.is_active %} <a href="/logout"> {% else %} <a href="{% google_logout_url "/" %}">{% endif %}Logout</a>
                     {% else %}
-                        <a href="{% google_login_url request.get_full_path %}">Login</a>  / <a href="{% url registration.views.register %}">Register</a>
+                        <a href="/login">Login</a>  / <a href="/register">Register</a>
                     {% endif %}
 	    		</div> 
 	    		{% block menu %}
