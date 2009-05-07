@@ -1,0 +1,92 @@
+.grid { background: url(../images/grid.png); }
+.container {
+	min-width: 790px;
+	width: 80%;
+	margin: 0 auto;
+	overflow: hidden;
+}
+.tabs { overflow: hidden; }
+
+body, #body, #panes {
+	margin:1.5em 0;
+	font-family: tahoma, trebuchet ms, arial, sans serif;
+}
+
+a, .link, #buttons { color: #0078CC; text-decoration: none; cursor: pointer; }
+a:hover, .link:hover { color: #000; }
+h2 { border-bottom: 1px solid #eee; display: block }
+
+#logo {
+	width: 708px;
+}
+
+#logo a {
+	display: block;
+	width: 708px;
+	/* text-indent: -100000px; */
+}
+
+#header .tabs, #buttons {
+    margin: 0;
+	padding: 5px 0px 0px 0px;	
+	color: #222;
+	background-color: #F5F5F5;
+	border-bottom: 0;
+}
+#header .tabs li, #buttons li {
+	background-color: #e5e5e5;
+	margin-right: 5px;
+	border: 0;
+}
+#header .tabs a, #buttons li {
+    border: 1px solid #E5E5E5;
+    border-bottom: 0;
+    font-weight: normal;
+	padding: 5px 10px 8px 10px;
+	color: #333333;
+	text-decoration: none;
+}
+
+#header .tabs a:hover, #buttons li:hover {
+	background-color: #fff;
+	text-decoration: underline;
+}
+
+#header .tabs a.active, #buttons li.active {
+	background-color: #fff;
+}
+
+#header .tabs a.active a:hover, #buttons li.active li:hover {
+	text-decoration: underline;
+}
+
+#top_nav { padding-top: 18px;}
+
+.box { padding-bottom: 0; }
+.plant_info, .plant_observation, .plant_comment { border-bottom: 1px solid #eee !important; }
+.center { text-align: center; }
+.right { text-align: right; }
+.quiet a { color: #004f80; }
+.quiet a:hover { color: #000; }
+th { background-color: #ccc; }
+
+.note { color: #f00; }
+.invisible { visibility: hidden; position: absolute; top:0; left:0; }
+
+.settings_table { margin-bottom: 0; }
+.settings_table td { vertical-align: top; padding-left: 0; }
+.settings_table td input { width: 100%; }
+
+.disabled { color: #ccc; }
+.log ul, .log li { list-style: none }
+
+.inline, .log.inline li {
+    display: -moz-inline-stack;
+    display: inline-block;
+    vertical-align: top;
+    margin: 5px;
+    zoom: 1;
+    *display: inline;
+}
+
+p.right { float:right; margin:0 0 1.5em 1.5em; padding:0;}

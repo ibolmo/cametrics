@@ -4,5 +4,6 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('myapp.views',
     (r'^create_admin_user$', 'create_admin_user'),
     (r'^$', 'list_measurements'),
+    (r'^about', 'about'),
     (r'^(?P<key>([^/]+))/(?P<path>(.*))$', 'measurements')
 )

@@ -16,6 +16,9 @@ from models import *
 
 def list_measurements(request):
     pass #return object_list(request, Person.all(), paginate_by=10)
+
+def about(request):
+    return render_to_response(request, 'myapp/about.html')
     
 def create_admin_user(request):
     user = User.get_by_key_name('admin')

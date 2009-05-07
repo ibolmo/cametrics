@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" xml:lang="{% firstof LANGUAGE_CODE 'en' %}" lang="{% firstof LANGUAGE_CODE 'en' %}">
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-        <title>{% block title %}{% endblock %} - {{ SITE_NAME }}</title>
+        <title>{% block title %}{% endblock %}</title>
         <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/blueprint.css" />
         <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
         {% block css %}{% endblock %}
@@ -14,11 +14,29 @@
     <body>
         <div class="container">
             {% block header %}
-            <div id="header">
-                
+            <div id="header" class="block">
+	    		<div class="column span-20"> 
+	    			<h1 id="logo"><a href="/">Campaign Metrics</a></h1> 
+	    		</div> 
+		    	<div id="top_nav" class="column last span-4 right"> 
+                    {% if user.is_authenticated %}
+                        Welcome, {{ user.username }} <a href="{% google_logout_url request.get_full_path %}">Logout</a>
+                    {% else %}
+                        <a href="{% google_login_url request.get_full_path %}">Login</a>  / <a href="{% url registration.views.register %}">Register</a>
+                    {% endif %}
+	    		</div> 
+	    		{% block menu %}
+	    		<div id="menu" class="column span-24"> 
+                    <ul class="tabs"> 
+                        <li><a class="active" href="/">Home</a></li> 
+                        <li><a href="{% url myapp.views.about %}">About</a></li>
+                    </ul> 
+	    		</div>
+	    		{% endblock %}
             </div>
+            
             {% endblock %}
-            <div id="content" class="column">
+	    	<div id="notices" class="block"> 
             {% block content-header %}
                 {% if error %}<div class="error">{{ error }}</div>{% endif %}
                 {% if info %}<div class="info">{{ info }}</div>{% endif %}
@@ -28,6 +46,8 @@
                     {% endfor %}
                 {% endif %}
             {% endblock %}
+	    	</div> 
+            <div id="body" class="block">
             {% block content %}{% endblock %}
             </div>
         </div>
