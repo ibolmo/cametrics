@@ -2,7 +2,7 @@ import unittest, logging, util
 from google.appengine.ext import db
 from google.appengine.api import users
 
-from models import *
+from myapp.models import *
 
 class CMTestCase (unittest.TestCase):
   def setUp(self):
