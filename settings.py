@@ -30,6 +30,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.core.context_processors.request',
     'django.core.context_processors.i18n',
+    'ragendja.auth.context_processors.google_user',
 )
 
 MIDDLEWARE_CLASSES = (
