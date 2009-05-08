@@ -67,8 +67,8 @@ GLOBALTAGS = (
     'myapp.templatetags.tags',
 )
 
-LOGIN_URL = '/account/login/'
-LOGOUT_URL = '/account/logout/'
+LOGIN_URL = '/login'
+LOGOUT_URL = '/logout'
 LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = (

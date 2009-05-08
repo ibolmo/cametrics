@@ -19,7 +19,7 @@ def google_login(request, template_name=None,
     redirect_to = get_redirect_to(request, redirect_field_name)
     return HttpResponseRedirect(users.create_login_url(redirect_to))
 
-def hybrid_login(request, template_name='registration/login.html',
+def hybrid_login(request, template_name='user_create_form.html',
         redirect_field_name=REDIRECT_FIELD_NAME):
     # Don't login using both authentication systems at the same time
     if request.user.is_authenticated():
