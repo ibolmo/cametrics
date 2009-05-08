@@ -5,9 +5,7 @@ from ragendja.forms import FormWithSets, FormSetField
 from ragendja.auth.hybrid_models import User
 from myapp.models import *
 
-class CampaignForm (forms.ModelForm):        
+class CampaignForm (forms.ModelForm):    
     class Meta:
         model = Campaign
-        exclude = ['created_on']
-        
-CampaignForm = FormWithSets(CampaignForm)
+        exclude = ['created_on', 'owner']

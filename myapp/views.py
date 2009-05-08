@@ -1,11 +1,11 @@
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Message
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic.list_detail import object_list, object_detail
 from django.views.generic.create_update import create_object, delete_object, \
-    update_object
+    update_object, redirect
     
 from google.appengine.ext import db
 from ragendja.template import render_to_response
@@ -92,10 +92,18 @@ def show_campaign(request, key):
     return object_detail(request, Campaign.all(), key)
 
 def add_campaign(request):
-    return create_object(request,
-        form_class = CampaignForm,
-        post_save_redirect = reverse('myapp.views.show_campaign', kwargs = dict(key = '%(key)s'))
-    )
+    if request.method == 'POST':
+        form = CampaignForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_object = form.save(commit = False)
+            new_object.owner = request.user
+            if (new_object.put()):
+                if request.user.is_authenticated():
+                    Message(user = request.user, message= "The campaign was created successfully.").put()
+                return redirect(reverse('myapp.views.show_campaign', kwargs = dict(key = '%(key)s')), new_object)
+    else:
+        form = CampaignForm()
+    return render_to_response(request, 'myapp/campaign_form.html', {'form': form})
 
 def edit_campaign(request, key):
     return update_object(request, object_id = key, form_class = CampaignForm)
