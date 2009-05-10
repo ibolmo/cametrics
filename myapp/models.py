@@ -3,6 +3,27 @@ from google.appengine.ext import db
 from ragendja.auth.hybrid_models import User
 import logging
 
+from google.appengine.api import datastore_types
+from django.utils import simplejson
+
+class JSONProperty(db.Property):
+    def get_value_for_datastore(self, model_instance):
+        value = super(JSONProperty, self).get_value_for_datastore(model_instance)
+        return db.Text(self._deflate(value))
+    def validate(self, value):
+        return self._inflate(value)
+    def make_value_from_datastore(self, value):
+        return self._inflate(value)
+    def _inflate(self, value):
+        if value is None:
+            return {}
+        if isinstance(value, unicode) or isinstance(value, str):
+            return simplejson.loads(value)
+        return value
+    def _deflate(self, value):
+        return simplejson.dumps(value)
+    data_type = datastore_types.Text
+
 class Campaign(db.Model):
   title = db.StringProperty(required = True)
   description = db.StringProperty(multiline = True)
@@ -15,19 +36,13 @@ class Storage(db.Expando):
   namespace = db.StringProperty(required = True)
   type = db.StringProperty(required = True, choices = ('string', 'number', 'datetime'))
   created_on = db.DateTimeProperty(auto_now_add = 1)
-
-class Histogram (db.Expando):
-  pass
-  
-class HitsHistogram (Histogram):
-  pass
   
 class Statistics (db.Expando):
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
   first_  = db.ReferenceProperty(name=  'first', collection_name = 'first')
   last_ = db.ReferenceProperty(name = 'last', collection_name = 'last')
-  hits = db.ReferenceProperty(HitsHistogram, collection_name = 'hits')
+  hits = JSONProperty()
   count = db.IntegerProperty()
   
   @staticmethod
@@ -38,15 +53,20 @@ class Statistics (db.Expando):
       
   def calc_stats(self, datum):
     '''docstring for calc_stats'''
-    logging.info('Statistics')
     if (not self.first_):
       self.first_ = datum
     self.last_ = datum
+    
     if (not self.count):
       self.count = 0
     self.count += 1
     
-    # self.hits
+    if (not self.hits):
+      self.hits = {}
+    key = str(datum.value) #careful
+    if (key not in self.hits):
+      self.hits[key] = []
+    self.hits[key].append(str(datum.key()))
   
 def calc_number_statistics(stats, datum):
   if (not hasattr(stats, 'min') or datum.value < stats.min):
