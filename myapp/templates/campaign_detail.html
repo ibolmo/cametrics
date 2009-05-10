@@ -3,11 +3,19 @@
 
 {% block content %}
 <h2>Campaign Details</h2>
-<a href="{% url myapp.views.list_campaigns %}">Back to listing</a> | 
-<a href="{% url myapp.views.edit_campaign key=object.key %}">Edit</a>
-
-<ul>
-  <li>Title: {{ object.title }}</li>
-  <li>Description: {{ object.description }}</li>
-</ul>
+<a href="{% url myapp.views.list_campaigns %}">Back to listing</a> |  <a href="{% url myapp.views.edit_campaign key=object.key %}">Edit</a><hr class="space" />
+<h3>{{ object.title }}</h3>
+<dl>
+    <dt>Description</dt>
+    <dd><p>{{ object.description }}</p></dd>
+    
+    <dt>Secret Key</dt>
+    <dd><p>{{ object.key }}</p></dd>
+    
+    <dt>Logging URI</dt>
+    <dd><p>
+        <a href="http://{{ request.get_host }}/{{ object.key }}/name/space/value" title="">http://{{ request.get_host }}/{{ object.key }}/namespace/value</a> <br />
+        <span class="quiet small">For example, http://{{ request.get_host }}/{{ object.key }}/visitor/count<span>
+    </p></dd>
+</dl>
 {% endblock %}

@@ -3,13 +3,15 @@
 
 {% block content %}
 <h2>Campaign Listing</h2>
-<a href="{% url myapp.views.add_campaign %}">Create Campaign</a>
+<p>
+    <a href="{% url myapp.views.add_campaign %}">Create a Campaign</a>
+</p>
+
 
 <ul>
   {% for campaign in object_list %}
     <li>
-      <a href="{% url myapp.views.show_campaign key=campaign.key %}">{{ campaign.title }} {{ campaign.description }}</a> |
-      <a href="{% url myapp.views.edit_campaign key=campaign.key %}">Edit</a>
+      [<a href="{% url myapp.views.edit_campaign key=campaign.key %}">Edit</a>] <a href="{% url myapp.views.show_campaign key=campaign.key %}">{{ campaign.title }}</a>, {{ campaign.description }}
     </li>
   {% endfor %}
 </ul>

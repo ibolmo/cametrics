@@ -8,4 +8,4 @@ from myapp.models import *
 class CampaignForm (forms.ModelForm):    
     class Meta:
         model = Campaign
-        exclude = ['created_on', 'owner']
+        exclude = ['created_on', 'organizer']

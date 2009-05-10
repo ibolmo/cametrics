@@ -6,7 +6,7 @@
  5/05 | | GET measurements
  5/05 |x| Campaign/Project Registration
  5/06 |x| Organizer/Developer Registration (Removes Google Account requirement)
- 5/06 | | Hook into datastore to update Statistics for Namespace
+ 5/06 |x| Hook into datastore to update Statistics for Namespace
  5/07 | | Write PHP Client
  5/07 | | Implement metrics into HAB Watch (Olmo)
  5/08 | | Implement metrics into GarbageWatch (Sasank)

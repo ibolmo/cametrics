@@ -6,6 +6,10 @@ api_version: 1
 default_expiration: '3650d'
 
 handlers:
+- url: /favicon.ico/?
+  static_files: _generated_media/1/img/favicon.ico
+  upload: _generated_media/1/img/favicon.ico
+  
 - url: /test.*
   script: gaeunit.py
   
