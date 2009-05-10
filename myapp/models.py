@@ -49,29 +49,67 @@ class Statistics (db.Expando):
     # self.hits
   
 def calc_number_statistics(stats, datum):
-    if (not hasattr(stats, 'min') or datum.value < stats.min):
-      stats.min = datum.value
-    if (not hasattr(stats, 'max') or datum.value > stats.max):
-      stats.max = datum.value
-    if (not hasattr(stats, 'sum')):
-      stats.sum = 0
-    stats.sum += datum.value
-    if (not hasattr(stats, 'mean')):
-      stats.mean = 0
-    stats.mean = ((stats.mean * (stats.count - 1)) + datum.value) / stats.count
+  if (not hasattr(stats, 'min') or datum.value < stats.min):
+    stats.min = datum.value
+  if (not hasattr(stats, 'max') or datum.value > stats.max):
+    stats.max = datum.value
+  if (not hasattr(stats, 'sum')):
+    stats.sum = 0
+  stats.sum += datum.value
+  if (not hasattr(stats, 'mean')):
+    stats.mean = 0
+  stats.mean = stats.sum / stats.count
+
+def calc_string_statistics(stats, datum):
+  pass
+  
+def calc_date_statistics(stats, datum):
+  pass
+  
+def calc_gps_statistics(stats, datum):
+  pass
+  
+def calc_timestamp_statistics(stats, datum):
+  pass
+  
+def calc_gps_statistics(stats, datum):
+  pass
+  
+def calc_coordinate_statistics(stats, datum):
+  pass
+  
+calc_stats = {
+  'number': calc_number_statistics,
+  'float': calc_number_statistics,
+  'int': calc_number_statistics,
+  'integer': calc_number_statistics,
+  'long': calc_number_statistics,
+  
+  'string': calc_string_statistics,
+  'str': calc_string_statistics,
+  
+  'date': calc_date_statistics,
+  'datetime': calc_date_statistics,
+  'timestamp': calc_timestamp_statistics,
+  
+  'location': calc_gps_statistics,
+  'gps': calc_gps_statistics,
+  'coordinate': calc_coordinate_statistics
+}
 
 def cb_statistics(sender, **kwargs):
-    '''docstring for cb_statistics'''
-    logging.info('Kwargs: %s' % kwargs)
-    instance = kwargs['instance'] or logging.error('No instance for cb_statistics')
-    logging.info('instance type: %s, value: %s' % (instance.type, instance.value))
-    
-    statistic = Statistics.get_by_campaign_and_namespace(instance.campaign, instance.namespace) or Statistics(campaign = instance.campaign, namespace = instance.namespace)
-    if (not statistic.is_saved()):
-      statistic.save()
-    statistic.calc_stats(instance)
-    calc_number_statistics(statistic, instance)
+  '''docstring for cb_statistics'''
+  global calc_stats
+  instance = kwargs['instance'] or logging.error('No instance for cb_statistics')
+  
+  statistic = Statistics.get_by_campaign_and_namespace(instance.campaign, instance.namespace) or Statistics(campaign = instance.campaign, namespace = instance.namespace)
+  if (not statistic.is_saved()):
     statistic.save()
-    logging.info('statistic: %s' % (statistic and statistic.key(), ))
+  statistic.calc_stats(instance)
+  if (instance.type in calc_stats):
+    logging.info('Calculating Statistics for %s' % instance.type)
+    calc_stats[instance.type](statistic, instance)
+  statistic.save()
+  logging.info('statistic: %s' % (statistic and statistic.key(), ))
     
 signals.post_save.connect(cb_statistics, sender = Storage)
