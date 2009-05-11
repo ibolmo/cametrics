@@ -1,4 +1,4 @@
-﻿application: campaign-metrics
+﻿application: cametrics
 version: 1
 runtime: python
 api_version: 1
@@ -8,6 +8,7 @@ default_expiration: '3650d'
 handlers:
 - url: /favicon.ico/?
   static_files: _generated_media/1/img/favicon.ico
+  mime_type: image/gif 
   upload: _generated_media/1/img/favicon.ico
   
 - url: /test.*
@@ -18,3 +19,22 @@ handlers:
 
 - url: /.*
   script: common/appenginepatch/main.py
+
+skip_files: |
+ ^(.*/)?(
+ (app\.yaml)|
+ (app\.yml)|
+ (index\.yaml)|
+ (index\.yml)|
+ (#.*#)|
+ (.*~)|
+ (.*\.py[co])|
+ (.*/RCS/.*)|
+ (\..*)|
+ (dev/.*)|
+ (tests/.*)|
+ (docs/.*)|
+ (.*\.md)|
+ (license\.txt)|
+ (setup.py)
+ )$
