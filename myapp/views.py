@@ -5,7 +5,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic.list_detail import object_list, object_detail
 from django.views.generic.create_update import create_object, delete_object, update_object, redirect
-  
+from django.utils import simplejson
 from google.appengine.ext import db
 from ragendja.template import render_to_response
 
@@ -49,10 +49,12 @@ mimetypes = {
   'plain': 'text/plain'
 }
 
-def to_dict(model):
-  entity = {}
-  model._to_entity(entity) # careful
-  return entity
+def render_json(data, stats):
+  def to_dict(datum):
+    return datum.to_dict()
+  data = map(to_dict, data)
+  stats = map(to_dict, stats)
+  return simplejson.dumps({ 'data': data, 'stats': stats })
 
 def measurements(request, key, path):
   if (not key):
@@ -66,26 +68,21 @@ def measurements(request, key, path):
   if request.method == 'GET':
     logging.info('get: %s, %s' % (ns, value))
     ns += '.%s' % value
-    data = map(to_dict, Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000)) # todo, paginator
-    stats = map(to_dict, Statistics.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1))
+    data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
+    stats = Statistics.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1)
     format = request.GET.get('format', 'json')
-    return render_to_response(request, 'myapp/get_data.%s' % format, {'data': data, 'stats': stats}, mimetype = mimetypes.get(format, 'text/html'))
-    
+    renderer = globals().get('render_%s' % format)
+    return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats)}, mimetype = mimetypes.get(format, 'text/plain')) \
+        or HttpResponse('Unsupported format', status = 500)
   elif request.method == 'POST':    
     v_type = request.POST.get('type', 'number')
     if (v_type == 'number'):
       if (not value or not value.isdigit()):
         ns += '.%s' % value
         value = 1
-    
     logging.info('post: %s, %s, %s' % (ns, value, v_type))
     
-    datum = Storage(
-      namespace = ns,
-      value = value,
-      type = v_type,
-      campaign = campaign
-    )
+    datum = Storage(namespace = ns, value = value, type = v_type, campaign = campaign)
     if (not datum.put()):
       logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, v_type))
       return HttpResponse('Internal error when saving measurement', status = 500)

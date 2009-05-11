@@ -1,10 +1,32 @@
 from django.db.models import signals
 from google.appengine.ext import db
 from ragendja.auth.hybrid_models import User
-import logging
+import logging, util
 
 from google.appengine.api import datastore_types
 from django.utils import simplejson
+                
+class SerializableExpando(db.Expando):
+    """Extends Expando to have json and possibly other serializations
+    
+    Use the class variable 'json_does_not_include' to declare properties
+    that should *not* be included in json serialization.
+    TODO -- Complete round-tripping
+    """
+    json_does_not_include = []
+ 
+    def to_dict(self, attr_list=[]):
+        def to_entity(entity):
+            """Convert datastore types in entity to 
+               JSON-friendly structures."""
+            self._to_entity(entity)
+            for skipped_property in self.__class__.json_does_not_include:
+                del entity[skipped_property]
+            util.replace_datastore_types(entity)
+        return util.to_dict(self, attr_list, to_entity)
+    
+    def to_json(self, attr_list=[]):
+        return simplejson.dumps(self.to_dict(attr_list))
 
 class JSONProperty(db.Property):
     def get_value_for_datastore(self, model_instance):
@@ -31,13 +53,17 @@ class Campaign(db.Model):
   organizer = db.ReferenceProperty(User, collection_name = 'campaigns')
   created_on = db.DateTimeProperty(auto_now_add = 1)
     
-class Storage(db.Expando):
+class Storage(SerializableExpando):
+  json_does_not_include = ['campaign', 'namespace', 'type']
+  
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
   type = db.StringProperty(required = True, choices = ('string', 'number', 'datetime'))
   created_on = db.DateTimeProperty(auto_now_add = 1)
   
-class Statistics (db.Expando):
+class Statistics (SerializableExpando):
+  json_does_not_include = ['campaign', 'namespace']
+  
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
   first_  = db.ReferenceProperty(name=  'first', collection_name = 'first')
