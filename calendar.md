@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 - Week 6 -
  5/04 |x| POST measurements
- 5/05 | | GET measurements
+ 5/05 |x| GET measurements
  5/05 |x| Campaign/Project Registration
  5/06 |x| Organizer/Developer Registration (Removes Google Account requirement)
  5/06 |x| Hook into datastore to update Statistics for Namespace
@@ -11,16 +11,16 @@
  5/07 | | Implement metrics into HAB Watch (Olmo)
  5/08 | | Implement metrics into GarbageWatch (Sasank)
  5/08 | | Meet with Vids and get him involved 
- 5/08 | | GET statistics
+ 5/08 |x| GET statistics
  5/08 | | Write Python Client
 - Week 7 -
  5/09 | | Implement UUID helper for PHP and Python
  5/09 | | Use Google Data Services for Data Visualization API
  5/10 | | Implement Timer helpers (measure.start(..).... measure.stop(...))
  
- 5/11 | | Meet with Deborah for a check-in, generate a list of Objectives for the project, and verify completeness.
+ 5/11 | | 
  5/12 | |
- 5/13 | |
+ 5/13 | | Meet with Deborah for a check-in, generate a list of Objectives for the project, and verify completeness.
  5/14 | |
  5/15 | |
  5/16 | |
