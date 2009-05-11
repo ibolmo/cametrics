@@ -7,3 +7,7 @@ def active(request, pattern):
     if re.search(pattern, request.path):
         return 'active'
     return''
+    
+@register.filter(name='attr')
+def get_attr(value, arg):
+    return value[arg]

@@ -1,0 +1,8 @@
+{
+  values: [{% for datum in data %}{% for prop in datum %}
+    {{ prop }}: '{{ datum|attr:prop }}',{% endfor %}
+  {% endfor %}],
+  stats: [{% for stat in stats %}{% for prop in stat %}
+    {{ prop }}: '{{ stat|attr:prop }}',{% endfor %}
+  {% endfor %}]
+}

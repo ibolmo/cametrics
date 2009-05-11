@@ -17,6 +17,7 @@
  5/09 | | Implement UUID helper for PHP and Python
  5/09 | | Use Google Data Services for Data Visualization API
  5/10 | | Implement Timer helpers (measure.start(..).... measure.stop(...))
+ 
  5/11 | | Meet with Deborah for a check-in, generate a list of Objectives for the project, and verify completeness.
  5/12 | |
  5/13 | |
