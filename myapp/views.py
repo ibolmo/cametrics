@@ -52,11 +52,13 @@ mimetypes = {
 def render_json(data, stats):
   def to_dict(datum):
     return datum.to_dict()
-  data = map(to_dict, data)
-  stats = map(to_dict, stats)
-  return simplejson.dumps({ 'data': data, 'stats': stats })
+  return simplejson.dumps({
+    'type': len(data) and data[0].type or None,
+    'values': map(to_dict, data),
+    'stats': map(to_dict, stats)
+  })
 
-def measurements(request, key, path):
+def measurements(request, key, path, format):
   if (not key):
     return HttpResponse('Invalid service usage', status = 500)
   
@@ -70,10 +72,10 @@ def measurements(request, key, path):
     ns += '.%s' % value
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = Statistics.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1)
-    format = request.GET.get('format', 'json')
+    format = request.GET.get('format') or format or 'json'
     renderer = globals().get('render_%s' % format)
     return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats)}, mimetype = mimetypes.get(format, 'text/plain')) \
-        or HttpResponse('Unsupported format', status = 500)
+        or HttpResponse('Unsupported format: %s' % format, status = 500)
   elif request.method == 'POST':    
     v_type = request.POST.get('type', 'number')
     if (v_type == 'number'):
