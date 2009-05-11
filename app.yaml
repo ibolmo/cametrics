@@ -32,8 +32,9 @@ skip_files: |
  (.*/RCS/.*)|
  (\..*)|
  (dev/.*)|
- (tests/.*)|
+ (test/.*)|
  (docs/.*)|
+ (clients/.*)|
  (.*\.md)|
  (license\.txt)|
  (setup.py)
