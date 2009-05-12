@@ -7,7 +7,8 @@ from ragendja.settings_pre import *
 MEDIA_VERSION = 1
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '1234567890'
+import config
+SECRET_KEY = config.SECRET_KEY
 
 #ENABLE_PROFILER = True
 #ONLY_FORCED_PROFILE = True

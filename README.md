@@ -1,13 +1,6 @@
 Name
 ====
-Still in progress.
-
-### Candidates
- - Campaign Meter
- - Meter
- - Info, for "informatics"
- - Webbug, see: Firebug
- - Measure
+Cametrics
 
 Ontology
 --------
