@@ -58,11 +58,12 @@ def render_json(data, stats):
     'stats': map(to_dict, stats)
   })
 
-def measurements(request, key, path, format):
+def measurements(request, key, path):
   if (not key):
     return HttpResponse('Invalid service usage')
   
   ns, value = util.getParts(path)
+  format = request.REQUEST.get('format', 'json')
   campaign = Campaign.get(key)
   if (not campaign):
     return HttpResponse('Campaign not found')
@@ -71,19 +72,24 @@ def measurements(request, key, path, format):
     logging.info('get: %s, %s' % (ns, value))
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = Statistics.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1)
-    format = request.GET.get('format') or format or 'json'
     renderer = globals().get('render_%s' % format)
     return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats)}, mimetype = mimetypes.get(format, 'text/plain')) \
         or HttpResponse('Unsupported format: %s' % format, status = 500)
   elif request.method == 'POST':    
     v_type = request.POST.get('type', 'number')
     if (v_type == 'number'):
-      if (not value or not value.isdigit()):
+      if (not value):
         value = 1
       else:
-        value = float(value)
-    logging.info('post: %s, %s, %s' % (ns, value, v_type))
+        try:
+            value = float(value)
+        except ValueError:
+            return HttpResponse('Incorrect value (%s) passed' % value, status = 404)
+    elif (v_type == 'string'):
+      import urllib
+      value = urllib.unquote_plus(value)
     
+    logging.info('post: %s, %s, %s' % (ns, value, v_type))
     datum = Storage(namespace = ns, value = value, type = v_type, campaign = campaign)
     if (not datum.put()):
       logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, v_type))

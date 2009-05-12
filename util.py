@@ -1,4 +1,4 @@
-import re
+import re, logging
 from google.appengine.ext import db
 
 def generateModel(name, properties = {}, base = db.Model):
@@ -13,7 +13,6 @@ def getParts(path):
     value = value and value.group(0) or ''
     ns = path[:-(len(value)+1)] or None
 
-  import logging
   logging.info('ns,value: %s | %s' % (ns, value))
   return (ns and ns.replace('/', '.'), value)
   
