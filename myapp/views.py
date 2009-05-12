@@ -60,16 +60,15 @@ def render_json(data, stats):
 
 def measurements(request, key, path, format):
   if (not key):
-    return HttpResponse('Invalid service usage', status = 500)
+    return HttpResponse('Invalid service usage')
   
   ns, value = util.getParts(path)
   campaign = Campaign.get(key)
   if (not campaign):
-    return HttpResponse('Campaign not found', status = 404)
+    return HttpResponse('Campaign not found')
   
   if request.method == 'GET':
     logging.info('get: %s, %s' % (ns, value))
-    ns += '.%s' % value
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = Statistics.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1)
     format = request.GET.get('format') or format or 'json'
@@ -82,6 +81,8 @@ def measurements(request, key, path, format):
       if (not value or not value.isdigit()):
         ns += '.%s' % value
         value = 1
+      else:
+        value = float(value)
     logging.info('post: %s, %s, %s' % (ns, value, v_type))
     
     datum = Storage(namespace = ns, value = value, type = v_type, campaign = campaign)

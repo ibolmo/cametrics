@@ -107,6 +107,8 @@ Globally Unique Identifier can be useful for namespacing to get a specific measu
 
 Thoughts
 --------
- - Olmo (4/27 14:59): Assuming: we have a good breadth of (statistical) processings for different objects, then incr/decr operations may not be necessary
-  - Olmo (4/27 15:00): Would be interesting to support abritrary/other actions, though.
- - Olmo (4/27 15:09): Would be interesting to have statistics local to a grouping.
+ - Olmo: Assuming: we have a good breadth of (statistical) processings for different objects, then incr/decr operations may not be necessary
+  - Olmo: Would be interesting to support abritrary/other actions, though.
+ - Olmo: Would be interesting to have statistics local to a grouping.
+ - Sasank: Delete all data for a campaign
+ - Sasank: Delete all data for a namespace
