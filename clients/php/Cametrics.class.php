@@ -9,7 +9,8 @@ class Cametrics
         'secret.key' => 'agljYW1ldHJpY3NyFAsSDm15YXBwX2NhbXBhaWduGAgM',
         'url.protocol' => 'http',
         'url.host' => 'localhost',
-        'url.pattern' => '%s/%s/%s'
+        'url.pattern' => '%s/%s/%s',
+        'namespace.separators' => '/[^\w]+/',
     );
     
     function __construct($options = array())
@@ -42,7 +43,8 @@ class Cametrics
     
     public function post($namespace, $value, $type)
     {
-        $uri = vsprintf("{$this->options['url.protocol']}://{$this->options['url.host']}/{$this->options['url.pattern']}", array($this->options['secret.key'], $namespace, $value));
+        $uri = "{$this->options['url.protocol']}://{$this->options['url.host']}/{$this->options['url.pattern']}";
+        $uri = vsprintf($uri, array($this->options['secret.key'], $this->mapNamespace($namespace), $value));
         syslog(LOG_NOTICE, sprintf('Cametrics posting: %s', $uri));
         
         $this->browser->post($uri, array(
@@ -60,5 +62,10 @@ class Cametrics
                 syslog(LOG_ERR, $message);
                 return false;
         }
+    }
+    
+    public function mapNamespace($namespace = '')
+    {
+        return preg_replace($this->options['namespace.separators'], '/', $namespace);
     }
 }

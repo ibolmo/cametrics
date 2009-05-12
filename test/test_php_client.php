@@ -4,7 +4,7 @@ require_once dirname(__FILE__).'/../clients/php/Cametrics.class.php';
 
 Cametrics::initialize('agljYW1ldHJpY3NyFAsSDm15YXBwX2NhbXBhaWduGAgM');
 
-#Cametrics::measure('test');
+Cametrics::measure('test');
 
 Cametrics::measure('namespace.value');
 #

@@ -79,7 +79,6 @@ def measurements(request, key, path, format):
     v_type = request.POST.get('type', 'number')
     if (v_type == 'number'):
       if (not value or not value.isdigit()):
-        ns += '.%s' % value
         value = 1
       else:
         value = float(value)

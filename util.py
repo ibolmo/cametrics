@@ -12,8 +12,9 @@ def getParts(path):
     value = re.search(r'([^/]+)$', path)
     value = value and value.group(0) or ''
     ns = path[:-(len(value)+1)] or None
-    import logging
-    logging.info('ns,value: %s | %s' % (ns, value))
+
+  import logging
+  logging.info('ns,value: %s | %s' % (ns, value))
   return (ns and ns.replace('/', '.'), value)
   
 # From: http://github.com/DocSavage/bloog/blob/346e5fb7c1fd87259dc79f2c4ae852badb6f2b79/models/__init__.py
