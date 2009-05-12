@@ -1,0 +1,3 @@
+[submodule "clients/php"]
+	path = clients/php
+	url = git://github.com/ibolmo/cametrics-php-client.git
