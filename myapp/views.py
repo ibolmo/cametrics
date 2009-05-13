@@ -9,7 +9,7 @@ from django.utils import simplejson
 from google.appengine.ext import db
 from ragendja.template import render_to_response
 
-import os, util, logging
+import os, util, logging, stat
 from myapp.forms import CampaignForm
 from myapp.models import *
 
@@ -71,26 +71,17 @@ def measurements(request, key, path):
   if request.method == 'GET':
     logging.info('get: %s, %s' % (ns, value))
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-    stats = Statistics.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1)
+    stats = Statistics.get_by_campaign_and_namespace(instance.campaign, instance.namespace)
     renderer = globals().get('render_%s' % format)
     return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats)}, mimetype = mimetypes.get(format, 'text/plain')) \
         or HttpResponse('Unsupported format: %s' % format, status = 500)
   elif request.method == 'POST':    
-    v_type = request.REQUEST.get('type', 'number')
-    if (v_type == 'number'):
-      if (not value):
-        value = 1
-      else:
-        try:
-            value = float(value)
-        except ValueError:
-            return HttpResponse('Incorrect value (%s) passed' % value, status = 404)
-    elif (v_type == 'string'):
-      import urllib
-      value = urllib.unquote_plus(value)
+    new_value = stat.prepare(value)
+    if (new_value is None):
+      return HttpResponse('Incorrect value (%s) passed' % value, status = 404)  
     
-    logging.info('post: %s, %s, %s' % (ns, value, v_type))
-    datum = Storage(namespace = ns, value = value, type = v_type, campaign = campaign)
+    logging.info('post: %s, %s, %s' % (ns, new_value, v_type))
+    datum = Storage(namespace = ns, value = new_value, type = v_type, campaign = campaign)
     if (not datum.put()):
       logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, v_type))
       return HttpResponse('Internal error when saving measurement', status = 500)
