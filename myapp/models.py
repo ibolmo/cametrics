@@ -150,8 +150,6 @@ def calc_date_statistics(stats, datum):
  - longitude
  - latitude
  - statistics
-    - first (location)
-    - last (location)
     - area
     - centroid
     - boundary
@@ -169,11 +167,15 @@ def calc_coordinate_statistics(stats, datum):
  - stop (date)
  - duration (number)
  - statistics
-    - first (interval)
-    - last (interval)
+  - 
 '''
+def calc_interval_statistics(stats, datum):
+  pass
   
 CALC_STATS = {
+  'off': lambda stats, datum: None,
+  'none': lambda stats, datum: None,
+
   'number': calc_number_statistics,
   'float': calc_number_statistics,
   'int': calc_number_statistics,
@@ -195,14 +197,23 @@ CALC_STATS = {
 
 def cb_statistics(sender, **kwargs):
   '''docstring for cb_statistics'''
-  instance = kwargs['instance'] or logging.error('No instance for cb_statistics')
+  instance = kwargs.get('instance')
+  if (not instance):
+    return logging.error('No instance for cb_statistics')
   
   statistic = Statistics.get_by_campaign_and_namespace(instance.campaign, instance.namespace) or Statistics(campaign = instance.campaign, namespace = instance.namespace)
-  if (not statistic.is_saved()):
-    statistic.save()
-  statistic.calc_stats(instance)
-  
-  CALC_STATS.get(instance.type, lambda x,y: None)(statistic, instance)
+  if (not statistic.is_saved()):  # todo, remove this
+    statistic.save()              #
+    
+  if (instance.type is not 'off' or instance.type is not 'none'):
+    statistic.calc_stats(instance)
+  else:
+    logging.info('Statistics off for datum.key(%s)' % instance.key())
+    
+  if (instance.type in CALC_STATS):
+    CALC_STATS[instance.type](statistic, instance)
+  else:
+    logging.warning('No statistics for type %s' % instance.type)
   
   statistic.save()
   logging.info('statistic: %s' % (statistic and statistic.key(), ))
