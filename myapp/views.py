@@ -100,11 +100,11 @@ def measurements(request, key, path):
 
 @login_required
 def list_campaigns(request):
-  return object_list(request, Campaign.all(), paginate_by=10)
+  return object_list(request, Campaign.all().filter('organizer =', request.user), paginate_by=10)
 
 @login_required
 def show_campaign(request, key):
-  return object_detail(request, Campaign.all(), key)
+  return object_detail(request, Campaign.all().filter('organizer =', request.user), key)
 
 @login_required
 def add_campaign(request):
