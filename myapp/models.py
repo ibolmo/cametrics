@@ -109,20 +109,41 @@ def calc_number_statistics(stats, datum):
 def calc_string_statistics(stats, datum):
   pass
 
-'''
-### Datetime
- - value
- - timestamp
- - statistics
-    - frequency
-    - day\_of\_week (histogram)
-    - hour (histogram)
-'''
 def calc_date_statistics(stats, datum):
-  pass
+  import datetime
+  if (datum.type == 'timestamp'):
+    try:
+      datum.timestamp = float(datum.value)
+    except TypeError:
+      return logging.critical('Could not convert string timestamp (%s) into integer' % datum.value)
+    try:
+      datum.datetime = datetime.datetime.fromtimestamp(datum.timestamp)
+    except ValueError:
+      return logging.critical('Could not datetime.fromtimestamp(%s)' % datum.timestamp)
+  elif ('date' in datum.type):
+    try:
+      datum.datetime = datetime.datetime.strptime(datum.value, '%Y-%m-%d %I:%M:%S') # careful
+    except ValueError:
+      return logging.critical('Could not datetime.strptime parse: %s' % datum.value)
+    
+    import time
+    try:
+      datum.timestamp = time.mktime(datum.datetime.timetuple())
+    except ValueError, OverflowError:
+      return logging.critical('Could not time.mktime(%s)' % datum.datetime.timetuple())
+  else:
+    return logging.critical('Unexpected type: %s for calc_date_statistics' % datum.type)
   
-def calc_timestamp_statistics(stats, datum):
-  pass
+  timetuple = datum.datetime.timetuple()
+  logging.info('Adding to the following buckets: %s' % timetuple)
+  for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s']):
+    attr = bucket % 's'
+    if (not hasattr(stats, attr)):
+      stats[attr] = {}
+    key = timetuple[i]
+    if (key not stats[attr]):
+      stats[attr][key] = []
+    stats[attr][key].append(str(datum.key()))
 
 '''
 ### Location
@@ -165,7 +186,7 @@ CALC_STATS = {
   
   'date': calc_date_statistics,
   'datetime': calc_date_statistics,
-  'timestamp': calc_timestamp_statistics,
+  'timestamp': calc_date_statistics,
   
   'location': calc_location_statistics,
   'gps': calc_location_statistics,
