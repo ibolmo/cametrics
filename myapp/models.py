@@ -174,16 +174,15 @@ CALC_STATS = {
 
 def cb_statistics(sender, **kwargs):
   '''docstring for cb_statistics'''
-  global calc_stats
   instance = kwargs['instance'] or logging.error('No instance for cb_statistics')
   
   statistic = Statistics.get_by_campaign_and_namespace(instance.campaign, instance.namespace) or Statistics(campaign = instance.campaign, namespace = instance.namespace)
   if (not statistic.is_saved()):
     statistic.save()
   statistic.calc_stats(instance)
-  if (instance.type in calc_stats):
-    logging.info('Calculating Statistics for %s' % instance.type)
-    CALC_STATS.get(instance.type, lambda x,y: None)(statistic, instance)
+  
+  CALC_STATS.get(instance.type, lambda x,y: None)(statistic, instance)
+  
   statistic.save()
   logging.info('statistic: %s' % (statistic and statistic.key(), ))
     
