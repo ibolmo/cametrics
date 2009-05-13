@@ -53,6 +53,15 @@ All things related to models, objects, or classes and their respected statistics
     - centroid
     - boundary
     - box (histogram)
+    
+### Coordinate*
+ - x
+ - y
+ - statistics
+  - area
+  - centroid
+  - boundary
+  - grid?
 
 ### Number
  - statistics 
@@ -114,9 +123,13 @@ Usage
     
     # measure.start|pause|resume|stop(namespace)
 
-GUID
+UUID
 ----
-Globally Unique Identifier can be useful for namespacing to get a specific measurement for an object that is known to the campaign but is anonymous to the system. For example, I can track a user's data quality without implicating the user in the backend. 
+Universally Unique Identifier can be useful for namespacing to get a specific measurement for an object that is known to the campaign but is anonymous to the system. For example, I can track a user's data quality without implicating the user in the backend. 
+
+TODO
+----
+ - Timezone for datetime calculations
 
 Thoughts
 --------

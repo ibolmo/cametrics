@@ -5,7 +5,9 @@ import logging, util
 
 from google.appengine.api import datastore_types
 from django.utils import simplejson
-                
+
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 class SerializableExpando(db.Expando):
     """Extends Expando to have json and possibly other serializations
     
@@ -89,7 +91,7 @@ class Statistics (SerializableExpando):
     
     if (not self.hits):
       self.hits = {}
-    key = str(datum.value) #careful
+    key = str(datum.value) # careful
     if (key not in self.hits):
       self.hits[key] = []
     self.hits[key].append(str(datum.key()))
@@ -122,7 +124,7 @@ def calc_date_statistics(stats, datum):
       return logging.critical('Could not datetime.fromtimestamp(%s)' % datum.timestamp)
   elif ('date' in datum.type):
     try:
-      datum.datetime = datetime.datetime.strptime(datum.value, '%Y-%m-%d %I:%M:%S') # careful
+      datum.datetime = datetime.datetime.strptime(datum.value, DATETIME_FORMAT) # careful
     except ValueError:
       return logging.critical('Could not datetime.strptime parse: %s' % datum.value)
     
@@ -136,12 +138,12 @@ def calc_date_statistics(stats, datum):
   
   timetuple = datum.datetime.timetuple()
   logging.info('Adding to the following buckets: %s' % timetuple)
-  for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s']):
+  for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%s_of_the_year']):
     attr = bucket % 's'
     if (not hasattr(stats, attr)):
       stats[attr] = {}
     key = timetuple[i]
-    if (key not stats[attr]):
+    if (key not in stats[attr]):
       stats[attr][key] = []
     stats[attr][key].append(str(datum.key()))
 
