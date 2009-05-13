@@ -108,23 +108,51 @@ def calc_number_statistics(stats, datum):
 
 def calc_string_statistics(stats, datum):
   pass
-  
+
+'''
+### Datetime
+ - value
+ - timestamp
+ - statistics
+    - frequency
+    - day\_of\_week (histogram)
+    - hour (histogram)
+'''
 def calc_date_statistics(stats, datum):
-  pass
-  
-def calc_gps_statistics(stats, datum):
   pass
   
 def calc_timestamp_statistics(stats, datum):
   pass
-  
-def calc_gps_statistics(stats, datum):
+
+'''
+### Location
+ - longitude
+ - latitude
+ - statistics
+    - first (location)
+    - last (location)
+    - area
+    - centroid
+    - boundary
+    - box (histogram)
+'''
+def calc_location_statistics(stats, datum):
   pass
   
 def calc_coordinate_statistics(stats, datum):
   pass
   
-calc_stats = {
+'''
+### Interval
+ - start (date)
+ - stop (date)
+ - duration (number)
+ - statistics
+    - first (interval)
+    - last (interval)
+'''
+  
+CALC_STATS = {
   'number': calc_number_statistics,
   'float': calc_number_statistics,
   'int': calc_number_statistics,
@@ -132,14 +160,15 @@ calc_stats = {
   'long': calc_number_statistics,
   
   'string': calc_string_statistics,
+  'text': calc_string_statistics,
   'str': calc_string_statistics,
   
   'date': calc_date_statistics,
   'datetime': calc_date_statistics,
   'timestamp': calc_timestamp_statistics,
   
-  'location': calc_gps_statistics,
-  'gps': calc_gps_statistics,
+  'location': calc_location_statistics,
+  'gps': calc_location_statistics,
   'coordinate': calc_coordinate_statistics
 }
 
@@ -154,7 +183,7 @@ def cb_statistics(sender, **kwargs):
   statistic.calc_stats(instance)
   if (instance.type in calc_stats):
     logging.info('Calculating Statistics for %s' % instance.type)
-    calc_stats[instance.type](statistic, instance)
+    CALC_STATS.get(instance.type, lambda x,y: None)(statistic, instance)
   statistic.save()
   logging.info('statistic: %s' % (statistic and statistic.key(), ))
     

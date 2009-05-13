@@ -2,65 +2,76 @@ Name
 ====
 Cametrics
 
+Types
+-----
+ - none (no statistics, no type)
+ - elevation (altitude)
+ - zipcode
+ - city
+ - country
+ - accuracy
+ - binary (true|false)
+ - temperature
+ - counter
+ - choice
+ 
+Modify Statistics
+-----------------
+Sometimes it would be useful to modify statistics to exclude certain statistics. The following are examples of such filters. Concept from Django Template Filters.
+
+`type|filters`
+
+### Filters
+ - off, no statistics
+  - number|off
+
+
 Ontology
 --------
-All things related to models, objects, or classes and their respected statistics that are auto incremented/decremented/updated.
+All things related to models, objects, or classes and their respected statistics that are auto incremented/decremented/updated. The '**\***' items are not yet implemented. The '**?**' items are unverified for appropiateness.
 
-### Date
+### Base (common for all types)
  - value
+ - created_on
+ - statistics
+  - first
+  - last
+
+### Datetime*
  - timestamp
  - statistics
-    - first (date)
-    - last (date)
     - frequency
-    - weekday (histogram)
+    - day\_of\_week (histogram)
     - hour (histogram)
 
-### Location
+### Location*
  - longitude
  - latitude
+ - elevation?
  - statistics
-    - first (location)
-    - last (location)
     - area
     - centroid
     - boundary
     - box (histogram)
 
 ### Number
- - value
  - statistics 
-    - first (number)
-    - last (number)
     - min
     - max
     - mean
     - sum
-    - deviation
-    - mode_id
-    - median
-    - unit (histogram) (0.1, 1, 10, ...)
+    - deviation*
+    - mode*
+    - median*
+    - unit (histogram) (0.1, 1, 10, ...)*
 
 ### String
- - value
  - length (number)
- - statistics
-    - first (string)
-    - last (string)
-    - values (histogram)
  
-### Interval
+### Interval*
  - start (date)
  - stop (date)
  - duration (number)
- - statistics
-    - first (interval)
-    - last (interval)
-
-### Histogram
- - bins
- - statistics
-    - count
 
 Events
 ------
@@ -75,9 +86,18 @@ Web hooks can be attached for when an event (for a namespace) occurs. Supports s
 
 Map
 ---
-The following map/alias between different kind of inputs
+The following map/alias between different type of inputs
 
- - timestamp -> Date
+ - timestamp -> date
+ - datetime -> date
+ - int -> number
+ - integer -> number
+ - float -> number
+ - long -> number
+ - text -> string
+ - str -> string
+ - gps -> location
+ 
 
 Usage
 -----
@@ -105,3 +125,4 @@ Thoughts
  - Olmo: Would be interesting to have statistics local to a grouping.
  - Sasank: Delete all data for a campaign
  - Sasank: Delete all data for a namespace
+ - Sasank: Query for specific stats, including filtering for withtin a boundary
