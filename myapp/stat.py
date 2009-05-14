@@ -117,13 +117,14 @@ class DatetimeSummary(StringSummary):
     
     timetuple = datum.datetime.timetuple()
     for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%s_of_the_year']):
-      attr = bucket % 's'
-      if (not hasattr(stats, attr)):
-        stats[attr] = {}
-      key = timetuple[i]
-      if (key not in stats[attr]):
-        stats[attr][key] = []
-      stats[attr][key].append(str(datum.key()))
+      attr = bucket % 's'      
+      if (attr not in stats.histograms):
+        stats.histograms.append(attr)
+      hist = Histogram(statistic = stats, name = attr)
+      hist.index = str(timetuple[i])
+      hist.datum = datum
+      if (not hist.put()):
+        return logging.critical('Could not save hist: %s' % hist)
 
 '''
 ### Location

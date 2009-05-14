@@ -70,6 +70,7 @@ def measurements(request, key, path):
     return HttpResponse('Campaign not found')
   
   if request.method == 'GET':
+    ns += value and ('.%s' % value) or ''
     logging.info('get: %s, %s' % (ns, value))
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = [Statistics.get_by_campaign_and_namespace(campaign, ns)]
