@@ -69,7 +69,7 @@ class Statistics (SerializableExpando):
   namespace = db.StringProperty(required = True)
   first_  = db.ReferenceProperty(name=  'first', collection_name = 'first')
   last_ = db.ReferenceProperty(name = 'last', collection_name = 'last')
-  hits = JSONProperty()
+  histograms = db.StringListProperty()
   count = db.IntegerProperty()
   
   @staticmethod
@@ -92,3 +92,10 @@ def cb_statistics(sender, **kwargs):
   logging.info('statistic: %s' % (statistic and statistic.key(), ))
     
 signals.post_save.connect(cb_statistics, sender = Storage)
+
+class Histogram(SerializableExpando):
+  statistic = db.ReferenceProperty(Statistics, collection_name = 'statistic')
+  name = db.StringProperty(required = True)
+  index = db.StringProperty()
+  datum = db.ReferenceProperty(Storage, collection_name = 'datum')
+

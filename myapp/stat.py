@@ -1,5 +1,5 @@
 import urllib, logging
-from models import JSONProperty
+from models import Histogram
 
 def get(prop):
   glbs = globals()
@@ -33,16 +33,16 @@ class Summary(NoSummary):
     """docstring for calculate"""
     super(Summary, cls).calculate(stats, datum)
     
-    if (not hasattr(stats, 'hits')):
-      stats.hits = {}
+    if ('hits' not in stats.histograms):
+      stats.histograms.append('hits')
+    hist = Histogram(statistic = stats, name = 'hits')
     try:
-      key = str(datum.value) # careful
+      hist.index = str(datum.value) # careful
     except:
       return logging.critical('Could not str(%s)' % datum.value)
-      
-    if (key not in stats.hits):
-      stats.hits[key] = []
-    stats.hits[key].append(str(datum.key()))
+    hist.datum = datum
+    if (not hist.put()):
+      return logging.critical('Could not save hist: %s' % hist)    
   
 class NumberSummary(Summary):
   match_type = ['number', 'float', 'int', 'integer', 'long']
