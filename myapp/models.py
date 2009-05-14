@@ -8,26 +8,26 @@ from django.utils import simplejson
 import stat
 
 class SerializableExpando(db.Expando):
-    """Extends Expando to have json and possibly other serializations
-    
-    Use the class variable 'json_does_not_include' to declare properties
-    that should *not* be included in json serialization.
-    TODO -- Complete round-tripping
-    """
-    json_does_not_include = []
- 
-    def to_dict(self, attr_list=[]):
-        def to_entity(entity):
-            """Convert datastore types in entity to 
-               JSON-friendly structures."""
-            self._to_entity(entity)
-            for skipped_property in self.__class__.json_does_not_include:
-                del entity[skipped_property]
-            util.replace_datastore_types(entity)
-        return util.to_dict(self, attr_list, to_entity)
-    
-    def to_json(self, attr_list=[]):
-        return simplejson.dumps(self.to_dict(attr_list))
+  """Extends Expando to have json and possibly other serializations
+  
+  Use the class variable 'json_does_not_include' to declare properties
+  that should *not* be included in json serialization.
+  TODO -- Complete round-tripping
+  """
+  json_does_not_include = []
+  
+  def to_entity(self, entity):
+    """Convert datastore types in entity to JSON-friendly structures."""
+    self._to_entity(entity)
+    for skipped_property in self.__class__.json_does_not_include:
+      del entity[skipped_property]
+    util.replace_datastore_types(entity)
+
+  def to_dict(self, attr_list=[]):
+    return util.to_dict(self, attr_list, self.to_entity)
+  
+  def to_json(self, attr_list=[]):
+    return simplejson.dumps(self.to_dict(attr_list))
 
 class JSONProperty(db.Property):
     def get_value_for_datastore(self, model_instance):
@@ -77,6 +77,29 @@ class Statistics (SerializableExpando):
     '''docstring for get_by_campaign_and_namespace'''
     result = Statistics.all().filter('campaign = ', campaign).filter('namespace = ', namespace).fetch(1)
     return len(result) and result[0] or None
+    
+  def to_entity(self, entity):
+    super(Statistics, self).to_entity(entity)
+    
+    for histogram in self.histograms:
+      logging.info('Model has histogram: %s' % histogram)
+      hists = Histogram.all().filter('statistic =', self).filter('name =', histogram).fetch(1000) #pagination
+      logging.info('All hists: %s' % hists)
+      hist_dict = {}
+      for h in hists:
+        if h.index not in hist_dict:
+          hist_dict[h.index] = []
+        hist_dict[h.index].append(str(h.datum.key()))
+      entity[histogram] = hist_dict
+
+class Histogram(SerializableExpando):
+  json_does_not_include = ['statistic', 'name']
+  
+  statistic = db.ReferenceProperty(Statistics, collection_name = 'statistic')
+  name = db.StringProperty(required = True)
+  index = db.StringProperty()
+  datum = db.ReferenceProperty(Storage, collection_name = 'datum')
+
 
 def cb_statistics(sender, **kwargs):
   '''docstring for cb_statistics'''
@@ -92,10 +115,3 @@ def cb_statistics(sender, **kwargs):
   logging.info('statistic: %s' % (statistic and statistic.key(), ))
     
 signals.post_save.connect(cb_statistics, sender = Storage)
-
-class Histogram(SerializableExpando):
-  statistic = db.ReferenceProperty(Statistics, collection_name = 'statistic')
-  name = db.StringProperty(required = True)
-  index = db.StringProperty()
-  datum = db.ReferenceProperty(Storage, collection_name = 'datum')
-

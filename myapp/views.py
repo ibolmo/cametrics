@@ -51,7 +51,8 @@ mimetypes = {
 
 def render_json(data, stats):
   def to_dict(datum):
-    return datum.to_dict()
+    return datum and datum.to_dict() or {}
+    
   return simplejson.dumps({
     'type': len(data) and data[0].type or None,
     'values': map(to_dict, data),
@@ -71,7 +72,7 @@ def measurements(request, key, path):
   if request.method == 'GET':
     logging.info('get: %s, %s' % (ns, value))
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-    stats = Statistics.get_by_campaign_and_namespace(campaign, ns) or []
+    stats = [Statistics.get_by_campaign_and_namespace(campaign, ns)]
     renderer = globals().get('render_%s' % format)
     return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats)}, mimetype = mimetypes.get(format, 'text/plain')) \
         or HttpResponse('Unsupported format: %s' % format, status = 500)
