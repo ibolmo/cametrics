@@ -75,8 +75,11 @@ def measurements(request, key, path):
     renderer = globals().get('render_%s' % format)
     return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats)}, mimetype = mimetypes.get(format, 'text/plain')) \
         or HttpResponse('Unsupported format: %s' % format, status = 500)
-  elif request.method == 'POST':    
-    new_value = stat.prepare(value)
+  elif request.method == 'POST':   
+    v_type = request.POST.get('type', 'number')
+    if (v_type is 'number' and not value):
+        value = 1
+    new_value = stat.get(v_type).prepare(value)
     if (new_value is None):
       return HttpResponse('Incorrect value (%s) passed' % value, status = 404)  
     

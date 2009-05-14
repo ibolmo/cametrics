@@ -87,7 +87,7 @@ def cb_statistics(sender, **kwargs):
   statistic = Statistics.get_by_campaign_and_namespace(instance.campaign, instance.namespace) or Statistics(campaign = instance.campaign, namespace = instance.namespace)
   if (not statistic.is_saved()):  # todo, remove this
     statistic.save()              #
-  stat.get(instance.type).calculate(stats, datum)
+  stat.get(instance.type).calculate(statistic, instance)
   statistic.save()
   logging.info('statistic: %s' % (statistic and statistic.key(), ))
     

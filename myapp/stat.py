@@ -1,4 +1,5 @@
-import urllib
+import urllib, logging
+from models import JSONProperty
 
 def get(prop):
   glbs = globals()
@@ -13,17 +14,16 @@ class NoSummary(object):
   
   @classmethod
   def prepare(cls, datum):
-    """docstring for prepare"""
     return datum
   
   @classmethod
   def calculate(cls, stats, datum):
     """docstring for calculate"""
-    if (not hasattr(stats, 'first_')):
+    if (not stats.first_):
       stats.first_ = datum
     stats.last_ = datum
     
-    if (not hasattr(stats, 'count')):
+    if (not stats.count):
       stats.count = 0
     stats.count += 1
     
@@ -35,7 +35,11 @@ class Summary(NoSummary):
     
     if (not hasattr(stats, 'hits')):
       stats.hits = {}
-    key = str(datum.value) # careful
+    try:
+      key = str(datum.value) # careful
+    except:
+      return logging.critical('Could not str(%s)' % datum.value)
+      
     if (key not in stats.hits):
       stats.hits[key] = []
     stats.hits[key].append(str(datum.key()))
@@ -43,9 +47,13 @@ class Summary(NoSummary):
 class NumberSummary(Summary):
   match_type = ['number', 'float', 'int', 'integer', 'long']
   @classmethod
-  def prepare(cls, datum):
+  def prepare(cls, value):
       """docstring for prepare"""
-      return float(datum)  
+      try:
+        return float(value)  
+      except:
+        logging.critical('Could not convert %s into a float' % value)
+        return None
     
   @classmethod
   def calculate(cls, stats, datum):
@@ -68,7 +76,11 @@ class StringSummary(Summary):
   @classmethod
   def prepare(self, value):
     """docstring for prepare"""
-    return urllib.unquote_plus(value)
+    try:
+      return urllib.unquote_plus(value)
+    except:
+      logging.critical('Could not unquote_plus(%s)' % value)
+      return None
     
 class DatetimeSummary(StringSummary):
   match_type = ['date', 'datetime', 'timestamp']
