@@ -59,7 +59,7 @@ class Storage(SerializableExpando):
   
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
-  type = db.StringProperty(required = True, choices = ('string', 'number', 'datetime'))
+  type = db.StringProperty(required = True)
   created_on = db.DateTimeProperty(auto_now_add = 1)
   
 class Statistics (SerializableExpando):
