@@ -82,9 +82,7 @@ class Statistics (SerializableExpando):
     super(Statistics, self).to_entity(entity)
     
     for histogram in self.histograms:
-      logging.info('Model has histogram: %s' % histogram)
       hists = Histogram.all().filter('statistic =', self).filter('name =', histogram).fetch(1000) #pagination
-      logging.info('All hists: %s' % hists)
       hist_dict = {}
       for h in hists:
         if h.index not in hist_dict:
