@@ -14,11 +14,14 @@ class NoSummary(object):
   
   @classmethod
   def prepare(cls, datum):
-    return datum
+    '''Decorates the datum with additional attributes or redefines the value attribute for the calculations'''
+    pass
   
   @classmethod
   def calculate(cls, stats, datum):
-    """docstring for calculate"""
+    '''Decorates the statistic with additional attributes.
+    For example, the first and last datum and increment the count of data in the system
+    '''
     if (not stats.first_):
       stats.first_ = datum
     stats.last_ = datum
@@ -30,7 +33,14 @@ class NoSummary(object):
 class Summary(NoSummary):
   @classmethod
   def calculate(cls, stats, datum):    
-    """docstring for calculate"""
+    '''The simplest summary by creating a histogram of all the 'hits' for the exact value.
+    For example: input = ['a', 'b', 'a', 'c']
+      hits = {
+        'a': ['a'.key(), 'a'.key()],
+        'b': ['b'.key()],
+        'c': ['c'.key()]
+      }
+    '''
     super(Summary, cls).calculate(stats, datum)
     
     if ('hits' not in stats.histograms):
@@ -47,17 +57,16 @@ class Summary(NoSummary):
 class NumberSummary(Summary):
   match_type = ['number', 'float', 'int', 'integer', 'long']
   @classmethod
-  def prepare(cls, value):
-      """docstring for prepare"""
+  def prepare(cls, datum):
+      '''Converts the datum from a string, to (optimistically) into a float. Additionally, if value is None defaults value to 1.0'''
       try:
-        return float(value or 1)  
+        datum.value = float(datum.value or 1)  
       except:
         logging.critical('Could not convert %s into a float' % value)
-        return None
     
   @classmethod
   def calculate(cls, stats, datum):
-    """docstring for calculate"""
+    '''Adds to the statistics the min, max, sum, mean, and other standard numerical statistics'''
     super(NumberSummary, cls).calculate(stats, datum)
     if (not hasattr(stats, 'min') or datum.value < stats.min):
       stats.min = datum.value
@@ -72,16 +81,14 @@ class NumberSummary(Summary):
     
 class StringSummary(Summary):
   match_type = ['str', 'string', 'text']
-      
+
 class DatetimeSummary(Summary):
   match_type = ['date', 'datetime', 'timestamp']
   DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
   
   @classmethod
-  def calculate(cls, stats, datum):
-    """docstring for calculate"""
-    NoSummary.calculate(stats, datum)
-    
+  def prepare(self, datum):
+    '''Adds to the datum the equivalent timestamp, datetime to standardize the interface for the datum'''
     import datetime
     if (datum.type == 'timestamp'):
       try:
@@ -105,6 +112,13 @@ class DatetimeSummary(Summary):
         return logging.critical('Could not time.mktime(%s)' % datum.datetime.timetuple())
     else:
       return logging.critical('Unexpected type: %s for calc_date_statistics' % datum.type)
+  
+  @classmethod
+  def calculate(cls, stats, datum):
+    '''Adds to the statistic various histograms/buckets for the years, months,
+    days, and so forth (see datetime.datetime.timetuple for other histograms).
+    Datetime statistics do not include the 'hits' histogram.'''
+    NoSummary.calculate(stats, datum) # No need for hits histogram
     
     timetuple = datum.datetime.timetuple()
     for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%s_of_the_year']):
@@ -116,7 +130,7 @@ class DatetimeSummary(Summary):
       hist.datum = datum
       if (not hist.put()):
         return logging.critical('Could not save hist: %s' % hist)
-
+        
 '''
 ### Location
  - longitude

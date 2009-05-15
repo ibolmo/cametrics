@@ -98,18 +98,23 @@ class Histogram(SerializableExpando):
   index = db.StringProperty()
   datum = db.ReferenceProperty(Storage, collection_name = 'datum')
 
-
-def cb_statistics(sender, **kwargs):
-  '''docstring for cb_statistics'''
-  instance = kwargs.get('instance')
-  if (not instance):
-    return logging.error('No instance for cb_statistics')
+def cb_prepare_datum(sender, **kwargs):
+  datum = kwargs.get('instance')
+  if (not datum):
+    return logging.error('No datum for cb_prepare_datum')
+  stat.get(datum.type).prepare(datum)
+      
+def cb_calc_statistic(sender, **kwargs):
+  datum = kwargs.get('instance')
+  if (not datum):
+    return logging.error('No datum for cb_statistics')
   
-  statistic = Statistics.get_by_campaign_and_namespace(instance.campaign, instance.namespace) or Statistics(campaign = instance.campaign, namespace = instance.namespace)
+  statistic = Statistics.get_by_campaign_and_namespace(datum.campaign, datum.namespace) or Statistics(campaign = datum.campaign, namespace = datum.namespace)
   if (not statistic.is_saved()):  # todo, remove this
     statistic.save()              #
-  stat.get(instance.type).calculate(statistic, instance)
+  stat.get(datum.type).calculate(statistic, datum)
   statistic.save()
   logging.info('statistic: %s' % (statistic and statistic.key(), ))
     
-signals.post_save.connect(cb_statistics, sender = Storage)
+signals.pre_save.connect(cb_prepare_datum, sender = Storage)
+signals.post_save.connect(cb_calc_statistic, sender = Storage)

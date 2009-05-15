@@ -79,11 +79,7 @@ def measurements(request, key, path):
   elif request.method == 'POST':   
     value = request.POST.get('value')
     kind = request.POST.get('type', 'number')
-    new_value = stat.get(kind).prepare(value)
-    if (new_value is None):
-      return HttpResponse('Incorrect value (%s) passed' % value, status = 404)  
-    
-    datum = Storage(namespace = ns, value = new_value, type = kind, campaign = campaign)
+    datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
     if (not datum.put()):
       logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, kind))
       return HttpResponse('Internal error when saving measurement', status = 500)
