@@ -63,7 +63,7 @@ class Storage(SerializableExpando):
   created_on = db.DateTimeProperty(auto_now_add = 1)
   
 class Statistics (SerializableExpando):
-  json_does_not_include = ['campaign', 'namespace']
+  json_does_not_include = ['campaign', 'namespace', 'histograms']
   
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)

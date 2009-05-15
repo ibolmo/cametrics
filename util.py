@@ -3,18 +3,6 @@ from google.appengine.ext import db
 
 def generateModel(name, properties = {}, base = db.Model):
   return type(name, (base, ), properties)
-
-def getParts(path):
-  ns = value = None
-  if (not re.search('/', path)):
-    ns = path or None
-  else:
-    value = re.search(r'([^/]+)$', path)
-    value = value and value.group(0) or ''
-    ns = path[:-(len(value)+1)] or None
-
-  logging.info('ns,value: %s | %s' % (ns, value))
-  return (ns and ns.replace('/', '.'), value)
   
 # From: http://github.com/DocSavage/bloog/blob/346e5fb7c1fd87259dc79f2c4ae852badb6f2b79/models/__init__.py
 import datetime
