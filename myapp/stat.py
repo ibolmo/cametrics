@@ -50,7 +50,7 @@ class NumberSummary(Summary):
   def prepare(cls, value):
       """docstring for prepare"""
       try:
-        return float(value)  
+        return float(value or 1)  
       except:
         logging.critical('Could not convert %s into a float' % value)
         return None
@@ -72,17 +72,8 @@ class NumberSummary(Summary):
     
 class StringSummary(Summary):
   match_type = ['str', 'string', 'text']
-  
-  @classmethod
-  def prepare(self, value):
-    """docstring for prepare"""
-    try:
-      return urllib.unquote_plus(value)
-    except:
-      logging.critical('Could not unquote_plus(%s)' % value)
-      return None
-    
-class DatetimeSummary(StringSummary):
+      
+class DatetimeSummary(Summary):
   match_type = ['date', 'datetime', 'timestamp']
   DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
   

@@ -63,35 +63,34 @@ def measurements(request, key, path):
   if (not key):
     return HttpResponse('Invalid service usage')
   
-  ns, value = util.getParts(path)
-  format = request.REQUEST.get('format', 'json')
   campaign = Campaign.get(key)
   if (not campaign):
     return HttpResponse('Campaign not found')
   
+  ns = path.strip('/').replace('/', '.')
+  
   if request.method == 'GET':
-    ns += value and ('.%s' % value) or ''
-    logging.info('get: %s, %s' % (ns, value))
+    format = request.GET.get('format', 'json')
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = [Statistics.get_by_campaign_and_namespace(campaign, ns)]
     renderer = globals().get('render_%s' % format)
     return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats)}, mimetype = mimetypes.get(format, 'text/plain')) \
         or HttpResponse('Unsupported format: %s' % format, status = 500)
   elif request.method == 'POST':   
-    v_type = request.POST.get('type', 'number')
-    if (v_type is 'number' and not value):
-        value = 1
-    new_value = stat.get(v_type).prepare(value)
+    value = request.POST.get('value')
+    kind = request.POST.get('type', 'number')
+    new_value = stat.get(kind).prepare(value)
     if (new_value is None):
       return HttpResponse('Incorrect value (%s) passed' % value, status = 404)  
     
-    logging.info('post: %s, %s, %s' % (ns, new_value, v_type))
-    datum = Storage(namespace = ns, value = new_value, type = v_type, campaign = campaign)
+    datum = Storage(namespace = ns, value = new_value, type = kind, campaign = campaign)
     if (not datum.put()):
-      logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, v_type))
+      logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, kind))
       return HttpResponse('Internal error when saving measurement', status = 500)
-    return HttpResponse('Ok')
-    
+    return HttpResponse('Ok', status = 201)
+  elif request.method == 'DELETE':
+    return HttpResponse('Not yet supported, please contact admin.', status = 304)
+
   return HttpResponse('Internal Error', status = 500)
 
 @login_required
