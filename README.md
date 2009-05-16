@@ -32,27 +32,41 @@ All things related to models, objects, or classes and their respected statistics
 
 ### Base (common for all types)
  - value
+ - prev*
+ - next*
  - created_on
  - statistics
   - first
   - last
 
-### Datetime*
+### Datetime
  - timestamp
+ - datetime
  - statistics
-    - frequency
-    - day\_of\_week (histogram)
-    - hour (histogram)
+    - frequency*
+    - years (bucket)
+    - months (bucket)
+    - days (bucket)
+    - hours (bucket)
+    - minutes (bucket)
+    - seconds (bucket)
+    - weekdays (bucket)
 
-### Location*
+### Location
  - longitude
  - latitude
  - elevation?
  - statistics
-    - area
-    - centroid
-    - boundary
-    - box (histogram)
+    - area*
+    - centroid*
+    - speed*
+    - distance*
+    - displacement*
+    - max.longitude
+    - min.longitude
+    - max.latitude
+    - min.latitude
+    - geotudes
     
 ### Coordinate*
  - x
@@ -61,7 +75,7 @@ All things related to models, objects, or classes and their respected statistics
   - area
   - centroid
   - boundary
-  - grid?
+  - grids (geotudes)?
 
 ### Number
  - statistics 
@@ -72,10 +86,10 @@ All things related to models, objects, or classes and their respected statistics
     - deviation*
     - mode*
     - median*
-    - unit (histogram) (0.1, 1, 10, ...)*
+    - units (0.1, 1, 10, ...)*
 
 ### String
- - length (number)
+ - length?
  
 ### Interval*
  - start (date)
@@ -97,21 +111,15 @@ Map
 ---
 The following map/alias between different type of inputs
 
- - timestamp -> date
- - datetime -> date
- - int -> number
- - integer -> number
- - float -> number
- - long -> number
- - text -> string
- - str -> string
- - gps -> location
- 
-
-Usage
------
- - The namespace should be delimited by (any number of) non-alpha (for example: `/[^\w]*/`) characters
- - Array inputs (for the namespace), will be joined by '.'
+ - timestamp `->` date
+ - datetime `->` date
+ - int `->` number
+ - integer `->` number
+ - float `->` number
+ - long `->` number
+ - text `->` string
+ - str `->` string
+ - gps `->` location
 
 ### Examples
 
@@ -130,7 +138,7 @@ Universally Unique Identifier can be useful for namespacing to get a specific me
 TODO
 ----
  - Timezone for datetime calculations
-
+ 
 Thoughts
 --------
  - Olmo: Assuming: we have a good breadth of (statistical) processings for different objects, then incr/decr operations may not be necessary

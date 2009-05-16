@@ -3,13 +3,13 @@ cmd /K "dev_appserver \www\cm -p 80 -c"
 Use Cases
 ---------
 
-## Use 1
+### Use 1
     measure('visitor')
     measure('visitor.click')
     measure('visitor.click.x', 44.3)
     measure('visitor.agent', 'ie', 'string')
 
-### Expected (json) object-tree
+#### Expected (json) object-tree
 
     visitor:
         values: [1]
@@ -27,6 +27,16 @@ Use Cases
             statistics (StringStatistics):
 
 -----
+
+Query
+-----
+
+### Uses
+
+    get('parent.child.subchild') => parent/child/subchild
+    get('parent.child.subchild.stats') => parent/child/subchild/stats
+    get('parent.child.subchild.stats.column') => parent/child/subchild/stats/column
+    get('parent.child.subchild.stats.column', 'format') => parent/child/subchild/stats/column.format
 
 Questions
 ---------
