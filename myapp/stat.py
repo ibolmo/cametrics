@@ -1,4 +1,4 @@
-import urllib, logging
+import urllib, logging, math, re
 from models import Histogram
 
 def get(prop):
@@ -130,7 +130,7 @@ class DatetimeSummary(Summary):
       hist.datum = datum
       if (not hist.put()):
         return logging.critical('Could not save hist: %s' % hist)
-        
+
 '''
 ### Location
  - longitude
@@ -140,7 +140,72 @@ class DatetimeSummary(Summary):
     - centroid
     - boundary
     - box (histogram)
+'''
+class LocationSummary(Summary):
+  match_type = ['gps', 'location']
+  non_alpha = re.compile(r'[^a-zA-Z0-9\-\.]')
+  
+  @classmethod
+  def prepare(cls, datum):
+    longitude, latitude = cls.non_alpha.split(datum.value)
+    try:
+      datum.longitude = float(longitude)
+    except:
+      logging.critical('Could not convert longitude %s into a float' % longitude)
+    
+    try:
+      datum.latitude = float(latitude)
+    except:
+      logging.critical('Could not convert latitude %s into a float' % latitude)  
+    
+  @classmethod
+  def calculate(self, stats, datum):
+    NoSummary.calculate(stats, datum)
+    
+    if ('geotudes' not in stats.histograms):
+      stats.histograms.append('geotudes')    
+    tude = LocationSummary.geotude(datum.longitude, datum.latitude)
+    key = ''
+    while len(tude):
+      key += tude.pop(0)
+      hist = Histogram(statistic = stats, name = 'geotudes')
+      hist.index = key
+      hist.datum = datum
+      if (not hist.put()):
+        return logging.critical('Could not save hist: %s' % hist)    
+      key += '.'
 
+    for limit, fn in {'min': min, 'max': max}.iteritems():
+      for axis in ['longitude', 'latitude']:
+        attr = '%s.%s' % (limit, axis)
+        if (not hasattr(stats, attr)):
+          setattr(stats, attr, getattr(datum, axis))
+          continue
+        setattr(stats, attr, fn(getattr(stats, attr), getattr(datum, axis)))
+          
+  @staticmethod
+  def geotude(lon, lat):
+    ''' Geotude indexing
+    Reference:
+      http://geotude.com/
+    '''
+    if (lat is None or lon is None or lat > 90 or lat <= -90 or lon < -180 or lon >= 180):
+      return None
+    
+    alpha = 90.0 - lat
+    beta = lon + 180.0
+    
+    gt = 500 * math.floor(alpha) + math.floor(beta) + 10000
+    
+    x, alpha = str(alpha).split('.')
+    x, beta =  str(beta).split('.')
+    gt, x = str(gt).split('.')
+    
+    la = len(alpha)
+    lb = len(beta)
+    return [gt] + [(i < la and alpha[i] or '0') + (i < lb and beta[i] or '0') for i in range(0, 7)]
+    
+'''
 ### Interval
  - start (date)
  - stop (date)
