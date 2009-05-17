@@ -67,8 +67,8 @@ class Statistics (SerializableExpando):
   
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
-  first_  = db.ReferenceProperty(name=  'first', collection_name = 'first')
-  last_ = db.ReferenceProperty(name = 'last', collection_name = 'last')
+  head = db.ReferenceProperty(Storage, collection_name = 'head')
+  tail = db.ReferenceProperty(Storage, collection_name = 'tail')
   histograms = db.StringListProperty()
   count = db.IntegerProperty()
   

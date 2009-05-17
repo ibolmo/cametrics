@@ -22,13 +22,14 @@ class NoSummary(object):
     '''Decorates the statistic with additional attributes.
     For example, the first and last datum and increment the count of data in the system
     '''
-    if (not stats.first_):
-      stats.first_ = datum
-    stats.last_ = datum
+    if (not stats.head):
+      stats.head = datum
+    stats.tail = datum
     
     if (not stats.count):
       stats.count = 0
     stats.count += 1
+    
     
 class Summary(NoSummary):
   @classmethod
