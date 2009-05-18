@@ -8,24 +8,19 @@
  5/06 |x| Organizer/Developer Registration (Removes Google Account requirement)
  5/06 |x| Hook into datastore to update Statistics for Namespace
  5/07 |x| Write PHP Client
- 5/07 | | Implement metrics into HAB Watch (Olmo)
  5/08 | | Implement metrics into GarbageWatch (Sasank)
- 5/08 | | Meet with Vids and get him involved 
+ 5/08 | | Implement metrics into Invasive Species (Eric Y)
  5/08 |x| GET statistics
  5/08 | | Write Python Client
 - Week 7 -
  5/09 | | Implement UUID helper for PHP and Python
- 5/09 | | Use Google Data Services for Data Visualization API
+ 5/09 |x| Use Google Data Services for Data Visualization API
  5/10 | | Implement Timer helpers (measure.start(..).... measure.stop(...))
- 5/11 | | 
- 5/12 | |
- 5/13 | | Meet with Deborah for a check-in, generate a list of Objectives for the project, and verify completeness.
- 5/14 | |
- 5/15 | |
- 5/16 | |
+ 5/13 |x| Meet with Deborah for a check-in, generate a list of Objectives for the project, and verify completeness.
 - Week 8|  -
  5/17 | | Create Organizer/Developer Usage Survey
  5/18 | | Send Organizer/Developer Usage Survey
+ 5/18 | | Start Experimentation
  5/18 | | Start writing written report (WR)
  5/20 | | Write about Organizer/Developer Response
  5/21 | | Visit Graduate Student Writing Center

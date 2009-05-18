@@ -135,6 +135,16 @@ UUID
 ----
 Universally Unique Identifier can be useful for namespacing to get a specific measurement for an object that is known to the campaign but is anonymous to the system. For example, I can track a user's data quality without implicating the user in the backend. 
 
+GCharts
+-------
+Google Charts API is supported by passing all the normal query parameters, as described in the [Google Charts API](http://code.google.com/apis/chart/basics.html "Google Charts API - Chart Basics") and appending `.gc` or `.gchart` to the end of your URL.
+
+For example visit:  
+    [http://cametrics.appspot.com/agljYW1ldHJpY3NyFQsSDm15YXBwX2NhbXBhaWduGNEPDA/name/space**.gchart?**cht=p3&chs=250x100]()
+
+## Note
+You do not need to include the `chd` argument since this will be automatically populated by the system.
+
 TODO
 ----
  - Timezone for datetime calculations

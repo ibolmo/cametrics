@@ -53,6 +53,7 @@ def render_json(data, stats, data_path):
   def to_dict(datum):
     return datum and datum.to_dict() or {}
   
+  data_path = data_path or []
   data_type = len(data) and data[0].type or None
   data_values = map(to_dict, data)
   data_stats = map(to_dict, stats)
@@ -63,10 +64,8 @@ def render_json(data, stats, data_path):
     return simplejson.dumps(data_values)
   elif 'stats' in data_path:
     path = data_path.split('.'); path.pop(0)
-    logging.info('paths: %s' % path)
     data_stats = data_stats[0]
     obj = data_stats
-    logging.info('obj: %s' % obj)
     for p in path:
       obj = data_stats.get(p)
     return simplejson.dumps(obj)

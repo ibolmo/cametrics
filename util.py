@@ -7,8 +7,8 @@ def generateModel(name, properties = {}, base = db.Model):
 special_keys = re.compile(r'\.((?:stats|values).*)')
 
 def getParts(ns):
-  ns, other, x = special_keys.split(ns)
-  return ns, other
+  x = special_keys.split(ns)
+  return len(x) and x[0] or None, len(x) > 1 and x[1] or None
   
 # From: http://github.com/DocSavage/bloog/blob/346e5fb7c1fd87259dc79f2c4ae852badb6f2b79/models/__init__.py
 import datetime
