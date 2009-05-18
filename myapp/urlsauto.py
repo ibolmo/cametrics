@@ -14,5 +14,5 @@ urlpatterns = patterns('',
     (r'^campaign/edit/(?P<key>.+)$', 'edit_campaign'),
 
     (r'^$', 'list_measurements'),
-    (r'^(?P<key>([^/]+))/(?P<path>(.*))$', 'measurements')
+    (r'^(?P<key>([^/]+))/(?P<path>([^\.]+))(?:\.(?P<format>(.+)))?$', 'measurements')
 )

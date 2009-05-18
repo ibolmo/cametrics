@@ -32,7 +32,6 @@ Query
 -----
 
 ### Uses
-
     get('parent.child.subchild') => parent/child/subchild
     get('parent.child.subchild.stats') => parent/child/subchild/stats
     get('parent.child.subchild.stats.column') => parent/child/subchild/stats/column

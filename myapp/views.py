@@ -59,7 +59,7 @@ def render_json(data, stats):
     'stats': map(to_dict, stats)
   })
 
-def measurements(request, key, path):
+def measurements(request, key, path, format):
   if (not key):
     return HttpResponse('Invalid service usage')
   
@@ -70,7 +70,7 @@ def measurements(request, key, path):
   ns = path.strip('/').replace('/', '.')
   
   if request.method == 'GET':
-    format = request.GET.get('format', 'json')
+    format = format or request.GET.get('format', 'json')
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = [Statistics.get_by_campaign_and_namespace(campaign, ns)]
     renderer = globals().get('render_%s' % format)

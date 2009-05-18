@@ -15,7 +15,10 @@ class NoSummary(object):
   @classmethod
   def prepare(cls, datum):
     '''Decorates the datum with additional attributes or redefines the value attribute for the calculations'''
-    pass
+    logging.info('In NoSummary')
+    #logging.info('Stats: %s, Tail: %s' % (datum.stats, datum.stats.tail))
+    #if (datum.stats.tail):
+    #  datum.prev = datum.stats.tail
   
   @classmethod
   def calculate(cls, stats, datum):
@@ -60,6 +63,7 @@ class NumberSummary(Summary):
   @classmethod
   def prepare(cls, datum):
       '''Converts the datum from a string, to (optimistically) into a float. Additionally, if value is None defaults value to 1.0'''
+      super(NumberSummary, cls).prepare(datum)
       try:
         datum.value = float(datum.value or 1)  
       except:
