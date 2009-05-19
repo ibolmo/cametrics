@@ -5,11 +5,11 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic.list_detail import object_list, object_detail
 from django.views.generic.create_update import create_object, delete_object, update_object, redirect
-from django.utils import simplejson
+
 from google.appengine.ext import db
 from ragendja.template import render_to_response
 
-import os, util, logging, stat
+import os, util, logging, stat, renderer
 from myapp.forms import CampaignForm
 from myapp.models import *
 
@@ -42,39 +42,6 @@ def create_new_user(request):
       return HttpResponseRedirect('/login')
   return render_to_response(request, 'myapp/user_create_form.html', {'form': form, 'heading': 'Register' })
 
-mimetypes = {
-  'json': 'text/json', #'application/json',
-  'html': 'text/html',
-  'csv': 'text/csv',
-  'plain': 'text/plain'
-}
-
-def render_json(data, stats, data_path):
-  def to_dict(datum):
-    return datum and datum.to_dict() or {}
-  
-  data_path = data_path or []
-  data_type = len(data) and data[0].type or None
-  data_values = map(to_dict, data)
-  data_stats = map(to_dict, stats)
-      
-  logging.info('data path: %s' % data_path)
-  
-  if 'values' in data_path:
-    return simplejson.dumps(data_values)
-  elif 'stats' in data_path:
-    path = data_path.split('.'); path.pop(0)
-    data_stats = data_stats[0]
-    obj = data_stats
-    for p in path:
-      obj = data_stats.get(p)
-    return simplejson.dumps(obj)
-  return simplejson.dumps({
-    'type': data_type,
-    'values': data_values,
-    'stats': data_stats
-  })
-
 def measurements(request, key, path, format):
   if (not key):
     return HttpResponse('Invalid service usage')
@@ -90,10 +57,7 @@ def measurements(request, key, path, format):
     ns, data_path = util.getParts(ns)
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = [Statistics.get_by_campaign_and_namespace(campaign, ns)]
-    
-    renderer = globals().get('render_%s' % format)
-    return renderer and render_to_response(request, 'myapp/get_data.%s' % format, {'data': renderer(data, stats, data_path)}, mimetype = mimetypes.get(format, 'text/plain')) \
-        or HttpResponse('Unsupported format: %s' % format, status = 500)
+    return renderer.get(format)(request, format, data, stats, data_path)
   elif request.method == 'POST':   
     value = request.POST.get('value')
     kind = request.POST.get('type', 'number')
