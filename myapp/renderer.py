@@ -27,11 +27,11 @@ class Renderer(object):
     
   @classmethod
   def render(cls, request, format = 'json', data = '{}', stats = None, data_path = None):
-    return render_to_response(request, 'myapp/get_data.%s' % format, {'data': data}, mimetype = mimetypes.get(format, 'text/plain'))
+    return render_to_response(request, 'myapp/get_data.%s' % format, {'data': data}, mimetype = Renderer.mimetypes.get(format, 'text/plain'))
   
 class Json_Renderer(Renderer):
   @classmethod
-  def render(cls, request, data, stats, data_path):
+  def render(cls, request, format, data, stats, data_path):
       """docstring for render"""      
       data_path = data_path or []
       data_type = len(data) and data[0].type or None
@@ -61,7 +61,8 @@ class ExtendedData(object):
   max_value = 4095
   enc_map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.'
 
-  def encode(self, data):
+  @staticmethod
+  def encode(data):
     encoded_data = []
     enc_size = len(ExtendedData.enc_map)
     for datum in data:
@@ -69,7 +70,7 @@ class ExtendedData(object):
       for value in datum:
         if value is None:
           sub_data.append('__')
-        elif value >= 0 and value <= self.max_value:
+        elif value >= 0 and value <= ExtendedData.max_value:
           first, second = divmod(int(value), enc_size)
           sub_data.append('%s%s' % (ExtendedData.enc_map[first], ExtendedData.enc_map[second]))
         else:
@@ -94,7 +95,7 @@ class Gchart_Renderer(Renderer):
     if ('?' in data_path):
       data_path, qs = data_path.split('?')
       import urlparse
-      try
+      try:
         dqs = urlparse.parse_qs(qs, keep_blank_values = True, strict_parsing = True)
       except ValueError:
         logging.critical('Could not parse_qs(%s)' % qs)
@@ -107,6 +108,7 @@ class Gchart_Renderer(Renderer):
       chxl = ['Values']
     elif 'stats' in data_path:
       path = data_path.split('.'); path.pop(0)
+      data_stats = map(Renderer.to_dict, stats)
       data_stats = data_stats[0]
       obj = data_stats
       for p in path:
@@ -127,7 +129,7 @@ class Gchart_Renderer(Renderer):
     
     dqs['chd'] = chd
     dqs['chxl'] = dqs.get('chxl', chxl) # todo, need a placeholder for x-axis for allowing custom axes
-    return HttpResponseRedirect(Gchart_Renderer.BASE_URL + urllib.encode(dqs))
+    return HttpResponseRedirect(Gchart_Renderer.BASE_URL + urllib.urlencode(dqs))
   
 class Gc_Renderer(Gchart_Renderer):
   pass

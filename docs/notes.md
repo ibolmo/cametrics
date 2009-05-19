@@ -1,4 +1,4 @@
-cmd /K "dev_appserver \www\cm -p 80 -c"
+cmd /K "dev_appserver \www\cm -p 80"
 
 Use Cases
 ---------
