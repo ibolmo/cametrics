@@ -2,7 +2,6 @@ from django.db.models import signals
 from google.appengine.ext import db
 from ragendja.auth.hybrid_models import User
 import logging, util
-from ragendja.dbutils import cleanup_relations
 
 from google.appengine.api import datastore_types
 from django.utils import simplejson
@@ -57,12 +56,6 @@ class Campaign(db.Model):
   homepage = db.StringProperty()
   organizer = db.ReferenceProperty(User, collection_name = 'campaigns')
   created_on = db.DateTimeProperty(auto_now_add = 1)
-  
-def cleanup_campaign_data(sender, **kwargs):
-  campaign = kwargs.get('instance')
-  logging.info('Campaign %s' % campaign)
-  
-signals.pre_delete.connect(cleanup_relations, sender = Campaign)
     
 class Storage(SerializableExpando):
   json_does_not_include = ['campaign', 'namespace', 'type', 'prev', 'stats']
@@ -110,6 +103,7 @@ class Histogram(SerializableExpando):
   index = db.StringProperty()
   datum = db.ReferenceProperty(Storage, collection_name = 'datum')
 
+
 def cb_prepare_datum(sender, **kwargs):
   datum = kwargs.get('instance')
   if (not datum):
@@ -131,3 +125,30 @@ def cb_calc_statistic(sender, **kwargs):
     
 signals.pre_save.connect(cb_prepare_datum, sender = Storage)
 signals.post_save.connect(cb_calc_statistic, sender = Storage)
+
+class DeleteCampaignTask(db.Model):
+  campaign = db.ReferenceProperty(Campaign, required = True)
+  
+  def execute(self):
+    logging.info('Campaign %s' % self.campaign)
+    storage_query = Storage.all(keys_only = True).filter('campaign =', self.campaign)
+    logging.info('results %s' % storage_query.fetch(1000))
+    if (not storage_query.count(limit = 1)):
+      logging.info('Nothing left in storage to clean up for campaign %s' % self.campaign)
+      #self.delete()
+      return True
+    
+    for datum in storage_query:
+      statistics_query = Statistics.all(keys_only = True).filter('campaign =', self.campaign)
+      for statistic in statistics_query:
+        for hist in Histrogram.all(keys_only = True).filter('statistic =', statistic):
+          db.delete(hist)
+        db.delete(statistic)
+      db.delete(datum)
+  
+def cleanup_relations(sender, **kwargs):
+  campaign = kwargs.get('instance')
+  if (not DeleteCampaignTask(campaign = campaign.key()).put()):
+    logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
+  
+signals.pre_delete.connect(cleanup_relations, sender = Campaign)
