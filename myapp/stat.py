@@ -83,9 +83,6 @@ class NumberSummary(Summary):
     if (not hasattr(stats, 'mean')):
       stats.mean = 0
     stats.mean = stats.sum / stats.count
-    
-class StringSummary(Summary):
-  match_type = ['str', 'string', 'text']
 
 class DatetimeSummary(Summary):
   match_type = ['date', 'datetime', 'timestamp']

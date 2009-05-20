@@ -97,3 +97,8 @@ def add_campaign(request):
 @login_required
 def edit_campaign(request, key):
   return update_object(request, object_id = key, form_class = CampaignForm)
+  
+@login_required
+def delete_campaign(request, key):
+    return delete_object(request, Campaign, object_id=key,
+        post_delete_redirect=reverse('myapp.views.list_campaigns'))

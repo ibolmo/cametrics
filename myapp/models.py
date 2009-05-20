@@ -2,6 +2,7 @@ from django.db.models import signals
 from google.appengine.ext import db
 from ragendja.auth.hybrid_models import User
 import logging, util
+from ragendja.dbutils import cleanup_relations
 
 from google.appengine.api import datastore_types
 from django.utils import simplejson
@@ -20,7 +21,10 @@ class SerializableExpando(db.Expando):
     """Convert datastore types in entity to JSON-friendly structures."""
     self._to_entity(entity)
     for skipped_property in self.__class__.json_does_not_include:
-      del entity[skipped_property]
+      try:
+        del entity[skipped_property]
+      except:
+        pass
     util.replace_datastore_types(entity)
 
   def to_dict(self, attr_list=[]):
@@ -53,6 +57,12 @@ class Campaign(db.Model):
   homepage = db.StringProperty()
   organizer = db.ReferenceProperty(User, collection_name = 'campaigns')
   created_on = db.DateTimeProperty(auto_now_add = 1)
+  
+def cleanup_campaign_data(sender, **kwargs):
+  campaign = kwargs.get('instance')
+  logging.info('Campaign %s' % campaign)
+  
+signals.pre_delete.connect(cleanup_relations, sender = Campaign)
     
 class Storage(SerializableExpando):
   json_does_not_include = ['campaign', 'namespace', 'type', 'prev', 'stats']
@@ -64,7 +74,7 @@ class Storage(SerializableExpando):
   
   prev = db.SelfReferenceProperty(collection_name = 'previous')
   stats = db.ReferenceProperty(collection_name = 'statistics')
-  
+    
 class Statistics (SerializableExpando):
   json_does_not_include = ['campaign', 'namespace', 'histograms']
   

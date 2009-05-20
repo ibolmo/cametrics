@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     (r'^campaign/create/?$', 'add_campaign'),
     (r'^campaign/show/(?P<key>.+)$', 'show_campaign'),
     (r'^campaign/edit/(?P<key>.+)$', 'edit_campaign'),
+    (r'^campaign/delete/(?P<key>.+)$', 'delete_campaign'),
 
     (r'^$', 'list_measurements'),
     (r'^(?P<key>([^/]+))/(?P<path>([^\.]+))(?:\.(?P<format>(.+)))?$', 'measurements')
