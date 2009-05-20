@@ -130,21 +130,19 @@ class DeleteCampaignTask(db.Model):
   campaign = db.ReferenceProperty(Campaign, required = True)
   
   def execute(self):
-    logging.info('Campaign %s' % self.campaign)
-    storage_query = Storage.all(keys_only = True).filter('campaign =', self.campaign)
-    logging.info('results %s' % storage_query.fetch(1000))
-    if (not storage_query.count(limit = 1)):
-      logging.info('Nothing left in storage to clean up for campaign %s' % self.campaign)
-      #self.delete()
-      return True
-    
-    for datum in storage_query:
-      statistics_query = Statistics.all(keys_only = True).filter('campaign =', self.campaign)
-      for statistic in statistics_query:
-        for hist in Histrogram.all(keys_only = True).filter('statistic =', statistic):
-          db.delete(hist)
-        db.delete(statistic)
-      db.delete(datum)
+    campaign = self.properties()['campaign'].get_value_for_datastore(self)
+    storage_query = Storage.all(keys_only = True).filter('campaign =', campaign)
+    if (storage_query.count(limit = 1)):
+      for datum in storage_query:
+        statistics_query = Statistics.all(keys_only = True).filter('campaign =', campaign)
+        for statistic in statistics_query:
+          for hist in Histogram.all(keys_only = True).filter('statistic =', statistic):
+            db.delete(hist)
+          db.delete(statistic)
+        db.delete(datum)
+        self.delete()
+        return True
+    logging.info('Nothing left in storage to clean up for campaign %s' % campaign)
   
 def cleanup_relations(sender, **kwargs):
   campaign = kwargs.get('instance')

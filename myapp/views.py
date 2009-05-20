@@ -73,7 +73,7 @@ def measurements(request, key, path, format):
 
 @login_required
 def list_campaigns(request):
-  return object_list(request, Campaign.all().filter('deleted =', False).filter('organizer =', request.user), paginate_by=10)
+  return object_list(request, Campaign.all().filter('organizer =', request.user), paginate_by=10)
 
 @login_required
 def show_campaign(request, key):
