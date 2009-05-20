@@ -57,6 +57,44 @@ class Json_Renderer(Renderer):
       })
       return super(Json_Renderer, cls).render(request, data = data)
 
+class TextData(object):
+    max_value = 100
+    
+    @staticmethod
+    def encode(data):
+        encoded_data = []
+        for datum in data:
+            sub_data = []
+            for value in datum:
+                if value is None:
+                    sub_data.append(-1)
+                elif value >= 0 and value <= TextData.max_value:
+                    sub_data.append("%.1f" % float(value))
+                else:
+                    logging.critical('Could not TextData %s' % (value))
+            encoded_data.append(','.join(sub_data))
+        return 't:' + '|'.join(encoded_data)
+
+class SimpleData(object):
+    max_value = 61
+    enc_map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    
+    @staticmethod
+    def encode(data):
+        encoded_data = []
+        for datum in data:
+            sub_data = []
+            for value in datum:
+                if value is None:
+                    sub_data.append('_')
+                elif value >= 0 and value <= SimpleData.max_value:
+                    sub_data.append(SimpleData.enc_map[value])
+                else:
+                    logging.critical('cannot encode value: %d' % value)
+                    sub_data.append('__')
+            encoded_data.append(''.join(sub_data))
+        return 's:' + ','.join(encoded_data)
+
 class ExtendedData(object):
   max_value = 4095
   enc_map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.'
@@ -84,7 +122,8 @@ class Gchart_Renderer(Renderer):
   
   default_dqs = {
     'chs': '250x100',
-    'cht': 'bvs'
+    'cht': 'bvs',
+    'chxt': 'x,y'
   }
   
   @classmethod
@@ -124,9 +163,10 @@ class Gchart_Renderer(Renderer):
       logging.critical('Unexpected gchart for %s' % data_path)          
     
     # convert
-    chd = ExtendedData.encode(chd)
+    chd = TextData.encode(chd)
     chxl = '0:|%s|' % '|'.join(chxl)
-    
+    dqs['chds'] = '%s,%s' % (stats[0].min - 1, stats[0].max) # careful
+    dqs['chxr'] = '%s,%s,%s' % (1, stats[0].min - 1, stats[0].max) # careful
     dqs['chd'] = chd
     dqs['chxl'] = dqs.get('chxl', chxl) # todo, need a placeholder for x-axis for allowing custom axes
     return HttpResponseRedirect(Gchart_Renderer.BASE_URL + urllib.urlencode(dqs))

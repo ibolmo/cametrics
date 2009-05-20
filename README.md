@@ -148,6 +148,7 @@ You do not need to include the `chd` argument since this will be automatically p
 TODO
 ----
  - Timezone for datetime calculations
+ - delete Campaign, Storage, and Statistics
  
 Thoughts
 --------
