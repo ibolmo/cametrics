@@ -61,6 +61,7 @@ def measurements(request, key, path, format):
   elif request.method == 'POST':   
     value = request.POST.get('value')
     kind = request.POST.get('type', 'number')
+    logging.debug('POST | value: %s | kind: %s' % (value, kind))
     datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
     if (not datum.put()):
       logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, kind))

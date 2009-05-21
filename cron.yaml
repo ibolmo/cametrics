@@ -1,4 +1,4 @@
 cron:
 - description: clean up storage, statistics, and histogram for when a campaign is deleted
   url: /tasks/clean_up_campaigns
-  schedule: every 1 hour
+  schedule: every 10 minutes
