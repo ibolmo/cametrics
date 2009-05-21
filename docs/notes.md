@@ -54,16 +54,28 @@ key/namespace/values.gc|gchart            -> typically scatterplot or line graph
 key/namespace/stats/histogram.gc|gchart   -> uses dict to create a histogram representation
 
 #### Most expensive
-all                         | Storage.fetch(1000) | Statistic.get | 
-key/namespace               | to_dict(values) + to_dict_stats |
-key/namespace/values        | to_dict(values) |
-key/namespace/stats         | to_dict(stats) |
-key/namespace...gc|gchart   |
+As of 5/20:
+
+    all                         | Storage.fetch(1000), Statistic.get
+    key/namespace                                                   \ to_dict(values) + to_dict(stats) (see below)
+                                                                     \ replace_datastore_types, json_dump, replace_datastore_types, Histogram.get, index, json_dump
+                                                                     
+    key/namespace/values                                            \ to_dict(values)
+                                                                     \ replace_datastore_types, json_dump
+                                                                     
+    key/namespace/stats                                             \ to_dict(stats)
+                                                                     \ replace_datastore_types, Histogram.get, index, json_dump
+                                                                     
+    key/namespace/values.gc|gchart                                  \ get_values, populate chxl and chd
+                                                                    
+    key/namespace/stats/histogram.gc|gchart                         \ get_values, to_dict,                                                    find_for_path, populate chxl and chd
+                                                                                  \ replace_datastore_types, Histogram.get, index, json_dump /
 
 ### Goal
 Memoize the visualization. As data comes in the visualization should be updated and cached. Preferrably one mecache call per request. Problem, though, is utility of visualization -- opportunity cost. Being able to cache everything is not necessarily useful if people are not requesting the visualization. Ideally, the visualization should be saved only if it is popular and/or very expensive.
 
-
+### Optimizing
+1. Instead of Histogram being a list of keys, convert a counter
 
 Questions
 ---------

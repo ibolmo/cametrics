@@ -44,6 +44,22 @@ class NoSummary(object):
   def critical(cls, msg):
     logging.critical(msg)
     return False
+    
+  @classmethod
+  def tally(cls, stats, name, index):
+    if (not isinstance(index, str)):
+      try:
+        index = str(index)
+      except:
+        return cls.critical('Could not str(%s)' % datum.value)
+    key = '%s.%s.%s' % (stats.key(), name, index)
+    hist = Histogram.get_by_key_name(key)
+    if (hist is None):
+        hist = Histogram.get_or_insert(key, statistic = stats, name = name, index = index)
+    hist.counter += 1
+    if (not hist.put()):
+      return cls.critical('Could not save hist: %s' % key)    
+            
         
 class Summary(NoSummary):
   @classmethod
@@ -57,18 +73,7 @@ class Summary(NoSummary):
       }
     '''
     super(Summary, cls).calculate(datum)
-    stats = datum.stats
-    
-    if ('hits' not in stats.histograms):
-      stats.histograms.append('hits')
-    hist = Histogram(statistic = stats, name = 'hits')
-    try:
-      hist.index = str(datum.value) # careful
-    except:
-      return cls.invalidate(datum, 'Could not str(%s)' % datum.value)
-    hist.datum = datum
-    if (not hist.put()):
-      return cls.critical('Could not save hist: %s' % hist)    
+    cls.tally(stats = datum.stats, name = 'hits', index = datum.value)
   
 class NumberSummary(Summary):
   match_type = ['number', 'float', 'int', 'integer', 'long']
@@ -135,17 +140,10 @@ class DatetimeSummary(Summary):
     Datetime statistics do not include the 'hits' histogram.'''
     NoSummary.calculate(datum) # No need for hits histogram
     
-    stats = datum.stats
     timetuple = datum.datetime.timetuple()
     for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%s_of_the_year']):
-      attr = bucket % 's'      
-      if (attr not in stats.histograms):
-        stats.histograms.append(attr)
-      hist = Histogram(statistic = stats, name = attr)
-      hist.index = str(timetuple[i])
-      hist.datum = datum
-      if (not hist.put()):
-        return cls.critical('Could not save hist: %s' % hist)
+      if (cls.tally(stats = datum.stats, name = bucket % 's', index = timetuple[i]) is False):
+        break
 
 '''
 ### Location
@@ -182,18 +180,12 @@ class LocationSummary(Summary):
   def calculate(cls, datum):
     NoSummary.calculate(datum)
     
-    stats = datum.stats
-    if ('geotudes' not in stats.histograms):
-      stats.histograms.append('geotudes')    
-    tude = LocationSummary.geotude(datum.longitude, datum.latitude)
+    stats = datum.stats 
+    tude = cls.geotude(datum.longitude, datum.latitude)
     key = ''
     while len(tude):
       key += tude.pop(0)
-      hist = Histogram(statistic = stats, name = 'geotudes')
-      hist.index = key
-      hist.datum = datum
-      if (not hist.put()):
-        return cls.critical('Could not save hist: %s' % hist)    
+      cls.tally(stats = datum.stats, name = 'geotudes', index = key)
       key += '.'
 
     for limit, fn in {'min': min, 'max': max}.iteritems():

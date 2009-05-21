@@ -51,14 +51,13 @@ class Storage(SerializableExpando):
   stats = db.ReferenceProperty(collection_name = 'statistics')
     
 class Statistics (SerializableExpando):
-  json_does_not_include = ['campaign', 'namespace', 'histograms']
+  json_does_not_include = ['campaign', 'namespace']
   
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
   head = db.ReferenceProperty(Storage, collection_name = 'head')
   tail = db.ReferenceProperty(Storage, collection_name = 'tail')
-  histograms = db.StringListProperty()
-  count = db.IntegerProperty()
+  count = db.IntegerProperty(default = 0)
   
   @staticmethod
   def get_by_campaign_and_namespace(campaign, namespace):
@@ -68,22 +67,18 @@ class Statistics (SerializableExpando):
   def to_entity(self, entity):
     super(Statistics, self).to_entity(entity)
     
-    for histogram in self.histograms:
-      hists = Histogram.all().filter('statistic =', self).filter('name =', histogram).fetch(1000) #pagination
-      hist_dict = {}
-      for h in hists:
-        if h.index not in hist_dict:
-          hist_dict[h.index] = []
-        hist_dict[h.index].append(str(h.datum.key()))
-      entity[histogram] = hist_dict
+    for hist in Histogram.all().filter('statistic =', self):
+      if (entity.get(hist.name) is None):
+        entity[hist.name] = {}
+      entity[hist.name][hist.index] = hist.count
 
 class Histogram(SerializableExpando):
   json_does_not_include = ['statistic', 'name']
   
   statistic = db.ReferenceProperty(Statistics, collection_name = 'statistic')
   name = db.StringProperty(required = True)
-  index = db.StringProperty()
-  datum = db.ReferenceProperty(Storage, collection_name = 'datum')
+  index = db.StringProperty(required = True)
+  count = db.IntegerProperty(default = 0)
 
   @staticmethod
   def has(stat):
