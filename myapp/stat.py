@@ -21,10 +21,11 @@ class NoSummary(object):
     #  datum.prev = datum.stats.tail
   
   @classmethod
-  def calculate(cls, stats, datum):
+  def calculate(cls, datum):
     '''Decorates the statistic with additional attributes.
     For example, the first and last datum and increment the count of data in the system
     '''
+    stats = datum.stats
     if (not stats.head):
       stats.head = datum
     stats.tail = datum
@@ -36,7 +37,7 @@ class NoSummary(object):
     
 class Summary(NoSummary):
   @classmethod
-  def calculate(cls, stats, datum):    
+  def calculate(cls, datum):    
     '''The simplest summary by creating a histogram of all the 'hits' for the exact value.
     For example: input = ['a', 'b', 'a', 'c']
       hits = {
@@ -45,8 +46,8 @@ class Summary(NoSummary):
         'c': ['c'.key()]
       }
     '''
-    super(Summary, cls).calculate(stats, datum)
-    
+    super(Summary, cls).calculate(datum)
+    stats = datum.stats
     if ('hits' not in stats.histograms):
       stats.histograms.append('hits')
     hist = Histogram(statistic = stats, name = 'hits')
@@ -70,9 +71,10 @@ class NumberSummary(Summary):
         logging.critical('Could not convert %s into a float' % value)
     
   @classmethod
-  def calculate(cls, stats, datum):
+  def calculate(cls, datum):
     '''Adds to the statistics the min, max, sum, mean, and other standard numerical statistics'''
-    super(NumberSummary, cls).calculate(stats, datum)
+    super(NumberSummary, cls).calculate(datum)
+    stats = datum.stats
     if (not hasattr(stats, 'min') or datum.value < stats.min):
       stats.min = datum.value
     if (not hasattr(stats, 'max') or datum.value > stats.max):
@@ -116,12 +118,13 @@ class DatetimeSummary(Summary):
       return logging.critical('Unexpected type: %s for calc_date_statistics' % datum.type)
   
   @classmethod
-  def calculate(cls, stats, datum):
+  def calculate(cls, datum):
     '''Adds to the statistic various histograms/buckets for the years, months,
     days, and so forth (see datetime.datetime.timetuple for other histograms).
     Datetime statistics do not include the 'hits' histogram.'''
-    NoSummary.calculate(stats, datum) # No need for hits histogram
+    NoSummary.calculate(datum) # No need for hits histogram
     
+    stats = datum.stats
     timetuple = datum.datetime.timetuple()
     for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%s_of_the_year']):
       attr = bucket % 's'      
@@ -145,11 +148,15 @@ class DatetimeSummary(Summary):
 '''
 class LocationSummary(Summary):
   match_type = ['gps', 'location']
-  non_alpha = re.compile(r'[^a-zA-Z0-9\-\.]')
+  non_alpha = re.compile(r'[^a-zA-Z0-9\-\.]+')
   
   @classmethod
   def prepare(cls, datum):
-    longitude, latitude = cls.non_alpha.split(datum.value)
+    try:
+      longitude, latitude = cls.non_alpha.split(datum.value)
+    except:
+      logging.critical('Could not unpack %s got: %s' % (datum.value, cls.non_alpha.split(datum.value)))
+      
     try:
       datum.longitude = float(longitude)
     except:
@@ -161,9 +168,10 @@ class LocationSummary(Summary):
       logging.critical('Could not convert latitude %s into a float' % latitude)  
     
   @classmethod
-  def calculate(self, stats, datum):
-    NoSummary.calculate(stats, datum)
+  def calculate(self, datum):
+    NoSummary.calculate(datum)
     
+    stats = datum.stats
     if ('geotudes' not in stats.histograms):
       stats.histograms.append('geotudes')    
     tude = LocationSummary.geotude(datum.longitude, datum.latitude)
