@@ -32,24 +32,6 @@ class SerializableExpando(db.Expando):
   def to_json(self, attr_list=[]):
     return simplejson.dumps(self.to_dict(attr_list))
 
-class JSONProperty(db.Property):
-    def get_value_for_datastore(self, model_instance):
-        value = super(JSONProperty, self).get_value_for_datastore(model_instance)
-        return db.Text(self._deflate(value))
-    def validate(self, value):
-        return self._inflate(value)
-    def make_value_from_datastore(self, value):
-        return self._inflate(value)
-    def _inflate(self, value):
-        if value is None:
-            return {}
-        if isinstance(value, unicode) or isinstance(value, str):
-            return simplejson.loads(value)
-        return value
-    def _deflate(self, value):
-        return simplejson.dumps(value)
-    data_type = datastore_types.Text
-
 class Campaign(db.Model):
   title = db.StringProperty(required = True)
   description = db.StringProperty(multiline = True)

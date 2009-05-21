@@ -35,15 +35,14 @@ class Json_Renderer(Renderer):
       """docstring for render"""      
       data_path = data_path or []
       data_type = len(data) and data[0].type or None
-      data_values = map(Renderer.to_dict, data)
-      data_stats = map(Renderer.to_dict, stats)
           
       logging.info('data path: %s' % data_path)
       
       if 'values' in data_path:
-        data = simplejson.dumps(data_values)
+        data = simplejson.dumps(map(Renderer.to_dict, data))
       elif 'stats' in data_path:
         path = data_path.split('.'); path.pop(0)
+        data_stats = map(Renderer.to_dict, stats)
         data_stats = data_stats[0]
         obj = data_stats
         for p in path:
@@ -52,8 +51,8 @@ class Json_Renderer(Renderer):
       else:
         data = simplejson.dumps({
         'type': data_type,
-        'values': data_values,
-        'stats': data_stats
+        'values': map(Renderer.to_dict, data),
+        'stats': map(Renderer.to_dict, stats)
       })
       return super(Json_Renderer, cls).render(request, data = data)
 
