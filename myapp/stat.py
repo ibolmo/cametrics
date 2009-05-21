@@ -33,8 +33,18 @@ class NoSummary(object):
     if (not stats.count):
       stats.count = 0
     stats.count += 1
+  
+  @classmethod
+  def invalidate(cls, datum, msg = ''):
+    datum._invalid = True
+    if (msg):
+      return cls.critical(msg)
     
-    
+  @classmethod
+  def critical(msg):
+    logging.critical(msg)
+    return False
+        
 class Summary(NoSummary):
   @classmethod
   def calculate(cls, datum):    
@@ -48,16 +58,17 @@ class Summary(NoSummary):
     '''
     super(Summary, cls).calculate(datum)
     stats = datum.stats
+    
     if ('hits' not in stats.histograms):
       stats.histograms.append('hits')
     hist = Histogram(statistic = stats, name = 'hits')
     try:
       hist.index = str(datum.value) # careful
     except:
-      return logging.critical('Could not str(%s)' % datum.value)
+      return cls.invalidate(datum, 'Could not str(%s)' % datum.value)
     hist.datum = datum
     if (not hist.put()):
-      return logging.critical('Could not save hist: %s' % hist)    
+      return cls.critical('Could not save hist: %s' % hist)    
   
 class NumberSummary(Summary):
   match_type = ['number', 'float', 'int', 'integer', 'long']
@@ -68,7 +79,7 @@ class NumberSummary(Summary):
       try:
         datum.value = float(datum.value or 1)  
       except:
-        logging.critical('Could not convert %s into a float' % value)
+        return cls.invalidate(datum, 'Could not float(%s)' % value)
     
   @classmethod
   def calculate(cls, datum):
@@ -98,24 +109,24 @@ class DatetimeSummary(Summary):
       try:
         datum.timestamp = float(datum.value)
       except TypeError:
-        return logging.critical('Could not convert string timestamp (%s) into integer' % datum.value)
+        return cls.invalidate(datum, 'Could not convert string timestamp (%s) into integer' % datum.value)
       try:
         datum.datetime = datetime.datetime.fromtimestamp(datum.timestamp)
       except ValueError:
-        return logging.critical('Could not datetime.fromtimestamp(%s)' % datum.timestamp)
+        return cls.invalidate(datum, 'Could not datetime.fromtimestamp(%s)' % datum.timestamp)
     elif ('date' in datum.type):
       try:
         datum.datetime = datetime.datetime.strptime(datum.value, DatetimeSummary.DATETIME_FORMAT) # careful
       except ValueError:
-        return logging.critical('Could not datetime.strptime parse: %s' % datum.value)
+        return cls.invalidate(datum, 'Could not datetime.strptime parse: %s' % datum.value)
       
       import time
       try:
         datum.timestamp = time.mktime(datum.datetime.timetuple())
       except ValueError, OverflowError:
-        return logging.critical('Could not time.mktime(%s)' % datum.datetime.timetuple())
+        return cls.invalidate(datum, 'Could not time.mktime(%s)' % datum.datetime.timetuple())
     else:
-      return logging.critical('Unexpected type: %s for calc_date_statistics' % datum.type)
+      return cls.invalidate(datum, 'Unexpected type: %s for calc_date_statistics' % datum.type)
   
   @classmethod
   def calculate(cls, datum):
@@ -134,7 +145,7 @@ class DatetimeSummary(Summary):
       hist.index = str(timetuple[i])
       hist.datum = datum
       if (not hist.put()):
-        return logging.critical('Could not save hist: %s' % hist)
+        return cls.critical('Could not save hist: %s' % hist)
 
 '''
 ### Location
@@ -155,17 +166,17 @@ class LocationSummary(Summary):
     try:
       longitude, latitude = cls.non_alpha.split(datum.value)
     except:
-      logging.critical('Could not unpack %s got: %s' % (datum.value, cls.non_alpha.split(datum.value)))
+      return cls.invalidate(datum, 'Could not unpack %s got: %s' % (datum.value, cls.non_alpha.split(datum.value)))
       
     try:
       datum.longitude = float(longitude)
     except:
-      logging.critical('Could not convert longitude %s into a float' % longitude)
+      return cls.invalidate(datum, 'Could not convert longitude %s to a float' % longitude)
     
     try:
       datum.latitude = float(latitude)
     except:
-      logging.critical('Could not convert latitude %s into a float' % latitude)  
+      return cls.invalidate(datum, 'Could not convert latitude %s to a float' % latitude)  
     
   @classmethod
   def calculate(self, datum):
@@ -182,7 +193,7 @@ class LocationSummary(Summary):
       hist.index = key
       hist.datum = datum
       if (not hist.put()):
-        return logging.critical('Could not save hist: %s' % hist)    
+        return cls.critical('Could not save hist: %s' % hist)    
       key += '.'
 
     for limit, fn in {'min': min, 'max': max}.iteritems():

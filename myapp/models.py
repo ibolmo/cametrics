@@ -120,8 +120,11 @@ def cb_calc_statistic(sender, **kwargs):
   if (not datum):
     return logging.error('No datum for cb_statistics')
   
-  stat.get(datum.type).calculate(datum)
-  datum.stats.save()
+  if (hasattr(datum, '_invalid')):
+    return datum.delete()
+  
+  if (stat.get(datum.type).calculate(datum) is not False):
+    datum.stats.save()
     
 signals.pre_save.connect(cb_prepare_datum, sender = Storage)
 signals.post_save.connect(cb_calc_statistic, sender = Storage)
