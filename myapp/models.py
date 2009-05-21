@@ -5,7 +5,7 @@ import logging, util
 
 from google.appengine.api import datastore_types
 from django.utils import simplejson
-import stat, tasks
+import stat
 
 class SerializableExpando(db.Expando):
   """Extends Expando to have json and possibly other serializations
@@ -103,10 +103,9 @@ class Histogram(SerializableExpando):
   index = db.StringProperty()
   datum = db.ReferenceProperty(Storage, collection_name = 'datum')
 
-      
   @staticmethod
   def has(stat):
-    return Histogram.all(keys_only = True).filter(statistic = stat).count(1)
+    return Histogram.all(keys_only = True).filter('statistic =', stat).count(1)
 
 def cb_prepare_datum(sender, **kwargs):
   datum = kwargs.get('instance')
@@ -140,6 +139,7 @@ class TaskModel(db.Expando):
   
   def execute(self):
      obj = self.properties()['object'].get_value_for_datastore(self)
+     import tasks
      return tasks.get(self.task)(self, obj)
   
   @staticmethod

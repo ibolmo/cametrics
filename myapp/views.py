@@ -102,3 +102,14 @@ def edit_campaign(request, key):
 @login_required
 def delete_campaign(request, key):
     return delete_object(request, Campaign, object_id = key, post_delete_redirect = reverse('myapp.views.list_campaigns'))
+    
+def clean_up_campaigns(request):
+  status = 200
+  task = TaskModel.all().get()
+  if task:
+    task_key = task.key()
+    logging.info('Executing clean up campaign task: %s' % task_key)
+    if (task.execute()):
+      logging.info('Finished clean up campaign task: %s' % task_key)
+      stats = 201
+  return HttpResponse(status = status)
