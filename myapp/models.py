@@ -121,6 +121,7 @@ def cb_calc_statistic(sender, **kwargs):
     return logging.error('No datum for cb_statistics')
   
   if (hasattr(datum, '_invalid')):
+    logging.debug('Datum (%s) is an invalid' % datum.key())
     return datum.delete()
   
   if (stat.get(datum.type).calculate(datum) is not False):

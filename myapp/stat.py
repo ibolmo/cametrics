@@ -41,7 +41,7 @@ class NoSummary(object):
       return cls.critical(msg)
     
   @classmethod
-  def critical(msg):
+  def critical(cls, msg):
     logging.critical(msg)
     return False
         
@@ -102,7 +102,7 @@ class DatetimeSummary(Summary):
   DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
   
   @classmethod
-  def prepare(self, datum):
+  def prepare(cls, datum):
     '''Adds to the datum the equivalent timestamp, datetime to standardize the interface for the datum'''
     import datetime
     if (datum.type == 'timestamp'):
@@ -179,7 +179,7 @@ class LocationSummary(Summary):
       return cls.invalidate(datum, 'Could not convert latitude %s to a float' % latitude)  
     
   @classmethod
-  def calculate(self, datum):
+  def calculate(cls, datum):
     NoSummary.calculate(datum)
     
     stats = datum.stats
