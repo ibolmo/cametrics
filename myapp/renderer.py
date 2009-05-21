@@ -1,4 +1,4 @@
-import urllib, logging, math, re
+import urllib, logging, math, re, util
 from models import Histogram
 from django.utils import simplejson
 
@@ -23,7 +23,7 @@ class Renderer(object):
   
   @staticmethod
   def to_dict(datum):
-    return datum and datum.to_dict() or {}
+    return datum and datum.to_dict() or None
     
   @classmethod
   def render(cls, request, format = 'json', data = '{}', stats = None, data_path = None):
@@ -39,21 +39,24 @@ class Json_Renderer(Renderer):
       logging.info('data path: %s' % data_path)
       
       if 'values' in data_path:
-        data = simplejson.dumps(map(Renderer.to_dict, data))
+        data = map(lambda datum: datum.to_json(), data)
       elif 'stats' in data_path:
-        path = data_path.split('.'); path.pop(0)
-        data_stats = map(Renderer.to_dict, stats)
-        data_stats = data_stats[0]
-        obj = data_stats
-        for p in path:
-          obj = data_stats.get(p)
-        data = simplejson.dumps(obj)
+        if (not stats):
+          stats = {}
+        else:
+          path = data_path.split('.'); path.pop(0)
+          obj = stats.to_dict()
+          for p in path:
+            obj = obj.get(p)
+          if (isinstance(obj, dict)):
+            util.replace_datastore_types(obj)
+          data = simplejson.dumps(obj)
       else:
-        data = simplejson.dumps({
+        data = {
         'type': data_type,
-        'values': map(Renderer.to_dict, data),
-        'stats': map(Renderer.to_dict, stats)
-      })
+        'values': map(lambda datum: datum.to_json(), data),
+        'stats': stats and stats.to_json() or {}
+      }
       return super(Json_Renderer, cls).render(request, data = data)
 
 class TextData(object):

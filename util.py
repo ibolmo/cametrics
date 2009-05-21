@@ -42,40 +42,31 @@ def to_dict(model_obj, attr_list, init_dict_func=None):
 # Format for conversion of datetime to JSON
 DATE_FORMAT = "%Y-%m-%d" 
 TIME_FORMAT = "%H:%M:%S"
- 
+
 def replace_datastore_types(entity):
-    """Replaces any datastore types in a dictionary with standard types.
-    
-    Passed-in entities are assumed to be dictionaries with values that
-    can be at most a single list level.  These transformations are made:
-      datetime.datetime      -> string
-      db.Key                 -> key hash suitable for regenerating key
-      users.User             -> dict with 'nickname' and 'email'
-    TODO -- GeoPt when needed
-    """
-    def get_replacement(value):
-        if isinstance(value, datetime.datetime):
-            return value.strftime("%s %s" % (DATE_FORMAT, TIME_FORMAT))
-        elif isinstance(value, datetime.date):
-            return value.strftime(DATE_FORMAT)
-        elif isinstance(value, datetime.time):
-            return value.strftime(TIME_FORMAT)
-        elif isinstance(value, datastore_types.Key):
-            return str(value)
-        elif isinstance(value, users.User):
-            return { 'nickname': value.nickname(), 
-                     'email': value.email() }
-        else:
-            return None
- 
-    for key, value in entity.iteritems():
-        if isinstance(value, list):
-            new_list = []
-            for item in value:
-                new_value = get_replacement(item)
-                new_list.append(new_value or item)
-            entity[key] = new_list
-        else:
-            new_value = get_replacement(value)
-            if new_value:
-                entity[key] = new_value
+  """Replaces any datastore types in a dictionary with standard types.
+  
+  Passed-in entities are assumed to be dictionaries with values that
+  can be at most a single list level.  These transformations are made:
+    datetime.datetime      -> string
+    db.Key                 -> key hash suitable for regenerating key
+    users.User             -> dict with 'nickname' and 'email'
+  TODO -- GeoPt when needed
+  """    
+  def get_replacement(value):
+    if isinstance(value, datetime.datetime):
+      return value.strftime("%s %s" % (DATE_FORMAT, TIME_FORMAT))
+    elif isinstance(value, datetime.date):
+      return value.strftime(DATE_FORMAT)
+    elif isinstance(value, datetime.time):
+      return value.strftime(TIME_FORMAT)
+    elif isinstance(value, datastore_types.Key):
+      return str(value)
+    elif isinstance(value, users.User):
+      return { 'nickname': value.nickname(), 'email': value.email() }
+  for key, value in entity.iteritems():
+    if isinstance(value, list):
+      entity[key] = [isinstance(item, (datetime.datetime, datetime.date, datetime.time, datastore_types.Key, users.User)) and get_replacement(item) or item for item in values]
+    else:
+      entity[key] = isinstance(value, (datetime.datetime, datetime.date, datetime.time, datastore_types.Key, users.User)) and get_replacement(value) or value
+        

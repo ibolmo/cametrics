@@ -56,7 +56,7 @@ def measurements(request, key, path, format):
     format = format or request.GET.get('format', 'json')
     ns, data_path = util.getParts(ns)
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-    stats = [Statistics.get_by_campaign_and_namespace(campaign, ns)]
+    stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
     return renderer.get(format)(request, format, data, stats, data_path)
   elif request.method == 'POST':   
     value = request.POST.get('value')

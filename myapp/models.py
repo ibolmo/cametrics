@@ -15,22 +15,20 @@ class SerializableExpando(db.Expando):
   TODO -- Complete round-tripping
   """
   json_does_not_include = []
-  
-  def to_entity(self, entity):
+
+  def to_dict(self):
     """Convert datastore types in entity to JSON-friendly structures."""
+    entity = {}
     self._to_entity(entity)
     for skipped_property in self.__class__.json_does_not_include:
-      try:
+      if skipped_property in entity:
         del entity[skipped_property]
-      except:
-        pass
-    util.replace_datastore_types(entity)
-
-  def to_dict(self, attr_list=[]):
-    return util.to_dict(self, attr_list, self.to_entity)
+    return entity
   
-  def to_json(self, attr_list=[]):
-    return simplejson.dumps(self.to_dict(attr_list))
+  def to_json(self):
+    entity = self.to_dict()
+    util.replace_datastore_types(entity)
+    return simplejson.dumps(entity)
 
 class Campaign(db.Model):
   title = db.StringProperty(required = True)
@@ -64,13 +62,14 @@ class Statistics (SerializableExpando):
     '''docstring for get_by_campaign_and_namespace'''
     return Statistics.all().filter('campaign = ', campaign).filter('namespace = ', namespace).get()
     
-  def to_entity(self, entity):
-    super(Statistics, self).to_entity(entity)
+  def to_dict(self):
+    entity = super(Statistics, self).to_dict()
     
     for hist in Histogram.all().filter('statistic =', self):
       if (entity.get(hist.name) is None):
         entity[hist.name] = {}
       entity[hist.name][hist.index] = hist.count
+    return entity
 
 class Histogram(SerializableExpando):
   json_does_not_include = ['statistic', 'name']

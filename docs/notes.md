@@ -58,13 +58,13 @@ As of 5/20:
 
     all                         | Storage.fetch(1000), Statistic.get
     key/namespace                                                   \ to_dict(values) + to_dict(stats) (see below)
-                                                                     \ replace_datastore_types, json_dump, replace_datastore_types, Histogram.get, json_dump
+                                                                     \ to_entity, replace_datastore_types, to_entity, replace_datastore_types, Histogram.get, json_dump
                                                                      
-    key/namespace/values                                            \ to_dict(values)
-                                                                     \ replace_datastore_types, json_dump
+    key/namespace/values                                            \ to_json(values)
+                                                                     \ to_entity, replace_datastore_types
                                                                      
     key/namespace/stats                                             \ to_dict(stats)
-                                                                     \ replace_datastore_types, Histogram.get, json_dump
+                                                                     \ to_entity, replace_datastore_types, Histogram.get
                                                                      
     key/namespace/values.gc|gchart                                  \ get_values, populate chxl and chd
                                                                     
