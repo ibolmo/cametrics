@@ -5,7 +5,7 @@ import logging, util
 
 from google.appengine.api import datastore_types
 from django.utils import simplejson
-import stat
+import stat, tasks
 
 class SerializableExpando(db.Expando):
   """Extends Expando to have json and possibly other serializations
@@ -103,6 +103,10 @@ class Histogram(SerializableExpando):
   index = db.StringProperty()
   datum = db.ReferenceProperty(Storage, collection_name = 'datum')
 
+      
+  @staticmethod
+  def has(stat):
+    return Histogram.all(keys_only = True).filter(statistic = stat).count(1)
 
 def cb_prepare_datum(sender, **kwargs):
   datum = kwargs.get('instance')
@@ -130,27 +134,22 @@ def cb_calc_statistic(sender, **kwargs):
 signals.pre_save.connect(cb_prepare_datum, sender = Storage)
 signals.post_save.connect(cb_calc_statistic, sender = Storage)
 
-class DeleteCampaignTask(db.Model):
-  campaign = db.ReferenceProperty(Campaign, required = True)
+class TaskModel(db.Expando):
+  object = db.ReferenceProperty(required = True)
+  task = db.StringProperty(required = True)
   
   def execute(self):
-    campaign = self.properties()['campaign'].get_value_for_datastore(self)
-    storage_query = Storage.all(keys_only = True).filter('campaign =', campaign)
-    if (storage_query.count(limit = 1)):
-      for datum in storage_query:
-        statistics_query = Statistics.all(keys_only = True).filter('campaign =', campaign)
-        for statistic in statistics_query:
-          for hist in Histogram.all(keys_only = True).filter('statistic =', statistic):
-            db.delete(hist)
-          db.delete(statistic)
-        db.delete(datum)
-        self.delete()
-        return True
-    logging.info('Nothing left in storage to clean up for campaign %s' % campaign)
+     obj = self.properties()['object'].get_value_for_datastore(self)
+     return tasks.get(self.task)(self, obj)
+  
+  @staticmethod
+  def has(object):
+    return TaskModel.all(keys_only = True).filter('object =', object).count(1)
+
   
 def cleanup_relations(sender, **kwargs):
   campaign = kwargs.get('instance')
-  if (not DeleteCampaignTask(campaign = campaign.key()).put()):
+  if (not TaskModel(object = campaign, task = 'delete campaign').put()):
     logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
   
 signals.pre_delete.connect(cleanup_relations, sender = Campaign)
