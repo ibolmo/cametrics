@@ -56,7 +56,7 @@ class NoSummary(object):
     hist = Histogram.get_by_key_name(key)
     if (hist is None):
         hist = Histogram.get_or_insert(key, statistic = stats, name = name, index = index)
-    hist.counter += 1
+    hist.count += 1
     if (not hist.put()):
       return cls.critical('Could not save hist: %s' % key)    
             
