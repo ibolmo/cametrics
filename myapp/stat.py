@@ -79,12 +79,12 @@ class NumberSummary(Summary):
   match_type = ['number', 'float', 'int', 'integer', 'long']
   @classmethod
   def prepare(cls, datum):
-      '''Converts the datum from a string, to (optimistically) into a float. Additionally, if value is None defaults value to 1.0'''
       super(NumberSummary, cls).prepare(datum)
       try:
-        datum.value = float(datum.value or 1)  
+        x =  datum.value or 1
+        datum.value = float(x) if '.' in x else long(x) if 'L' in x else int(x)
       except:
-        return cls.invalidate(datum, 'Could not float(%s)' % value)
+        return cls.invalidate(datum, 'Could not float(%s)' % datum.value)
     
   @classmethod
   def calculate(cls, datum):
