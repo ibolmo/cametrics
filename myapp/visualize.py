@@ -1,4 +1,4 @@
-import logging, stat
+import logging, stat, cgi, urllib
 from pygooglechart import *
 
 def get(prop):
@@ -32,6 +32,13 @@ class NoVisual(object):
   @classmethod
   def get_url(cls, dqs, obj):
     pass
+    
+  @classmethod
+  def _get_url(cls, request, chart):
+    url, dqs = chart.get_url().split('?')
+    query = request.GET.copy()
+    query.update(dict(cgi.parse_qsl(dqs)))
+    return url + '?' + urllib.urlencode(query)
             
 class Visual(NoVisual):
   pass
@@ -44,16 +51,14 @@ class NumberVisual(Visual):
     chs = dict(enumerate(request.GET.get('chs', '').split('x')))
     w = int(chs.get(0) or cls.w)
     h = int(chs.get(1) or cls.h)
-    logging.debug('NumberVisual.get_url::s = (%s, %s)' % (w, h))
     
     ChartCLS = CHART_TYPE_MAP.get(request.GET.get('cht', ''), SparkLineChart)
-    logging.debug('Using chart %s' % ChartCLS)
     
     chart = ChartCLS(w, h)
     logging.debug('NumberVisual::obj = %s' % obj)
     
     chart.add_data(obj)
-    return chart.get_url()
+    return cls._get_url(request, chart)
     
 class DatetimeVisual(Visual):
   match_type = stat.DatetimeSummary.match_type

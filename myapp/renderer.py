@@ -1,4 +1,4 @@
-import urllib, logging, math, re, util, visualize, urlparse
+import logging, math, re, util, visualize, urlparse
 from models import Histogram
 from django.utils import simplejson
 
