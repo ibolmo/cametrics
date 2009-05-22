@@ -30,7 +30,7 @@ class NoVisual(object):
   s = (w, h)
   
   @classmethod
-  def get_url(cls, dqs, obj):
+  def get_url(cls, request, obj):
     pass
     
   @classmethod
@@ -57,7 +57,11 @@ class NumberVisual(Visual):
     chart = ChartCLS(w, h)
     logging.debug('NumberVisual::obj = %s' % obj)
     
-    chart.add_data(obj)
+    if (isinstance(obj, dict)):
+      chart.set_axis_labels(Axis.BOTTOM, obj.keys())
+      chart.add_data(obj.values())
+    else:
+      chart.add_data(obj)
     return cls._get_url(request, chart)
     
 class DatetimeVisual(Visual):

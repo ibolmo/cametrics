@@ -5,6 +5,9 @@ from django.utils import simplejson
 from django.http import HttpResponse, HttpResponseRedirect
 from ragendja.template import render_to_response
 
+from appenginepatcher import on_production_server
+DEBUG = not on_production_server
+
 def get(prop):
   for cls_name in globals().keys():
     if not cls_name.endswith('_Renderer'):
@@ -79,29 +82,22 @@ class Gchart_Renderer(Renderer):
     else:
       logging.warning('No arguments passed to Google Charts API')
       return {}
-      
-  @staticmethod
-  def get_type_from_object(obj):
-    if (isinstance(obj, list)):
-      obj = len(obj) and obj[0] or None
-    try:
-      return obj.type
-    except:
-      return str(type(obj))[7:-2]
     
   @classmethod
   def render(cls, request, format, data, stats, data_path):    
     obj = None
+    if not len(data):
+      return HttpResponse(status = 404)
+    
+    dtype = data[0].type
     if 'values' in data_path and len(data):
       obj = [d.value for d in data]
     elif 'stats' in data_path and stats:
       obj = cls.object_from_path(root = stats.to_dict(), path = data_path)
     else:
       logging.warning('Did not expect data_path: %s' % data_path)
-    dtype = cls.get_type_from_object(obj)
-    logging.debug('dtype found: %s' % dtype)
     url = visualize.get(not obj and 'none' or dtype).get_url(request, obj)
-    return url and HttpResponseRedirect(url) or HttpResponse(status = 500)
+    return url and (DEBUG and HttpResponse('<img src="%s" />' % url) or HttpResponseRedirect(url)) or HttpResponse(status = 500)
 
 class Gc_Renderer(Gchart_Renderer):
   pass
