@@ -43,6 +43,8 @@ def create_new_user(request):
   return render_to_response(request, 'myapp/user_create_form.html', {'form': form, 'heading': 'Register' })
 
 def measurements(request, key, path, format):
+  logging.debug('measurements::path = %s' % path)
+  logging.debug('measurements::format = %s' % format)
   if (not key):
     return HttpResponse('Invalid service usage')
   

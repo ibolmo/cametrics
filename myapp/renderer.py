@@ -1,4 +1,4 @@
-import urllib, logging, math, re, util
+import urllib, logging, math, re, util, visualize, urlparse
 from models import Histogram
 from django.utils import simplejson
 
@@ -28,6 +28,14 @@ class Renderer(object):
   @classmethod
   def render(cls, request, format = 'json', data = '{}', stats = None, data_path = None):
     return render_to_response(request, 'myapp/get_data.%s' % format, {'data': data}, mimetype = Renderer.mimetypes.get(format, 'text/plain'))
+    
+  @classmethod
+  def object_from_path(cls, root = None, path = ''):
+    path = path.split('.'); path.pop(0) # assume root is the first element
+    obj = root
+    for p in path:
+      obj = obj.get(p)
+    return obj      
   
 class Json_Renderer(Renderer):
   @classmethod
@@ -59,120 +67,42 @@ class Json_Renderer(Renderer):
       }
       return super(Json_Renderer, cls).render(request, data = data)
 
-class TextData(object):
-    max_value = 100
-    
-    @staticmethod
-    def encode(data):
-        encoded_data = []
-        for datum in data:
-            sub_data = []
-            for value in datum:
-                if value is None:
-                    sub_data.append(-1)
-                elif value >= 0 and value <= TextData.max_value:
-                    sub_data.append("%.1f" % float(value))
-                else:
-                    logging.critical('Could not TextData %s' % (value))
-            encoded_data.append(','.join(sub_data))
-        return 't:' + '|'.join(encoded_data)
-
-class SimpleData(object):
-    max_value = 61
-    enc_map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    
-    @staticmethod
-    def encode(data):
-        encoded_data = []
-        for datum in data:
-            sub_data = []
-            for value in datum:
-                if value is None:
-                    sub_data.append('_')
-                elif value >= 0 and value <= SimpleData.max_value:
-                    sub_data.append(SimpleData.enc_map[value])
-                else:
-                    logging.critical('cannot encode value: %d' % value)
-                    sub_data.append('__')
-            encoded_data.append(''.join(sub_data))
-        return 's:' + ','.join(encoded_data)
-
-class ExtendedData(object):
-  max_value = 4095
-  enc_map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.'
-
+class Gchart_Renderer(Renderer):  
   @staticmethod
-  def encode(data):
-    encoded_data = []
-    enc_size = len(ExtendedData.enc_map)
-    for datum in data:
-      sub_data = []
-      for value in datum:
-        if value is None:
-          sub_data.append('__')
-        elif value >= 0 and value <= ExtendedData.max_value:
-          first, second = divmod(int(value), enc_size)
-          sub_data.append('%s%s' % (ExtendedData.enc_map[first], ExtendedData.enc_map[second]))
-        else:
-          sub_data.append('__')
-          logging.critical('Item #%i "%s" is out of range' % (datum.index(value), value))
-      encoded_data.append(''.join(sub_data))
-    return 'e:' + ','.join(encoded_data)
-
-class Gchart_Renderer(Renderer):
-  BASE_URL = 'http://chart.apis.google.com/chart?'
-  
-  default_dqs = {
-    'chs': '250x100',
-    'cht': 'bvs',
-    'chxt': 'x,y'
-  }
-  
-  @classmethod
-  def render(cls, request, format, data, stats, data_path):
-    '''
-    Get data_path, grab query, append to query the chd=, and also add/replace axes
-    '''
-    if ('?' in data_path):
-      data_path, qs = data_path.split('?')
-      import urlparse
+  def get_dqs(qs):
+    logging.debug('Gchart_Renderer::qs = %s' % qs)
+    if (qs):
       try:
-        dqs = urlparse.parse_qs(qs, keep_blank_values = True, strict_parsing = True)
+        return urlparse.parse_qs(qs, keep_blank_values = True, strict_parsing = True)
       except ValueError:
         logging.critical('Could not parse_qs(%s)' % qs)
     else:
       logging.warning('No arguments passed to Google Charts API')
-      dqs = Gchart_Renderer.default_dqs
+      return {}
       
-    if 'values' in data_path:
-      chd = [[d.value for d in data]]
-      chxl = ['Values']
-    elif 'stats' in data_path:
-      path = data_path.split('.'); path.pop(0)
-      data_stats = map(Renderer.to_dict, stats)
-      data_stats = data_stats[0]
-      obj = data_stats
-      for p in path:
-        obj = data_stats.get(p)
-      if (isinstance(obj, dict)): # guess (for now) that this is a histogram/bucket list
-        chd = []
-        chxl = []
-        for key, values in obj.iteritems():
-          chxl.append(key)
-          chd.append(len(values))
-        chd = [chd] # todo, ExtendedData expects multi-d list which would be correct for stats snapshots
-    else:
-      logging.critical('Unexpected gchart for %s' % data_path)          
+  @staticmethod
+  def get_type_from_object(obj):
+    if (isinstance(obj, list)):
+      obj = len(obj) and obj[0] or None
+    try:
+      return obj.type
+    except:
+      return str(type(obj))[7:-2]
     
-    # convert
-    chd = TextData.encode(chd)
-    chxl = '0:|%s|' % '|'.join(chxl)
-    dqs['chds'] = '%s,%s' % (stats[0].min - 1, stats[0].max) # careful
-    dqs['chxr'] = '%s,%s,%s' % (1, stats[0].min - 1, stats[0].max) # careful
-    dqs['chd'] = chd
-    dqs['chxl'] = dqs.get('chxl', chxl) # todo, need a placeholder for x-axis for allowing custom axes
-    return HttpResponseRedirect(Gchart_Renderer.BASE_URL + urllib.urlencode(dqs))
-  
+  @classmethod
+  def render(cls, request, format, data, stats, data_path):    
+    obj = None
+    if 'values' in data_path and len(data):
+      obj = [d.value for d in data]
+    elif 'stats' in data_path and stats:
+      obj = cls.object_from_path(root = stats.to_dict(), path = data_path)
+    else:
+      logging.warning('Did not expect data_path: %s' % data_path)
+    dtype = cls.get_type_from_object(obj)
+    logging.debug('dtype found: %s' % dtype)
+    url = visualize.get(not obj and 'none' or dtype).get_url(request, obj)
+    return url and HttpResponseRedirect(url) or HttpResponse(status = 500)
+
 class Gc_Renderer(Gchart_Renderer):
   pass
   

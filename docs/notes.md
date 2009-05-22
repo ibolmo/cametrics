@@ -40,7 +40,7 @@ Query
 
 ----------
 
-Output/Visualization
+Output Rendering
 -------------
 
 ### Variations
@@ -76,6 +76,47 @@ Memoize the visualization. As data comes in the visualization should be updated 
 
 ### Optimizing
 1. Instead of Histogram being a list of keys, convert a counter
+
+Visualization
+-------------
+For:
+
+    GET something/stats/histogram.gc
+        something/values.gc
+
+### What is appropiate for the type?
+ type     |  values | histogram
+----------|-------------------
+ number   | scatter | bar
+          | line    |
+ location | map     |
+ ...
+ 
+### Better yet, which types fit with the type of chart?
+line
+ - number:values
+ - buckets
+bar
+ - number:values
+ - buckets
+pie
+ - [value / sum * 100 for value in values]
+ - [bucket / count * 100 for bucket in buckets]
+venn
+scatter
+ - number: values
+ - if strings had length, could show the scatter map of lengths?
+radar
+maps
+google-o-meter
+QR codes
+ 
+### Deduction
+There's a many-to-many relationship, or possible combinations, between a type and a visualization. Question is: how to provide an open environment to code visuals?
+
+Currently: some-data-uri.gc?gchart\_query\_string
+
+If no gchart\_query\_string, use default. But what does this default mean? Default should mean, what's the simplest way to visualize the data. For this we need to look at the **datum.type**. Depending on type, one can then invoke the necessary function to return the correct gchart uri. Otherwise, use the provided gchart type as access to the necessary function to prepare the uri.
 
 Questions
 ---------
