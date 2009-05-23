@@ -96,8 +96,10 @@ class Gchart_Renderer(Renderer):
       obj = cls.object_from_path(root = stats.to_dict(), path = data_path)
     else:
       logging.warning('Did not expect data_path: %s' % data_path)
+    logging.info('Getting visualization for: %s' % (not obj and 'none' or dtype))
     url = visualize.get(not obj and 'none' or dtype).get_url(request, obj)
-    return url and (DEBUG and HttpResponse('<img src="%s" />' % url) or HttpResponseRedirect(url)) or HttpResponse(status = 500)
+    logging.info('Redirecting to: %s' % url)
+    return url and (DEBUG and HttpResponse('<img src="%s" />' % url) or HttpResponseRedirect(url)) or HttpResponse('No visualization found', status = 500)
 
 class Gc_Renderer(Gchart_Renderer):
   pass

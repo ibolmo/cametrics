@@ -77,19 +77,22 @@ class NumberVisual(Visual):
     lower, upper = chart.data_y_range()
     chart.set_axis_range(Axis.LEFT, lower, upper)
     
-class DatetimeVisual(Visual):
-  match_type = stat.DatetimeSummary.match_type
-  DATETIME_FORMAT = stat.DatetimeSummary.DATETIME_FORMAT
+class StringVisual(Visual):
+  match_type = stat.StringSummary.match_type  
   
   @classmethod
   def get_url(cls, request, obj):
     if isinstance(obj, dict):
-      return NumberVisual(request, obj)
+      return NumberVisual.get_url(request, obj)
   
   @classmethod
   def add_labels(cls, chart, obj):
     if isinstance(obj, dict):
       return NumberVisual.add_labels(chart, obj)
+    
+class DatetimeVisual(StringVisual):
+  match_type = stat.DatetimeSummary.match_type
+  DATETIME_FORMAT = stat.DatetimeSummary.DATETIME_FORMAT
   
 class LocationVisual(Visual):
   match_type = stat.LocationSummary.match_type
