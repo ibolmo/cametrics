@@ -32,6 +32,17 @@ class NoVisual(object):
   @classmethod
   def get_url(cls, request, obj):
     pass
+  
+  @classmethod
+  def add_labels(cls, chart, obj):
+    pass
+  
+  @staticmethod
+  def get_chart(request):
+    chs = dict(enumerate(request.GET.get('chs', '').split('x')))
+    w = int(chs.get(0) or NoVisual.w)
+    h = int(chs.get(1) or NoVisual.h)
+    return CHART_TYPE_MAP.get(request.GET.get('cht', ''), SparkLineChart)(w, h)
     
   @classmethod
   def _get_url(cls, request, chart):
@@ -41,32 +52,44 @@ class NoVisual(object):
     return url + '?' + urllib.urlencode(query)
             
 class Visual(NoVisual):
-  pass
+  @classmethod
+  def get_url(cls, request, obj):        
+    chart = cls.get_chart(request)
+    
+    if (isinstance(obj, dict)):
+      chart.add_data(obj.values())
+    else:
+      chart.add_data(obj)
+    
+    cls.add_labels(chart, obj)    
+    return cls._get_url(request, chart)
   
 class NumberVisual(Visual):
   match_type = stat.NumberSummary.match_type
   
   @classmethod
-  def get_url(cls, request, obj):    
-    chs = dict(enumerate(request.GET.get('chs', '').split('x')))
-    w = int(chs.get(0) or cls.w)
-    h = int(chs.get(1) or cls.h)
-    
-    ChartCLS = CHART_TYPE_MAP.get(request.GET.get('cht', ''), SparkLineChart)
-    
-    chart = ChartCLS(w, h)
-    logging.debug('NumberVisual::obj = %s' % obj)
-    
+  def add_labels(cls, chart, obj):
     if (isinstance(obj, dict)):
       chart.set_axis_labels(Axis.BOTTOM, obj.keys())
-      chart.add_data(obj.values())
     else:
-      chart.add_data(obj)
-    return cls._get_url(request, chart)
+      chart.set_axis_labels(Axis.BOTTOM, range(1, len(obj) + 1))
+    
+    lower, upper = chart.data_y_range()
+    chart.set_axis_range(Axis.LEFT, lower, upper)
     
 class DatetimeVisual(Visual):
   match_type = stat.DatetimeSummary.match_type
   DATETIME_FORMAT = stat.DatetimeSummary.DATETIME_FORMAT
+  
+  @classmethod
+  def get_url(cls, request, obj):
+    if isinstance(obj, dict):
+      return NumberVisual(request, obj)
+  
+  @classmethod
+  def add_labels(cls, chart, obj):
+    if isinstance(obj, dict):
+      return NumberVisual.add_labels(chart, obj)
   
 class LocationVisual(Visual):
   match_type = stat.LocationSummary.match_type
