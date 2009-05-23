@@ -15,10 +15,8 @@ class NoSummary(object):
   @classmethod
   def prepare(cls, datum):
     '''Decorates the datum with additional attributes or redefines the value attribute for the calculations'''
-    logging.info('In NoSummary')
-    #logging.info('Stats: %s, Tail: %s' % (datum.stats, datum.stats.tail))
-    #if (datum.stats.tail):
-    #  datum.prev = datum.stats.tail
+    if (not hasattr(datum, 'value') or datum.value is None or datum.value is '' or datum.value is u''):
+      return cls.invalidate(datum, 'No value provided')
   
   @classmethod
   def calculate(cls, datum):
@@ -79,17 +77,20 @@ class NumberSummary(Summary):
   match_type = ['number', 'float', 'int', 'integer', 'long']
   @classmethod
   def prepare(cls, datum):
-      super(NumberSummary, cls).prepare(datum)
-      try:
-        x =  datum.value or 1
-        datum.value = float(x) if '.' in x else long(x) if 'L' in x else int(x)
-      except:
-        return cls.invalidate(datum, 'Could not float(%s)' % datum.value)
+    if super(NumberSummary, cls).prepare(datum) is False:
+      return False
+    
+    try:
+      x =  datum.value or 1
+      datum.value = float(x) if '.' in x else long(x) if 'L' in x else int(x)
+    except:
+      return cls.invalidate(datum, 'Could not float(%s)' % datum.value)
     
   @classmethod
   def calculate(cls, datum):
     '''Adds to the statistics the min, max, sum, mean, and other standard numerical statistics'''
     super(NumberSummary, cls).calculate(datum)
+      
     stats = datum.stats
     if (not hasattr(stats, 'min') or datum.value < stats.min):
       stats.min = datum.value
@@ -101,6 +102,19 @@ class NumberSummary(Summary):
     if (not hasattr(stats, 'mean')):
       stats.mean = 0
     stats.mean = stats.sum / stats.count
+    
+class StringSummary(Summary):
+  match_type = ['str', 'string', 'text']
+  
+  @classmethod
+  def prepare(cls, datum):
+    if super(StringSummary, cls).prepare(datum) is False:
+      return False
+    
+    try:
+      datum.value = str(datum.value)
+    except:
+      return cls.invalidate(datum, 'Could not str(%s)' % datum.value)
 
 class DatetimeSummary(Summary):
   match_type = ['date', 'datetime', 'timestamp']
@@ -109,6 +123,9 @@ class DatetimeSummary(Summary):
   @classmethod
   def prepare(cls, datum):
     '''Adds to the datum the equivalent timestamp, datetime to standardize the interface for the datum'''
+    if super(DatetimeSummary, cls).prepare(datum) is False:
+      return False
+    
     import datetime
     if (datum.type == 'timestamp'):
       try:
@@ -161,6 +178,7 @@ class LocationSummary(Summary):
   
   @classmethod
   def prepare(cls, datum):
+    super(LocationSummary, cls).prepare(datum)
     try:
       longitude, latitude = cls.non_alpha.split(datum.value)
     except:
