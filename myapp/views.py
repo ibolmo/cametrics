@@ -52,7 +52,7 @@ def measurements(request, key, path, format):
   if (not campaign):
     return HttpResponse('Campaign not found')
   
-  ns = path.strip('/').replace('/', '.')
+  ns = (path or '').strip('/').replace('/', '.')
   
   if request.method == 'GET':
     format = format or request.GET.get('format', 'json')
@@ -60,19 +60,28 @@ def measurements(request, key, path, format):
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
     return renderer.get(format)(request, format, data, stats, data_path)
-  elif request.method == 'POST':   
-    value = request.POST.get('value')
-    kind = request.POST.get('type', 'number')
-    logging.debug('POST | value: %s | kind: %s' % (value, kind))
-    datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
-    if (not datum.put()):
-      logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, kind))
-      return HttpResponse('Internal error when saving measurement', status = 500)
-    return HttpResponse('Ok', status = 201)
+  
+  elif request.method == 'POST':
+    if request.POST.get('type') is 'bulk':
+      result = [create_datum(datum.get('namespace'), datum.get('value'), datum.get('type', 'number')) for datum in request.POST.get('data', [])]
+      if False in result:
+        logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, kind))    
+      return True in result and HttpResponse(status = 201) or HttpResponse(status = 304)
+    else:
+      value = request.POST.get('value')
+      kind = request.POST.get('type', 'number')
+      saved = create_datum(ns, value, kind)
+      return HttpResponse(saved and 201 or 304)
+      
   elif request.method == 'DELETE':
     return HttpResponse('Not yet supported, please contact admin.', status = 304)
 
   return HttpResponse('Internal Error', status = 500)
+
+def create_datum(ns, value, kind):
+  logging.debug('POST | value: %s | kind: %s' % (value, kind))
+  datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
+  return bool(datum.put()):
 
 @login_required
 def list_campaigns(request):
