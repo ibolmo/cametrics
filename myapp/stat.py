@@ -79,12 +79,14 @@ class NumberSummary(Summary):
   def prepare(cls, datum):
     if super(NumberSummary, cls).prepare(datum) is False:
       return False
-    
     try:
-      x =  datum.value or 1
-      datum.value = float(x) if '.' in x else long(x) if 'L' in x else int(x)
-    except:
-      return cls.invalidate(datum, 'Could not float(%s)' % datum.value)
+      x = datum.value is None and 1 or datum.value
+      if not isinstance(x, (float, long, int)):
+        datum.value = float(x) if '.' in x else long(x) if 'L' in x else int(x)
+      else:
+        datum.value = x
+    except TypeError, err:
+      return cls.invalidate(datum, 'Could not number(%s): %s' % (datum.value, err))
     
   @classmethod
   def calculate(cls, datum):
