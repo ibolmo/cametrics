@@ -13,6 +13,7 @@ import os, util, logging, stat, renderer
 from myapp.forms import CampaignForm
 from myapp.models import *
 
+from django.utils import simplejson
 from django.contrib.auth.decorators import login_required
 
 def list_measurements(request):
@@ -62,26 +63,31 @@ def measurements(request, key, path, format):
     return renderer.get(format)(request, format, data, stats, data_path)
   
   elif request.method == 'POST':
-    if request.POST.get('type') is 'bulk':
-      result = [create_datum(datum.get('namespace'), datum.get('value'), datum.get('type', 'number')) for datum in request.POST.get('data', [])]
-      if False in result:
-        logging.error('Datum not saved. Campaign: %s %s %s %s' % (campaign, ns, value, kind))    
-      return True in result and HttpResponse(status = 201) or HttpResponse(status = 304)
+    if 'bulk' in request.POST.get('type'):
+      data = simplejson.loads(request.POST.get('data') or '[]')
+      saved = False
+      for datum in data:
+        if create_datum(campaign, datum.get('namespace'), datum):
+          saved = True
     else:
-      value = request.POST.get('value')
-      kind = request.POST.get('type', 'number')
-      saved = create_datum(ns, value, kind)
-      return HttpResponse(saved and 201 or 304)
+      saved = create_datum(campaign, ns, request.POST)
+    return HttpResponse(status = (saved and 201 or 304))
       
   elif request.method == 'DELETE':
     return HttpResponse('Not yet supported, please contact admin.', status = 304)
 
   return HttpResponse('Internal Error', status = 500)
 
-def create_datum(ns, value, kind):
+def create_datum(campaign, ns, obj = {}):
+  value = obj.get('value')
+  kind = obj.get('type', 'number')
   logging.debug('POST | value: %s | kind: %s' % (value, kind))
+  
   datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
-  return bool(datum.put()):
+  saved = bool(datum.put())
+  if not saved:
+    logging.critical('Could not save: Storage(%s, %s, %s, %s)' % (campaign, ns, value, kind))
+  return saved
 
 @login_required
 def list_campaigns(request):
