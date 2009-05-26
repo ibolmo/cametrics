@@ -1,4 +1,4 @@
-﻿application: cametrics-stress
+﻿application: cametrics
 version: 1
 runtime: python
 api_version: 1
