@@ -900,13 +900,13 @@ class PieChart(Chart):
         return Chart.scaled_data(self, data_class, x_range, self.y_range)
 
 
-class PieChart2D(PieChart):
+class Pie2DChart(PieChart):
 
     def type_to_url(self):
         return 'cht=p'
 
 
-class PieChart3D(PieChart):
+class Pie3DChart(PieChart):
 
     def type_to_url(self):
         return 'cht=p3'

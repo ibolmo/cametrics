@@ -75,11 +75,19 @@ class NumberVisual(Visual):
     logging.debug('chart is %s' % chart)
     
     if (isinstance(obj, dict)):
-      chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, obj.keys())
+      if (isinstance(chart, (Pie2DChart, Pie3DChart))):
+        logging.debug('pie getting labeled')
+        chart.set_pie_labels(obj.keys())
+      else:
+        chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, obj.keys())
     else:
       chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, range(1, len(obj) + 1))
     
-    lower, upper = flip and chart.data_x_range() or chart.data_y_range()
+    t, s = list(chart.annotated_data())[0]
+    if t == 'x':
+      lower, upper = chart.data_x_range()
+    elif t == 'y':
+      lower, upper = chart.data_y_range()
     chart.set_axis_range(flip and Axis.BOTTOM or Axis.LEFT, lower, upper)
     
 class StringVisual(Visual):
