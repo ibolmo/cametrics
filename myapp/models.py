@@ -1,4 +1,4 @@
-from django.db.models import signals
+#from django.db.models import signals
 from google.appengine.ext import db
 from ragendja.auth.hybrid_models import User
 import logging, util
@@ -106,8 +106,8 @@ def cb_calc_statistic(sender, **kwargs):
   if (stat.get(datum.type).calculate(datum) is not False):
     datum.stats.save()
     
-signals.pre_save.connect(cb_prepare_datum, sender = Storage)
-signals.post_save.connect(cb_calc_statistic, sender = Storage)
+#signals.pre_save.connect(cb_prepare_datum, sender = Storage)
+#signals.post_save.connect(cb_calc_statistic, sender = Storage)
 
 class TaskModel(db.Expando):
   object = db.ReferenceProperty(required = True)
@@ -128,4 +128,4 @@ def cleanup_relations(sender, **kwargs):
   if (not TaskModel(object = campaign, task = 'delete campaign').put()):
     logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
   
-signals.pre_delete.connect(cleanup_relations, sender = Campaign)
+#signals.pre_delete.connect(cleanup_relations, sender = Campaign)

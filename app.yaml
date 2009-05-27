@@ -16,6 +16,9 @@ handlers:
   
 - url: /media
   static_dir: _generated_media
+  
+- url: /measure/.*
+  script: measure.py
 
 - url: /.*
   script: common/appenginepatch/main.py

@@ -1,12 +1,10 @@
-import logging, math, re, util, visualize, urlparse
-from models import Histogram
-from django.utils import simplejson
-
+import os, logging, math, simplejson, re, urlparse
 from django.http import HttpResponse, HttpResponseRedirect
-from ragendja.template import render_to_response
 
-from appenginepatcher import on_production_server
-DEBUG = not on_production_server
+from models import Histogram
+import util, visualize
+
+DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Dev')
 
 def get(prop):
   for cls_name in globals().keys():
