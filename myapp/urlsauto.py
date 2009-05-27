@@ -1,8 +1,6 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
-    (r'^login/?', 'django.contrib.auth.views.login', {'template_name': 'user_create_form.html'}),
-    (r'^logout/?$', 'django.contrib.auth.views.logout_then_login', {'login_url': '/'}),
     (r'^about/?$', 'django.views.generic.simple.direct_to_template', {'template': 'about.html'}),
 ) + patterns('myapp.views',
     (r'^tasks/clean_up_campaigns/?', 'clean_up_campaigns'),

@@ -41,10 +41,10 @@ MIDDLEWARE_CLASSES = (
     #'django.contrib.auth.middleware.AuthenticationMiddleware',
     
     # Google authentication
-    #'ragendja.auth.middleware.GoogleAuthenticationMiddleware',
+    'ragendja.auth.middleware.GoogleAuthenticationMiddleware',
     
     # Hybrid Django/Google authentication
-    'ragendja.auth.middleware.HybridAuthenticationMiddleware',
+    #'ragendja.auth.middleware.HybridAuthenticationMiddleware',
     
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -54,11 +54,11 @@ MIDDLEWARE_CLASSES = (
 )
 
 # Google authentication
-#AUTH_USER_MODULE = 'ragendja.auth.google_models'
-#AUTH_ADMIN_MODULE = 'ragendja.auth.google_admin'
+AUTH_USER_MODULE = 'ragendja.auth.google_models'
+AUTH_ADMIN_MODULE = 'ragendja.auth.google_admin'
 
 # Hybrid Django/Google authentication
-AUTH_USER_MODULE = 'ragendja.auth.hybrid_models'
+#AUTH_USER_MODULE = 'ragendja.auth.hybrid_models'
 
 GLOBALTAGS = (
     'ragendja.templatetags.ragendjatags',

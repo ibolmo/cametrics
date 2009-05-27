@@ -1,5 +1,6 @@
-import os, logging, math, simplejson, re, urlparse
+import os, logging, math, re, urlparse
 from django.http import HttpResponse, HttpResponseRedirect
+from django.utils import simplejson
 
 from models import Histogram
 import util, visualize

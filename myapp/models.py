@@ -1,6 +1,5 @@
 #from django.db.models import signals
 from google.appengine.ext import db
-from ragendja.auth.hybrid_models import User
 import logging, util
 
 from google.appengine.api import datastore_types
@@ -34,7 +33,7 @@ class Campaign(db.Model):
   title = db.StringProperty(required = True)
   description = db.StringProperty(multiline = True)
   homepage = db.StringProperty()
-  organizer = db.ReferenceProperty(User, collection_name = 'campaigns')
+  organizer = db.ReferenceProperty(collection_name = 'campaigns')
   created_on = db.DateTimeProperty(auto_now_add = 1)
     
 class Storage(SerializableExpando):

@@ -13,7 +13,6 @@ import os, util, logging, stat, renderer
 from myapp.forms import CampaignForm
 from myapp.models import *
 
-from django.utils import simplejson
 from django.contrib.auth.decorators import login_required
 
 def list_measurements(request):
@@ -45,7 +44,7 @@ def create_new_user(request):
 
 @login_required
 def list_campaigns(request):
-  return object_list(request, Campaign.all().filter('organizer =', request.user), paginate_by=10)
+  return object_list(request, Campaign.all().filter('organizer =', request.user.key()), paginate_by=10)
 
 @login_required
 def show_campaign(request, key):
@@ -57,7 +56,7 @@ def add_campaign(request):
     form = CampaignForm(request.POST, request.FILES)
     if form.is_valid():
       new_object = form.save(commit = False)
-      new_object.organizer = request.user
+      new_object.organizer = request.user.key()
       if (new_object.put()):
         if request.user.is_authenticated():
           Message(user = request.user, message= "The campaign was created successfully.").put()
