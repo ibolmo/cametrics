@@ -18,7 +18,7 @@ def get(prop):
 
 class Renderer(object):
   mimetypes = {
-    'json': 'text/plain', #'application/json',
+    'json': DEBUG and 'text/html' or 'application/json',
     'html': 'text/html',
     'csv': 'text/csv',
     'plain': 'text/plain'

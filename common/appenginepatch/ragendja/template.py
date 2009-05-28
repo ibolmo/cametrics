@@ -7,12 +7,6 @@ render_to_response() and render_to_string() use RequestContext internally.
 The app_prefixed_loader is a template loader that loads directly from the app's
 'templates' folder when you specify an app prefix ('app/template.html').
 
-It's possible to register global template libraries by adding this to your
-settings:
-GLOBALTAGS = (
-    'myapp.templatetags.cooltags',
-)
-
 The JSONResponse() function automatically converts a given Python object into
 JSON and returns it as an HttpResponse.
 """
@@ -20,9 +14,6 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.template import RequestContext, add_to_builtins, loader, \
     TemplateDoesNotExist
-from django.utils.functional import Promise
-from django.utils.encoding import force_unicode
-from django.utils import simplejson
 from ragendja.apputils import get_app_dirs
 import os
 
@@ -60,25 +51,15 @@ def render_to_response(request, template_name, data=None, mimetype=None):
     return HttpResponse(render_to_string(request, template_name, data),
         content_type='%s; charset=%s' % (mimetype, settings.DEFAULT_CHARSET))
 
-class LazyEncoder(simplejson.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Promise):
-            return force_unicode(obj)
-        return obj
-
 def JSONResponse(pyobj):
-    return HttpResponse(simplejson.dumps(pyobj, cls=LazyEncoder),
-        content_type='application/json; charset=%s' % settings.DEFAULT_CHARSET)
+    from ragendja.json import JSONResponse as real_class
+    global JSONResponse
+    JSONResponse = real_class
+    return JSONResponse(pyobj)
 
 def TextResponse(string=''):
     return HttpResponse(string,
         content_type='text/plain; charset=%s' % settings.DEFAULT_CHARSET)
-
-# Load app modules after all definitions, so imports won't break.
-
-# Register global template libraries.
-for lib in getattr(settings, 'GLOBALTAGS', ()):
-    add_to_builtins(lib)
 
 # This is needed by app_prefixed_loader.
 app_template_dirs = get_app_dirs('templates')
