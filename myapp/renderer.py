@@ -28,8 +28,10 @@ class Renderer(object):
     return datum and datum.to_dict() or None
     
   @classmethod
-  def render(cls, request, format = 'json', data = '{}', stats = None, data_path = None):
-    return render_to_response(request, 'myapp/get_data.%s' % format, {'data': data}, mimetype = Renderer.mimetypes.get(format, 'text/plain'))
+  def render(cls, page, format = 'json', data = '{}', stats = None, data_path = None):
+    page.response.headers.add_header('Content-Type', Renderer.mimetypes.get(format, 'text/plain'))
+    page.response.out.write(data)
+    page.response.set_status(200)
     
   @classmethod
   def object_from_path(cls, root = None, path = ''):
@@ -41,16 +43,16 @@ class Renderer(object):
   
 class Json_Renderer(Renderer):
   @classmethod
-  def render(cls, request, format, data, stats, data_path):
+  def render(cls, page, format, data, stats, data_path):
       """docstring for render"""      
-      data_path = data_path or []
-      data_type = len(data) and data[0].type or None
+      data_path = data_path or ''
       
       if 'values' in data_path:
         data = map(lambda datum: datum.to_json(), data)
       elif 'stats' in data_path:
+        logging.debug('stats is %s' % stats)
         if (not stats):
-          stats = {}
+          data = '{}'
         else:
           path = data_path.split('.'); path.pop(0)
           obj = stats.to_dict()
@@ -61,11 +63,11 @@ class Json_Renderer(Renderer):
           data = simplejson.dumps(obj)
       else:
         data = {
-        'type': data_type,
+        'type': len(data) and data[0].type or 'null',
         'values': map(lambda datum: datum.to_json(), data),
         'stats': stats and stats.to_json() or {}
       }
-      return super(Json_Renderer, cls).render(request, data = data)
+      return super(Json_Renderer, cls).render(page, data = data)
 
 class Gchart_Renderer(Renderer):  
   @staticmethod
@@ -81,10 +83,10 @@ class Gchart_Renderer(Renderer):
       return {}
     
   @classmethod
-  def render(cls, request, format, data, stats, data_path):    
+  def render(cls, page, format, data, stats, data_path):    
     obj = None
     if not len(data):
-      logging.critical('No data found for request %s' % request)
+      logging.critical('No data found for page %s' % page)
       return HttpResponse(status = 404)
     
     dtype = data[0].type
@@ -95,7 +97,7 @@ class Gchart_Renderer(Renderer):
     else:
       logging.warning('Did not expect data_path: %s' % data_path)
     logging.info('Getting visualization for: %s' % (not obj and 'none' or dtype))
-    url = visualize.get(not obj and 'none' or dtype).get_url(request, obj)
+    url = visualize.get(not obj and 'none' or dtype).get_url(page.request, obj)
     logging.info('Redirecting to: %s' % url)
     return url and (DEBUG and HttpResponse('<img src="%s" />' % url) or HttpResponseRedirect(url)) or HttpResponse('No visualization found', status = 500)
 

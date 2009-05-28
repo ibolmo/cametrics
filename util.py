@@ -7,7 +7,6 @@ def generateModel(name, properties = {}, base = db.Model):
 special_keys = re.compile(r'\.((?:stats|values).*)')
 
 def getParts(ns):
-  logging.debug('getParts::ns = %s' % ns)
   x = special_keys.split(ns)
   return len(x) and x[0] or None, len(x) > 1 and x[1] or None
   

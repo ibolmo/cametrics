@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 from ragendja.settings_pre import *
+
+DJANGO_STYLE_MODEL_KIND = False
 
 import config
 # Increase this when you update your media on the production site, so users

@@ -57,7 +57,7 @@ class Statistics (SerializableExpando):
   @staticmethod
   def get_by_campaign_and_namespace(campaign, namespace):
     '''docstring for get_by_campaign_and_namespace'''
-    return Statistics.all().filter('campaign = ', campaign).filter('namespace = ', namespace).get()
+    return Statistics.all().filter('campaign = ', isinstance(campaign, str) and db.Key(campaign) or campaign).filter('namespace = ', namespace).get()
     
   def to_dict(self):
     entity = super(Statistics, self).to_dict()

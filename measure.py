@@ -1,38 +1,41 @@
 import os, logging
+logging.getLogger().setLevel(logging.DEBUG)
 
-from google.appengine.ext import webapp
+from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from django.utils import simplejson
-from myapp.models import *
+from myapp.models import Campaign, Storage, Statistics
 import util, myapp.renderer as renderer
-
  
 class MainPage(webapp.RequestHandler):
   def get(self, key, path, format):
     if (not key):
-      self.error(500)
+      return self.error(500)
     
-    campaign = Campaign.all(keys_only = True).filter('__key__ = ', key).get()
+    campaign = Campaign.all(keys_only = True).filter('__key__ = ', db.Key(key)).get()
     if (not campaign):
-      self.error(404)
+      logging.warning('No campaign (%s) found.' % key)
+      return self.error(404)
     
     ns = (path or '').strip('/').replace('/', '.')
-    logging.warning("%s, %s, %s" % (key, ns, format))
-    
-    format = format or self.request.GET.get('format', 'json')
+    format = format or self.request.get('format', 'json')
     ns, data_path = util.getParts(ns)
+
+    logging.info("%s, %s, %s; %s" % (key, ns, format, data_path))
+    
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
-    return renderer.get(format)(request, format, data, stats, data_path)
-    
+    renderer.get(format)(self, format, data, stats, data_path)
+
   def post(self, key, path, format):
     if (not key):
-      self.error(500)
+      return self.error(500)
     
-    campaign = Campaign.all(keys_only = True).filter('__key__ = ', key).get()
+    campaign = Campaign.all(keys_only = True).filter('__key__ = ', db.Key(key)).get()
     if (not campaign):
-      self.error(404)
+      logging.warning('No campaign (%s) found.' % key)
+      return self.error(404)
     
     ns = (path or '').strip('/').replace('/', '.')
     logging.warning("%s, %s, %s" % (key, ns, format))
@@ -44,8 +47,8 @@ class MainPage(webapp.RequestHandler):
         if create_datum(campaign, datum.get('namespace').strip('/').replace('/', '.'), datum):
           saved = True
     else:
-      saved = create_datum(campaign, ns, request.POST)
-    self.set_status(saved and 201 or 304)
+      saved = create_datum(campaign, ns, self.request)
+    self.response.set_status(saved and 201 or 304)
     
 def create_datum(campaign, ns, obj = {}):
   value = obj.get('value')

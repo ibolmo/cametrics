@@ -7,13 +7,13 @@ from ragendja.template import render_to_response
 
 import logging, renderer
 from myapp.forms import CampaignForm
-from myapp.models import Campaign, TaskModel
+from models import Campaign, TaskModel
 
 from django.contrib.auth.decorators import login_required
 
 @login_required
 def list_campaigns(request):
-  return object_list(request, Campaign.all().filter('organizer =', request.user.key()), paginate_by=10)
+  return object_list(request, Campaign.all().filter('organizer =', request.user.key()), paginate_by = 10)
 
 @login_required
 def show_campaign(request, key):
