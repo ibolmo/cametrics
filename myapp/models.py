@@ -26,6 +26,13 @@ class SerializableExpando(db.Expando):
     entity = self.to_dict()
     util.replace_datastore_types(entity)
     return simplejson.dumps(entity)
+    
+  @classmethod
+  def get_by_key_name_or_insert(cls, key, **kwds):
+    model = cls.get_by_key_name(key)
+    if (model is None):
+        model = cls.get_or_insert(key, **kwds)
+    return model
 
 class Campaign(db.Model):
   title = db.StringProperty(required = True)
@@ -80,29 +87,6 @@ class Histogram(SerializableExpando):
   def has(stat):
     return Histogram.all(keys_only = True).filter('statistic =', stat).count(1)
 
-def cb_prepare_datum(sender, **kwargs):
-  datum = kwargs.get('instance')
-  if (not datum):
-    return logging.error('No datum for cb_prepare_datum')
-    
-  statistic = Statistics.get_by_campaign_and_namespace(datum.campaign, datum.namespace) or Statistics(campaign = datum.campaign, namespace = datum.namespace)
-  if (not statistic.is_saved()):
-    statistic.save()
-  datum.stats = statistic
-  stat.get(datum.type).prepare(datum)
-      
-def cb_calc_statistic(sender, **kwargs):
-  datum = kwargs.get('instance')
-  if (not datum):
-    return logging.error('No datum for cb_statistics')
-  
-  if (hasattr(datum, '_invalid')):
-    logging.debug('Datum (%s) is an invalid' % datum.key())
-    return datum.delete()
-  
-  if (stat.get(datum.type).calculate(datum) is not False):
-    datum.stats.save()
-
 class TaskModel(db.Expando):
   object = db.ReferenceProperty(required = True)
   task = db.StringProperty(required = True)
@@ -115,13 +99,3 @@ class TaskModel(db.Expando):
   @staticmethod
   def has(object):
     return TaskModel.all(keys_only = True).filter('object =', object).count(1)
-
-def cleanup_relations(sender, **kwargs):
-  campaign = kwargs.get('instance')
-  if (not TaskModel(object = campaign, task = 'delete campaign').put()):
-    logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
-  
-import stat
-#signals.pre_save.connect(cb_prepare_datum, sender = Storage)
-#signals.post_save.connect(cb_calc_statistic, sender = Storage)
-#signals.pre_delete.connect(cleanup_relations, sender = Campaign)

@@ -6,8 +6,13 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 from django.utils import simplejson
 from myapp.models import Campaign, Storage, Statistics
-import util, myapp.renderer as renderer
+
+import util
+import myapp.stat as stat
+import myapp.renderer as renderer
  
+_Stats = {}
+
 class MainPage(webapp.RequestHandler):
   def get(self, key, path, format):
     if (not key):
@@ -36,68 +41,52 @@ class MainPage(webapp.RequestHandler):
     if (not campaign):
       logging.warning('No campaign (%s) found.' % key)
       return self.error(404)
+      
+    logging.warning("%s, %s, %s" % (key, path, format))
     
-    ns = (path or '').strip('/').replace('/', '.')
-    logging.warning("%s, %s, %s" % (key, ns, format))
-    
+    models = []
+    error = False
     if 'bulk' in self.request.get('type'):
-      data = simplejson.loads(self.request.get('data') or '[]')
-      saved = False
+      data = simplejson.loads(self.request.get('data') or '[]')  #todo remove need for loads
       for datum in data:
-        if create_datum(campaign, datum.get('namespace').strip('/').replace('/', '.'), datum):
-          saved = True
-    else:
-      saved = create_datum(campaign, ns, self.request)
-    self.response.set_status(saved and 201 or 304)
+        ns = datum.get('namespace')
+        if ns:
+          models.append(create_datum(campaign, ns, datum))
+    elif path:
+        models.append(create_datum(campaign, path, self.request))
     
+    models += _Stats.values() + stat._Hists.values()
+    try:
+      keys = db.put(models)
+    except:
+      error = True
+      logging.warning('Could not save all models: (%s/%s)' % (len(keys) / len(models)))
+    self.response.set_status(error and 304 or 201)
+
 def create_datum(campaign, ns, obj = {}):
+  ns = ns.strip('/').replace('/', '.')    
   value = obj.get('value')
   kind = obj.get('type', 'number')
+  
   logging.debug('POST | value: %s | kind: %s' % (value, kind))
-  
-  datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
-  saved = bool(datum.put())
-  if not saved:
-    logging.critical('Could not save: Storage(%s, %s, %s, %s)' % (campaign, ns, value, kind))
-  return saved
-'''
-def measurements(request, key, path, format):
-  logging.debug('measurements::path = %s' % path)
-  logging.debug('measurements::format = %s' % format)
-  if (not key):
-    return HttpResponse('Invalid service usage')
-  
-  campaign = Campaign.get(key)
-  if (not campaign):
-    return HttpResponse('Campaign not found')
-  
-  ns = (path or '').strip('/').replace('/', '.')
-  
-  if request.method == 'GET':
-    format = format or self.request.GET.get('format', 'json')
-    ns, data_path = util.getParts(ns)
-    data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-    stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
-    return renderer.get(format)(request, format, data, stats, data_path)
-  
-  elif request.method == 'POST':
-    if 'bulk' in request.POST.get('type'):
-      data = simplejson.loads(request.POST.get('data') or '[]')
-      saved = False
-      for datum in data:
-        if create_datum(campaign, datum.get('namespace'), datum):
-          saved = True
-    else:
-      saved = create_datum(campaign, ns, request.POST)
-    return HttpResponse(status = (saved and 201 or 304))
-      
-  elif request.method == 'DELETE':
-    return HttpResponse('Not yet supported, please contact admin.', status = 304)
-
-  return HttpResponse('Internal Error', status = 500)
-
-'''
     
+  datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
+  
+  key = '%s.%s' % (campaign, ns)
+  if (not _Stats.has_key(key)):
+    datum.stats = _Stats[key] = Statistics.get_by_key_name_or_insert(key, campaign = campaign, namespace = ns)
+  else:
+    datum.stats = _Stats[key]
+    
+  if not hasattr(datum, '_invalid'):
+    stat.get(kind).calculate(datum)
+    return datum
+
+def cleanup_relations(sender, **kwargs):
+  campaign = kwargs.get('instance')
+  if (not TaskModel(object = campaign, task = 'delete campaign').put()):
+    logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
+      
 application = webapp.WSGIApplication(debug = os.environ['SERVER_SOFTWARE'].startswith('Dev'), url_mapping = [
   ('/measure/([^/]+)/([^\.]+)?(?:\.(.+))?', MainPage)
 ])

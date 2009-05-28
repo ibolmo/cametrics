@@ -1,6 +1,8 @@
 import urllib, logging, math, re
 from models import Histogram
 
+_Hists = {}
+
 def get(prop):
   glbs = globals()
   Summaries = map(lambda p: glbs[p], [p for p in glbs if '__' not in p and p is not 'get'])
@@ -24,9 +26,9 @@ class NoSummary(object):
     For example, the first and last datum and increment the count of data in the system
     '''
     stats = datum.stats
-    if (not stats.head):
-      stats.head = datum
-    stats.tail = datum
+    #if (not stats.head):
+    #  stats.head = datum
+    #stats.tail = datum
     
     if (not stats.count):
       stats.count = 0
@@ -49,15 +51,13 @@ class NoSummary(object):
       try:
         index = str(index)
       except:
-        return cls.critical('Could not str(%s)' % datum.value)
+        return cls.critical('Could not str(%s)' % index)
     key = '%s.%s.%s' % (stats.key(), name, index)
-    hist = Histogram.get_by_key_name(key)
-    if (hist is None):
-        hist = Histogram.get_or_insert(key, statistic = stats, name = name, index = index)
-    hist.count += 1
-    if (not hist.put()):
-      return cls.critical('Could not save hist: %s' % key)    
-            
+    if not _Hists.has_key(key):
+      hist = _Hists[key] = Histogram.get_by_key_name_or_insert(key, statistic = stats, name = name, index = index)
+    else:
+      hist = _Hists[key]
+    hist.count += 1            
         
 class Summary(NoSummary):
   @classmethod
