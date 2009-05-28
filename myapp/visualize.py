@@ -42,7 +42,9 @@ class NoVisual(object):
     chs = dict(enumerate(request.GET.get('chs', '').split('x')))
     w = int(chs.get(0) or NoVisual.w)
     h = int(chs.get(1) or NoVisual.h)
-    return CHART_TYPE_MAP.get(request.GET.get('cht', ''), SparkLineChart)(w, h)
+    ctype = request.GET.get('cht', '')
+    logging.debug('cht is %s' % ctype)
+    return CHART_TYPE_MAP.get(ctype, SparkLineChart)(w, h)
     
   @classmethod
   def _get_url(cls, request, chart):
@@ -57,7 +59,7 @@ class Visual(NoVisual):
     chart = cls.get_chart(request)
     
     if (isinstance(obj, dict)):
-      chart.add_data(obj.values())
+      chart.add_data([0] + obj.values()) # hrm..
     else:
       chart.add_data(obj)
     
@@ -69,13 +71,24 @@ class NumberVisual(Visual):
   
   @classmethod
   def add_labels(cls, chart, obj):
-    if (isinstance(obj, dict)):
-      chart.set_axis_labels(Axis.BOTTOM, obj.keys())
-    else:
-      chart.set_axis_labels(Axis.BOTTOM, range(1, len(obj) + 1))
+    flip = isinstance(chart, (StackedHorizontalBarChart, GroupedHorizontalBarChart))
+    logging.debug('chart is %s' % chart)
     
-    lower, upper = chart.data_y_range()
-    chart.set_axis_range(Axis.LEFT, lower, upper)
+    if (isinstance(obj, dict)):
+      if (isinstance(chart, (Pie2DChart, Pie3DChart))):
+        logging.debug('pie getting labeled')
+        chart.set_pie_labels(obj.keys())
+      else:
+        chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, obj.keys())
+    else:
+      chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, range(1, len(obj) + 1))
+    
+    t, s = list(chart.annotated_data())[0]
+    if t == 'x':
+      lower, upper = chart.data_x_range()
+    elif t == 'y':
+      lower, upper = chart.data_y_range()
+    chart.set_axis_range(flip and Axis.BOTTOM or Axis.LEFT, lower, upper)
     
 class StringVisual(Visual):
   match_type = stat.StringSummary.match_type  

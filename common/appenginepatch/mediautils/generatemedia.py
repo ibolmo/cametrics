@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.utils.simplejson import dumps
 from os.path import getmtime
-import os, codecs, shutil
+import os, codecs, shutil, logging
 
 MEDIA_VERSION = unicode(settings.MEDIA_VERSION)
 COMPRESSOR = os.path.join(os.path.dirname(__file__), '.yuicompressor.jar')
@@ -75,7 +75,8 @@ def compress_file(path):
     from subprocess import Popen
     print '  Running yuicompressor...',
     try:
-        cmd = Popen(['java', '-jar', COMPRESSOR, path, '-o', path])
+        cmd = Popen(['java', '-jar', COMPRESSOR, '--charset', 'UTF-8',
+                     path, '-o', path])
         if cmd.wait() == 0:
             print '%d bytes' % os.path.getsize(path)
         else:
@@ -105,12 +106,12 @@ def get_file_content(handler, cache, **kwargs):
     path = get_file_path(handler, **kwargs)
     if path not in cache:
         if isinstance(handler, basestring):
-            file = codecs.open(path, 'r', 'utf-8')
             try:
+                file = codecs.open(path, 'r', 'utf-8')
                 cache[path] = file.read().lstrip(codecs.BOM_UTF8.decode('utf-8')
                     ).replace('\r\n', '\n').replace('\r', '\n')
             except:
-                print 'Error in %s', path
+                logging.error('Error in %s' % path)
                 raise
             file.close()
         elif callable(handler):
@@ -146,8 +147,6 @@ def get_targets(combine_media=settings.COMBINE_MEDIA, **kwargs):
     """Returns all files that must be combined."""
     targets = []
     for target in sorted(combine_media.keys()):
-        import logging
-        logging.info('Target: %s' % target)
         group = combine_media[target]
         if '.site_data.js' in group:
             index = list(group).index('.site_data.js')

@@ -65,13 +65,9 @@ def setup_env(manage_py_env=False):
     if not manage_py_env:
         return
 
-    print 'Running on app-engine-patch 1.0'
+    print 'Running on app-engine-patch 1.1beta1'
 
 def setup_project():
-    # Remove the standard version of Django
-    for k in [k for k in sys.modules if k.startswith('django')]:
-        del sys.modules[k]
-
     from appenginepatcher import on_production_server
     if on_production_server:
         # This fixes a pwd import bug for os.path.expanduser()
@@ -101,4 +97,15 @@ def setup_project():
             for zip_package in os.listdir(packages_dir):
                 EXTRA_PATHS.append(os.path.join(packages_dir, zip_package))
 
-    sys.path = EXTRA_PATHS + sys.path
+    # App Engine causes main.py to be reloaded if an exception gets raised
+    # on the first request of a main.py instance, so don't call setup_project()
+    # multiple times. We ensure this indirectly by checking if we've already
+    # modified sys.path.
+    if len(sys.path) < len(EXTRA_PATHS) or \
+            sys.path[:len(EXTRA_PATHS)] != EXTRA_PATHS:
+
+        # Remove the standard version of Django
+        for k in [k for k in sys.modules if k.startswith('django')]:
+            del sys.modules[k]
+
+        sys.path = EXTRA_PATHS + sys.path

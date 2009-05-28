@@ -4,7 +4,6 @@ import logging, util
 
 from google.appengine.api import datastore_types
 from django.utils import simplejson
-import stat
 
 class SerializableExpando(db.Expando):
   """Extends Expando to have json and possibly other serializations
@@ -104,9 +103,6 @@ def cb_calc_statistic(sender, **kwargs):
   
   if (stat.get(datum.type).calculate(datum) is not False):
     datum.stats.save()
-    
-#signals.pre_save.connect(cb_prepare_datum, sender = Storage)
-#signals.post_save.connect(cb_calc_statistic, sender = Storage)
 
 class TaskModel(db.Expando):
   object = db.ReferenceProperty(required = True)
@@ -121,10 +117,12 @@ class TaskModel(db.Expando):
   def has(object):
     return TaskModel.all(keys_only = True).filter('object =', object).count(1)
 
-  
 def cleanup_relations(sender, **kwargs):
   campaign = kwargs.get('instance')
   if (not TaskModel(object = campaign, task = 'delete campaign').put()):
     logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
   
+import stat
+#signals.pre_save.connect(cb_prepare_datum, sender = Storage)
+#signals.post_save.connect(cb_calc_statistic, sender = Storage)
 #signals.pre_delete.connect(cleanup_relations, sender = Campaign)

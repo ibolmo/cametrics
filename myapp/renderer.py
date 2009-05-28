@@ -17,7 +17,7 @@ def get(prop):
 
 class Renderer(object):
   mimetypes = {
-    'json': 'text/json', #'application/json',
+    'json': DEBUG and 'text/html' or 'application/json',
     'html': 'text/html',
     'csv': 'text/csv',
     'plain': 'text/plain'
@@ -45,8 +45,6 @@ class Json_Renderer(Renderer):
       """docstring for render"""      
       data_path = data_path or []
       data_type = len(data) and data[0].type or None
-          
-      logging.info('data path: %s' % data_path)
       
       if 'values' in data_path:
         data = map(lambda datum: datum.to_json(), data)
@@ -86,6 +84,7 @@ class Gchart_Renderer(Renderer):
   def render(cls, request, format, data, stats, data_path):    
     obj = None
     if not len(data):
+      logging.critical('No data found for request %s' % request)
       return HttpResponse(status = 404)
     
     dtype = data[0].type
