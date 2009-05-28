@@ -27,7 +27,7 @@ class MainPage(webapp.RequestHandler):
     format = format or self.request.get('format', 'json')
     ns, data_path = util.getParts(ns)
 
-    logging.info("%s, %s, %s; %s" % (key, ns, format, data_path))
+    logging.debug("%s, %s, %s; %s" % (key, ns, format, data_path))
     
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
@@ -42,7 +42,7 @@ class MainPage(webapp.RequestHandler):
       logging.warning('No campaign (%s) found.' % key)
       return self.error(404)
       
-    logging.warning("%s, %s, %s" % (key, path, format))
+    logging.debug("%s, %s, %s" % (key, path, format))
     
     models = []
     error = False
@@ -77,9 +77,11 @@ def create_datum(campaign, ns, obj = {}):
     datum.stats = _Stats[key] = Statistics.get_by_key_name_or_insert(key, campaign = campaign, namespace = ns)
   else:
     datum.stats = _Stats[key]
-    
+  
+  helper = stat.get(kind)
+  helper.prepare(datum)
   if not hasattr(datum, '_invalid'):
-    stat.get(kind).calculate(datum)
+    helper.calculate(datum)
     return datum
 
 def cleanup_relations(sender, **kwargs):

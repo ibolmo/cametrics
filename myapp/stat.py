@@ -26,6 +26,7 @@ class NoSummary(object):
     For example, the first and last datum and increment the count of data in the system
     '''
     stats = datum.stats
+    # The datum is not yet saved, and referencing it is not possible. Need to come up with a workaround. Perhaps Key.from_path().
     #if (not stats.head):
     #  stats.head = datum
     #stats.tail = datum
@@ -118,6 +119,8 @@ class StringSummary(Summary):
     except:
       return cls.invalidate(datum, 'Could not str(%s)' % datum.value)
 
+
+import datetime, time
 class DatetimeSummary(Summary):
   match_type = ['date', 'datetime', 'timestamp']
   DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -128,7 +131,6 @@ class DatetimeSummary(Summary):
     if super(DatetimeSummary, cls).prepare(datum) is False:
       return False
     
-    import datetime
     if (datum.type == 'timestamp'):
       try:
         datum.timestamp = float(datum.value)
@@ -144,7 +146,6 @@ class DatetimeSummary(Summary):
       except ValueError:
         return cls.invalidate(datum, 'Could not datetime.strptime parse: %s' % datum.value)
       
-      import time
       try:
         datum.timestamp = time.mktime(datum.datetime.timetuple())
       except ValueError, OverflowError:
