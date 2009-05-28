@@ -1,8 +1,7 @@
-#from django.db.models import signals
-from google.appengine.ext import db
 import logging, util
 
-from google.appengine.api import datastore_types
+#from django.db.models import signals
+from google.appengine.ext import db
 from django.utils import simplejson
 
 class SerializableExpando(db.Expando):
