@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from ragendja.settings_pre import *
 
+import config
 # Increase this when you update your media on the production site, so users
 # don't have to refresh their cache. By setting this your MEDIA_URL
 # automatically becomes /media/MEDIA_VERSION/
@@ -25,11 +26,10 @@ COMBINE_MEDIA = {
 
 # Change your email settings
 if on_production_server:
-    DEFAULT_FROM_EMAIL = 'bla@bla.com'
+    DEFAULT_FROM_EMAIL = config.EMAIL_ADDRESS
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Make this unique, and don't share it with anybody.
-import config
 SECRET_KEY = config.SECRET_KEY
 
 #ENABLE_PROFILER = True
