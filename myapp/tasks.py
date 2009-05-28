@@ -30,6 +30,7 @@ class DeleteCampaignTask(object):
     storage_query = Storage.all().filter('campaign =', campaign)
     if (storage_query.count(limit = 1)):
       for datum in storage_query.fetch(100):
+        logging.info('checking for stats: %s' % datum.stats.key())
         if (Histogram.has(datum.stats) and not TaskModel.has(datum.stats)): #perhaps use a pickled dictionary instead of count queries
           if (not TaskModel(object = datum.stats, task = 'delete histogram').put()):
             logging.critical('Could not create delete histogram task for %s' % datum.stats)

@@ -44,8 +44,8 @@ def create_new_user(request):
   return render_to_response(request, 'myapp/user_create_form.html', {'form': form, 'heading': 'Register' })
 
 def measurements(request, key, path, format):
-  logging.debug('measurements::path = %s' % path)
-  logging.debug('measurements::format = %s' % format)
+  logging.info('measurements::path = %s' % path)
+  logging.info('measurements::format = %s' % format)
   if (not key):
     return HttpResponse('Invalid service usage')
   
@@ -57,7 +57,9 @@ def measurements(request, key, path, format):
   
   if request.method == 'GET':
     format = format or request.GET.get('format', 'json')
+    logging.info('format %s' % format)
     ns, data_path = util.getParts(ns)
+    logging.info('GET %s/%s' % (ns, data_path))
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
     stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
     return renderer.get(format)(request, format, data, stats, data_path)
@@ -65,9 +67,10 @@ def measurements(request, key, path, format):
   elif request.method == 'POST':
     if 'bulk' in request.POST.get('type'):
       data = simplejson.loads(request.POST.get('data') or '[]')
+      logging.info('data uploaded: %s' % data)
       saved = False
       for datum in data:
-        if create_datum(campaign, datum.get('namespace'), datum):
+        if create_datum(campaign, datum.get('namespace').strip('/').replace('/', '.'), datum):
           saved = True
     else:
       saved = create_datum(campaign, ns, request.POST)
