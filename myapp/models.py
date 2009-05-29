@@ -53,18 +53,27 @@ class Storage(SerializableExpando):
   stats = db.ReferenceProperty(collection_name = 'statistics')
     
 class Statistics (SerializableExpando):
-  json_does_not_include = ['campaign', 'namespace']
+  json_does_not_include = ['campaign', 'namespace', 'histograms']
   
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
-  head = db.ReferenceProperty(Storage, collection_name = 'head')
-  tail = db.ReferenceProperty(Storage, collection_name = 'tail')
+  #head = db.ReferenceProperty(Storage, collection_name = 'head')
+  #tail = db.ReferenceProperty(Storage, collection_name = 'tail')
   count = db.IntegerProperty(default = 0)
+  histograms = db.StringListProperty()
   
   @staticmethod
   def get_by_campaign_and_namespace(campaign, namespace):
-    '''docstring for get_by_campaign_and_namespace'''
-    return Statistics.all().filter('campaign = ', isinstance(campaign, str) and db.Key(campaign) or campaign).filter('namespace = ', namespace).get()
+    return Statistics.get_by_key_name('%s.%s' % (campaign, namespace))
+    
+  def __getattr__(self, key):
+    if key in self.histograms:
+      entity = {}
+      for bucket in Histogram.all().filter('statistic =', self).filter('name =', key):
+        entity[bucket.index] = bucket.count
+      return entity
+    else:
+      return super(Statistics, self).__getattr__(key)
     
   def to_dict(self):
     entity = super(Statistics, self).to_dict()

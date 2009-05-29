@@ -18,8 +18,8 @@ class MainPage(webapp.RequestHandler):
     if (not key):
       return self.error(500)
     
-    campaign = Campaign.all(keys_only = True).filter('__key__ = ', db.Key(key)).get()
-    if (not campaign):
+    self.campaign = Campaign.all(keys_only = True).filter('__key__ = ', db.Key(key)).get()
+    if (not self.campaign):
       logging.warning('No campaign (%s) found.' % key)
       return self.error(404)
     
@@ -28,17 +28,14 @@ class MainPage(webapp.RequestHandler):
     ns, data_path = util.getParts(ns)
 
     logging.debug("%s, %s, %s; %s" % (key, ns, format, data_path))
-    
-    data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-    stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
-    renderer.get(format)(self, format, data, stats, data_path)
+    renderer.get(format)(self, ns, data_path)
 
   def post(self, key, path, format):
     if (not key):
       return self.error(500)
     
-    campaign = Campaign.all(keys_only = True).filter('__key__ = ', db.Key(key)).get()
-    if (not campaign):
+    self.campaign = Campaign.all(keys_only = True).filter('__key__ = ', db.Key(key)).get()
+    if (not self.campaign):
       logging.warning('No campaign (%s) found.' % key)
       return self.error(404)
       
@@ -51,9 +48,9 @@ class MainPage(webapp.RequestHandler):
       for datum in data:
         ns = datum.get('namespace')
         if ns:
-          models.append(create_datum(campaign, ns, datum))
+          models.append(create_datum(self.campaign, ns, datum))
     elif path:
-        models.append(create_datum(campaign, path, self.request))
+        models.append(create_datum(self.campaign, path, self.request))
     
     models += _Stats.values() + stat._Hists.values()
     try:

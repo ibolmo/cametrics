@@ -53,6 +53,10 @@ class NoSummary(object):
         index = str(index)
       except:
         return cls.critical('Could not str(%s)' % index)
+        
+    if name not in stats.histograms:
+      stats.histograms.append(name)
+
     key = '%s.%s.%s' % (stats.key(), name, index)
     if not _Hists.has_key(key):
       hist = _Hists[key] = Histogram.get_by_key_name_or_insert(key, statistic = stats, name = name, index = index)
@@ -101,7 +105,7 @@ class NumberSummary(Summary):
       stats.max = datum.value
     if (not hasattr(stats, 'sum')):
       stats.sum = 0
-    stats.sum += datum.value
+    stats.sum = stats.sum + datum.value
     if (not hasattr(stats, 'mean')):
       stats.mean = 0
     stats.mean = stats.sum / stats.count

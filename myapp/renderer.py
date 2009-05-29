@@ -2,7 +2,7 @@ import os, logging, math, re, urlparse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
 
-from models import Histogram
+from models import Storage, Statistics, Histogram
 import util, visualize
 
 DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Dev')
@@ -13,7 +13,25 @@ def get(prop):
       continue
     if (cls_name.startswith(prop.capitalize())):
       return globals()[cls_name].render
-  return lambda l, format, m, n, o: HttpResponse('Unsupported format: %s' % format, status = 500)
+  return lambda ns, data_path: HttpResponse('Unsupported format: %s' % format, status = 500)
+
+def getattr_by_path(obj, attr, *default):
+  """Like getattr(), but can go down a hierarchy like 'attr.subattr'"""
+  value = obj
+  for i, part in enumerate(attr.split('.')):
+    if isinstance(value, dict):
+      if not value.has_key(part) and len(default) > i:
+        return default[i]
+      value = value.get(part)
+      if callable(value):
+        value = value()
+    else:
+      if not hasattr(value, part) and len(default) > i:
+        return default[i]
+      value = getattr(value, part)
+      if callable(value):
+        value = value()
+  return value
 
 class Renderer(object):
   mimetypes = {
@@ -28,46 +46,39 @@ class Renderer(object):
     return datum and datum.to_dict() or None
     
   @classmethod
-  def render(cls, page, format = 'json', data = '{}', stats = None, data_path = None):
+  def render(cls, page, data, format):
     page.response.headers.add_header('Content-Type', Renderer.mimetypes.get(format, 'text/plain'))
     page.response.out.write(data)
     page.response.set_status(200)
-    
-  @classmethod
-  def object_from_path(cls, root = None, path = ''):
-    path = path.split('.'); path.pop(0) # assume root is the first element
-    obj = root
-    for p in path:
-      obj = obj.get(p)
-    return obj      
-  
+
 class Json_Renderer(Renderer):
   @classmethod
-  def render(cls, page, format, data, stats, data_path):
+  def render(cls, page, ns, path):
       """docstring for render"""      
-      data_path = data_path or ''
-      
-      if 'values' in data_path:
+      path = path or ''
+    
+      if path.startswith('values'):
+        data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
         data = map(lambda datum: datum.to_json(), data)
-      elif 'stats' in data_path:
-        logging.debug('stats is %s' % stats)
+        
+      elif path.startswith('stats'):
+        stats = Statistics.get_by_campaign_and_namespace(page.campaign, ns)
         if (not stats):
           data = '{}'
         else:
-          path = data_path.split('.'); path.pop(0)
-          obj = stats.to_dict()
-          for p in path:
-            obj = obj.get(p)
-          if (isinstance(obj, dict)):
-            util.replace_datastore_types(obj)
-          data = simplejson.dumps(obj)
+          path = path.lstrip('stats').strip('.')
+          if path:
+            obj = getattr_by_path(stats, path)
+            data = simplejson.dumps(obj)
+          else:
+            data = stats.to_json()          
       else:
         data = {
         'type': len(data) and data[0].type or 'null',
         'values': map(lambda datum: datum.to_json(), data),
         'stats': stats and stats.to_json() or {}
       }
-      return super(Json_Renderer, cls).render(page, data = data)
+      return super(Json_Renderer, cls).render(page, data, 'json')
 
 class Gchart_Renderer(Renderer):  
   @staticmethod
