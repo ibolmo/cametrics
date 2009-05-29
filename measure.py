@@ -28,7 +28,7 @@ class MainPage(webapp.RequestHandler):
     ns, data_path = util.getParts(ns)
 
     logging.debug("%s, %s, %s; %s" % (key, ns, format, data_path))
-    renderer.get(format)(self, ns, data_path)
+    renderer.get(format)(self, ns, data_path or '')
 
   def post(self, key, path, format):
     if (not key):

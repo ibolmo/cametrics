@@ -71,22 +71,19 @@ class Json_Renderer(Renderer):
     return data
     
   @classmethod
-  def render(cls, page, ns, path):
-      """docstring for render"""      
-      path = path or ''
-    
-      if path.startswith('values'):
-        data = cls.get_stored_data(page.campaign, ns)
-      elif path.startswith('stats'):
-        data = cls.get_statistics(page.campaign, ns, path)
-      else:
-        datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
-        data = {
-          'type': simplejson.dumps(datum and datum.type),
-          'values': cls.get_stored_data(page.campaign, ns),
-          'stats': cls.get_statistics(page.campaign, ns, path)
-        }
-      return super(Json_Renderer, cls).render(page, data, 'json')
+  def render(cls, page, ns, path):  
+    if path.startswith('values'):
+      data = cls.get_stored_data(page.campaign, ns)
+    elif path.startswith('stats'):
+      data = cls.get_statistics(page.campaign, ns, path)
+    else:
+      datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
+      data = {
+        'type': simplejson.dumps(datum and datum.type),
+        'values': cls.get_stored_data(page.campaign, ns),
+        'stats': cls.get_statistics(page.campaign, ns, path)
+      }
+    return super(Json_Renderer, cls).render(page, data, 'json')
 
 class Gchart_Renderer(Renderer):  
   @staticmethod
@@ -102,23 +99,32 @@ class Gchart_Renderer(Renderer):
       return {}
     
   @classmethod
-  def render(cls, page, format, data, stats, data_path):    
-    obj = None
-    if not len(data):
-      logging.critical('No data found for page %s' % page)
-      return HttpResponse(status = 404)
+  def render(cls, page, ns, path):
+  #def render(cls, page, format, data, stats, data_path):        
+    datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
+    if not datum:
+      logging.warning('No stored data found (%s/%s)' % (page.campaign, ns))
+      return page.response.set_status(404)
     
-    dtype = data[0].type
-    if 'values' in data_path and len(data):
+    obj = None
+    if path.startswith('values'):
+      data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
       obj = [d.value for d in data]
-    elif 'stats' in data_path and stats:
-      obj = cls.object_from_path(root = stats.to_dict(), path = data_path)
+    elif path.startswith('stats'):
+      stats = Statistics.get_by_campaign_and_namespace(page.campaign, ns)
+      path = path.lstrip('stats').strip('.')
+      obj = stats and path and getattr_by_path(stats, path)
     else:
-      logging.warning('Did not expect data_path: %s' % data_path)
-    logging.info('Getting visualization for: %s' % (not obj and 'none' or dtype))
-    url = visualize.get(not obj and 'none' or dtype).get_url(page.request, obj)
+      logging.warning('Did not expect data_path: %s' % data_path)        
+      
+    logging.info('Getting visualization for: %s' % (not obj and 'none' or datum.type))
+    url = visualize.get(not obj and 'none' or datum.type).get_url(page.request, obj)
     logging.info('Redirecting to: %s' % url)
-    return url and (DEBUG and HttpResponse('<img src="%s" />' % url) or HttpResponseRedirect(url)) or HttpResponse('No visualization found', status = 500)
+    if url:
+      if DEBUG:
+        return page.response.out.write('<img src="%s" />' % url)
+      return page.redirect(url)
+    page.response.set_status(500)
 
 class Gc_Renderer(Gchart_Renderer):
   pass
