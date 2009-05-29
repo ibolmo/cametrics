@@ -38,6 +38,7 @@ skip_files: |
  (.*\.py[co])|
  (.*/RCS/.*)|
  (\..*)|
+ (.*\.csv)|
  (dev/.*)|
  (test/.*)|
  (docs/.*)|

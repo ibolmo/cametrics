@@ -69,11 +69,11 @@ def replace_datastore_types(entity):
       entity[key] = [isinstance(item, (datetime.datetime, datetime.date, datetime.time, datastore_types.Key, users.User)) and get_replacement(item) or item for item in values]
     else:
       entity[key] = isinstance(value, (datetime.datetime, datetime.date, datetime.time, datastore_types.Key, users.User)) and get_replacement(value) or value
-
+        
 class Mapper(object):
   # Subclasses should replace this with a model class (eg, model.Person).
   KIND = None
-
+ 
   # Subclasses can replace this with a list of (property, value) tuples to filter by.
   FILTERS = []
   
@@ -83,7 +83,7 @@ class Mapper(object):
     Implementers should return a tuple containing two iterables (to_update, to_delete).
     """
     return ([], [])
-
+ 
   def get_query(self):
     """Returns a query over the specified kind, with any appropriate filters applied."""
     q = self.KIND.all()
@@ -91,7 +91,7 @@ class Mapper(object):
       q.filter("%s =" % prop, value)
     q.order("__key__")
     return q
-
+ 
   def run(self, batch_size=100):
     """Executes the map procedure over all matching entities."""
     q = self.get_query()
@@ -110,7 +110,7 @@ class Mapper(object):
       q = self.get_query()
       q.filter("__key__ >", entities[-1].key())
       entities = q.fetch(batch_size)
-
+ 
 class FixNamespace(Mapper):
   def __init__(self, kind, filters = None):
     self.KIND = kind
@@ -123,4 +123,28 @@ class FixNamespace(Mapper):
         entity.namespace = entity.namespace.strip('/').replace('/', '.')
         return ([entity], [])
     return ([], [])
+
+import csv
+
+class Export(Mapper):
+  def __init__(self, filename, kind, attrs, filters = None):
+    self.KIND = kind
+    if filters:
+      self.FILTERS = filters
+    self.ATTRS = attrs
+    self.writer = csv.writer(open(filename, 'w'))
+    self.writer.writerow(self.ATTRS)
+    
+  def map(self, entity):
+    self.writer.writerow([getattr(entity, attr) for attr in self.ATTRS])
+    return ([], [])
+    
+class Delete(Mapper):
+  def __init__(self, kind, filters = None):
+    self.KIND = kind
+    if filters:
+      self.FILTERS = filters
+  
+  def map(self, entity):
+    return ([], [entity])
   

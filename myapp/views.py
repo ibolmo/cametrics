@@ -13,11 +13,11 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def list_campaigns(request):
-  return object_list(request, Campaign.all().filter('organizer =', request.user.key()), paginate_by = 10)
+  return object_list(request, Campaign.all().filter('organizer =', request.user.key()), paginate_by = 10, template_name = 'campaign_list.html')
 
 @login_required
 def show_campaign(request, key):
-  return object_detail(request, Campaign.all().filter('organizer =', request.user), key)
+  return object_detail(request, Campaign.all().filter('organizer =', request.user), key, template_name = 'campaign_detail.html')
 
 @login_required
 def add_campaign(request):
@@ -34,11 +34,11 @@ def add_campaign(request):
 
 @login_required
 def edit_campaign(request, key):
-  return update_object(request, object_id = key, form_class = CampaignForm)
+  return update_object(request, object_id = key, form_class = CampaignForm, template_name = 'campaign_form.html')
   
 @login_required
 def delete_campaign(request, key):
-    return delete_object(request, Campaign, object_id = key, post_delete_redirect = reverse('myapp.views.list_campaigns'))
+    return delete_object(request, Campaign, object_id = key, post_delete_redirect = reverse('myapp.views.list_campaigns'), template_name = 'campaign_confirm_delete.html')
     
 def clean_up_campaigns(request):
   status = 200
