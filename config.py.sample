@@ -1,0 +1,2 @@
+EMAIL_ADDRESS = 'your@email.tld'
+SECRET_KEY = 'change me!'

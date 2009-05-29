@@ -82,6 +82,25 @@ class Histogram(SerializableExpando):
   def has(stat):
     return Histogram.all(keys_only = True).filter('statistic =', stat).count(1)
 
+class TaskModel(db.Expando):
+  object = db.ReferenceProperty(required = True)
+  task = db.StringProperty(required = True)
+  
+  def execute(self):
+     obj = self.properties()['object'].get_value_for_datastore(self)
+     import tasks
+     return tasks.get(self.task)(self, obj)
+  
+  @staticmethod
+  def has(object):
+    return TaskModel.all(keys_only = True).filter('object =', object).count(1)
+
+def cleanup_relations(sender, **kwargs):
+  campaign = kwargs.get('instance')
+  if (not TaskModel(object = campaign, task = 'delete campaign').put()):
+    logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
+  
+import stat
 def cb_prepare_datum(sender, **kwargs):
   datum = kwargs.get('instance')
   if (not datum):
@@ -105,25 +124,6 @@ def cb_calc_statistic(sender, **kwargs):
   if (stat.get(datum.type).calculate(datum) is not False):
     datum.stats.save()
 
-class TaskModel(db.Expando):
-  object = db.ReferenceProperty(required = True)
-  task = db.StringProperty(required = True)
-  
-  def execute(self):
-     obj = self.properties()['object'].get_value_for_datastore(self)
-     import tasks
-     return tasks.get(self.task)(self, obj)
-  
-  @staticmethod
-  def has(object):
-    return TaskModel.all(keys_only = True).filter('object =', object).count(1)
-
-def cleanup_relations(sender, **kwargs):
-  campaign = kwargs.get('instance')
-  if (not TaskModel(object = campaign, task = 'delete campaign').put()):
-    logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
-  
-import stat
 signals.pre_save.connect(cb_prepare_datum, sender = Storage)
 signals.post_save.connect(cb_calc_statistic, sender = Storage)
 signals.pre_delete.connect(cleanup_relations, sender = Campaign)

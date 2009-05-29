@@ -2,6 +2,12 @@ Name
 ====
 Cametrics
 
+Running Your Own Cametrics
+--------------------------
+ 1. Download from Github (http://github.com/ibolmo/cametrics/zipball/master) or `git clone git://github.com/ibolmo/cametrics.git`
+ 2. Rename `config.py.sample` to `config.py` and edit the file appropriately
+ 3. Update `app.yaml` (in particular the `application`)
+
 Types
 -----
  - none (no statistics, no type)
@@ -14,7 +20,7 @@ Types
  - temperature
  - counter
  - choice
- 
+
 Modify Statistics
 -----------------
 Sometimes it would be useful to modify statistics to exclude certain statistics. The following are examples of such filters. Concept from Django Template Filters.
