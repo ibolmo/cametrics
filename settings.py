@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 from ragendja.settings_pre import *
+
+DJANGO_STYLE_MODEL_KIND = False
 
 import config
 # Increase this when you update your media on the production site, so users
@@ -65,10 +66,10 @@ MIDDLEWARE_CLASSES = (
     #'django.contrib.auth.middleware.AuthenticationMiddleware',
     
     # Google authentication
-    #'ragendja.auth.middleware.GoogleAuthenticationMiddleware',
+    'ragendja.auth.middleware.GoogleAuthenticationMiddleware',
     
     # Hybrid Django/Google authentication
-    'ragendja.auth.middleware.HybridAuthenticationMiddleware',
+    #'ragendja.auth.middleware.HybridAuthenticationMiddleware',
     
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -78,11 +79,11 @@ MIDDLEWARE_CLASSES = (
 )
 
 # Google authentication
-#AUTH_USER_MODULE = 'ragendja.auth.google_models'
-#AUTH_ADMIN_MODULE = 'ragendja.auth.google_admin'
+AUTH_USER_MODULE = 'ragendja.auth.google_models'
+AUTH_ADMIN_MODULE = 'ragendja.auth.google_admin'
 
 # Hybrid Django/Google authentication
-AUTH_USER_MODULE = 'ragendja.auth.hybrid_models'
+#AUTH_USER_MODULE = 'ragendja.auth.hybrid_models'
 
 LOGIN_URL = '/login'
 LOGOUT_URL = '/logout'

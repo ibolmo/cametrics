@@ -1,6 +1,8 @@
 import urllib, logging, math, re
 from models import Histogram
 
+_Hists = {}
+
 def get(prop):
   glbs = globals()
   Summaries = map(lambda p: glbs[p], [p for p in glbs if '__' not in p and p is not 'get'])
@@ -24,9 +26,10 @@ class NoSummary(object):
     For example, the first and last datum and increment the count of data in the system
     '''
     stats = datum.stats
-    if (not stats.head):
-      stats.head = datum
-    stats.tail = datum
+    # The datum is not yet saved, and referencing it is not possible. Need to come up with a workaround. Perhaps Key.from_path().
+    #if (not stats.head):
+    #  stats.head = datum
+    #stats.tail = datum
     
     if (not stats.count):
       stats.count = 0
@@ -49,15 +52,17 @@ class NoSummary(object):
       try:
         index = str(index)
       except:
-        return cls.critical('Could not str(%s)' % datum.value)
+        return cls.critical('Could not str(%s)' % index)
+        
+    if name not in stats.histograms:
+      stats.histograms.append(name)
+
     key = '%s.%s.%s' % (stats.key(), name, index)
-    hist = Histogram.get_by_key_name(key)
-    if (hist is None):
-        hist = Histogram.get_or_insert(key, statistic = stats, name = name, index = index)
-    hist.count += 1
-    if (not hist.put()):
-      return cls.critical('Could not save hist: %s' % key)    
-            
+    if not _Hists.has_key(key):
+      hist = _Hists[key] = Histogram.get_by_key_name_or_insert(key, statistic = stats, name = name, index = index)
+    else:
+      hist = _Hists[key]
+    hist.count += 1            
         
 class Summary(NoSummary):
   @classmethod
@@ -100,7 +105,7 @@ class NumberSummary(Summary):
       stats.max = datum.value
     if (not hasattr(stats, 'sum')):
       stats.sum = 0
-    stats.sum += datum.value
+    stats.sum = stats.sum + datum.value
     if (not hasattr(stats, 'mean')):
       stats.mean = 0
     stats.mean = stats.sum / stats.count
@@ -118,6 +123,8 @@ class StringSummary(Summary):
     except:
       return cls.invalidate(datum, 'Could not str(%s)' % datum.value)
 
+
+import datetime, time
 class DatetimeSummary(Summary):
   match_type = ['date', 'datetime', 'timestamp']
   DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -128,7 +135,6 @@ class DatetimeSummary(Summary):
     if super(DatetimeSummary, cls).prepare(datum) is False:
       return False
     
-    import datetime
     if (datum.type == 'timestamp'):
       try:
         datum.timestamp = float(datum.value)
@@ -144,7 +150,6 @@ class DatetimeSummary(Summary):
       except ValueError:
         return cls.invalidate(datum, 'Could not datetime.strptime parse: %s' % datum.value)
       
-      import time
       try:
         datum.timestamp = time.mktime(datum.datetime.timetuple())
       except ValueError, OverflowError:

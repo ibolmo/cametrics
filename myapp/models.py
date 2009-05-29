@@ -1,9 +1,6 @@
-from django.db.models import signals
-from google.appengine.ext import db
-from ragendja.auth.hybrid_models import User
 import logging, util
 
-from google.appengine.api import datastore_types
+from google.appengine.ext import db
 from django.utils import simplejson
 
 class SerializableExpando(db.Expando):
@@ -28,12 +25,19 @@ class SerializableExpando(db.Expando):
     entity = self.to_dict()
     util.replace_datastore_types(entity)
     return simplejson.dumps(entity)
+    
+  @classmethod
+  def get_by_key_name_or_insert(cls, key, **kwds):
+    model = cls.get_by_key_name(key)
+    if (model is None):
+        model = cls.get_or_insert(key, **kwds)
+    return model
 
 class Campaign(db.Model):
   title = db.StringProperty(required = True)
   description = db.StringProperty(multiline = True)
   homepage = db.StringProperty()
-  organizer = db.ReferenceProperty(User, collection_name = 'campaigns')
+  organizer = db.ReferenceProperty(collection_name = 'campaigns')
   created_on = db.DateTimeProperty(auto_now_add = 1)
     
 class Storage(SerializableExpando):
@@ -48,18 +52,27 @@ class Storage(SerializableExpando):
   stats = db.ReferenceProperty(collection_name = 'statistics')
     
 class Statistics (SerializableExpando):
-  json_does_not_include = ['campaign', 'namespace']
+  json_does_not_include = ['campaign', 'namespace', 'histograms']
   
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
-  head = db.ReferenceProperty(Storage, collection_name = 'head')
-  tail = db.ReferenceProperty(Storage, collection_name = 'tail')
+  #head = db.ReferenceProperty(Storage, collection_name = 'head')
+  #tail = db.ReferenceProperty(Storage, collection_name = 'tail')
   count = db.IntegerProperty(default = 0)
+  histograms = db.StringListProperty()
   
   @staticmethod
   def get_by_campaign_and_namespace(campaign, namespace):
-    '''docstring for get_by_campaign_and_namespace'''
-    return Statistics.all().filter('campaign = ', campaign).filter('namespace = ', namespace).get()
+    return Statistics.get_by_key_name('%s.%s' % (campaign, namespace))
+    
+  def __getattr__(self, key):
+    if key in self.histograms:
+      entity = {}
+      for bucket in Histogram.all().filter('statistic =', self).filter('name =', key):
+        entity[bucket.index] = bucket.count
+      return entity
+    else:
+      return super(Statistics, self).__getattr__(key)
     
   def to_dict(self):
     entity = super(Statistics, self).to_dict()
@@ -94,36 +107,3 @@ class TaskModel(db.Expando):
   @staticmethod
   def has(object):
     return TaskModel.all(keys_only = True).filter('object =', object).count(1)
-
-def cleanup_relations(sender, **kwargs):
-  campaign = kwargs.get('instance')
-  if (not TaskModel(object = campaign, task = 'delete campaign').put()):
-    logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
-  
-import stat
-def cb_prepare_datum(sender, **kwargs):
-  datum = kwargs.get('instance')
-  if (not datum):
-    return logging.error('No datum for cb_prepare_datum')
-    
-  statistic = Statistics.get_by_campaign_and_namespace(datum.campaign, datum.namespace) or Statistics(campaign = datum.campaign, namespace = datum.namespace)
-  if (not statistic.is_saved()):
-    statistic.save()
-  datum.stats = statistic
-  stat.get(datum.type).prepare(datum)
-      
-def cb_calc_statistic(sender, **kwargs):
-  datum = kwargs.get('instance')
-  if (not datum):
-    return logging.error('No datum for cb_statistics')
-  
-  if (hasattr(datum, '_invalid')):
-    logging.debug('Datum (%s) is an invalid' % datum.key())
-    return datum.delete()
-  
-  if (stat.get(datum.type).calculate(datum) is not False):
-    datum.stats.save()
-
-signals.pre_save.connect(cb_prepare_datum, sender = Storage)
-signals.post_save.connect(cb_calc_statistic, sender = Storage)
-signals.pre_delete.connect(cleanup_relations, sender = Campaign)

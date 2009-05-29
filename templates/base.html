@@ -23,9 +23,9 @@
 	    		</div> 
 		    	<div id="top_nav" class="column last span-4 right"> 
                     {% if user.is_authenticated %}
-                        Welcome, {{ user.username }} {% if not google_user %} <a href="/logout"> {% else %} <a href="{% google_logout_url "/" %}">{% endif %}Logout</a>
+                        Welcome, {{ user.username }} <a href="{% google_logout_url "/" %}">Logout</a>
                     {% else %}
-                        <a href="/login">Login</a>  / <a href="/register">Register</a>
+                        <a href="{% google_login_url "/" %}">Login</a>
                     {% endif %}
 	    		</div> 
 	    		{% block menu %}

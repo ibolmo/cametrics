@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
 from django import forms
-from ragendja.auth.models import UserTraits
-from ragendja.forms import FormWithSets, FormSetField
-from ragendja.auth.hybrid_models import User
-from myapp.models import *
+from myapp.models import Campaign
 
 class CampaignForm (forms.ModelForm):    
     class Meta:

@@ -1,6 +1,6 @@
 import logging
 from google.appengine.ext import db
-from models import *
+from models import Storage, Histogram, TaskModel
 
 def get(task):
   for cls_name in globals().keys():
