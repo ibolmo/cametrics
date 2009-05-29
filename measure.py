@@ -57,7 +57,7 @@ class MainPage(webapp.RequestHandler):
       keys = db.put(models)
     except:
       error = True
-      logging.warning('Could not save all models: (%s/%s)' % (len(keys) / len(models)))
+      logging.warning('Could not save all models')
     self.response.set_status(error and 304 or 201)
 
 def create_datum(campaign, ns, obj = {}):
