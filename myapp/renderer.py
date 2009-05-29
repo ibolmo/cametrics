@@ -28,7 +28,10 @@ def getattr_by_path(obj, attr, *default):
     else:
       if not hasattr(value, part) and len(default) > i:
         return default[i]
-      value = getattr(value, part)
+      try:
+        value = getattr(value, part)
+      except:
+        value = None
       if callable(value):
         value = value()
   return value
@@ -53,31 +56,36 @@ class Renderer(object):
 
 class Json_Renderer(Renderer):
   @classmethod
+  def get_stored_data(cls, campaign, ns):
+    data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
+    return map(lambda datum: datum.to_json(), data)
+  
+  @classmethod
+  def get_statistics(cls, campaign, ns, path):
+    stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
+    if (not stats):
+      data = '{}'
+    else:
+      path = path.lstrip('stats').strip('.')
+      data = path and simplejson.dumps(getattr_by_path(stats, path)) or stats.to_json()
+    return data
+    
+  @classmethod
   def render(cls, page, ns, path):
       """docstring for render"""      
       path = path or ''
     
       if path.startswith('values'):
-        data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-        data = map(lambda datum: datum.to_json(), data)
-        
+        data = cls.get_stored_data(page.campaign, ns)
       elif path.startswith('stats'):
-        stats = Statistics.get_by_campaign_and_namespace(page.campaign, ns)
-        if (not stats):
-          data = '{}'
-        else:
-          path = path.lstrip('stats').strip('.')
-          if path:
-            obj = getattr_by_path(stats, path)
-            data = simplejson.dumps(obj)
-          else:
-            data = stats.to_json()          
+        data = cls.get_statistics(page.campaign, ns, path)
       else:
+        datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
         data = {
-        'type': len(data) and data[0].type or 'null',
-        'values': map(lambda datum: datum.to_json(), data),
-        'stats': stats and stats.to_json() or {}
-      }
+          'type': simplejson.dumps(datum and datum.type),
+          'values': cls.get_stored_data(page.campaign, ns),
+          'stats': cls.get_statistics(page.campaign, ns, path)
+        }
       return super(Json_Renderer, cls).render(page, data, 'json')
 
 class Gchart_Renderer(Renderer):  
