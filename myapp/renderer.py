@@ -106,8 +106,7 @@ class Gchart_Renderer(Renderer):
       return {}
     
   @classmethod
-  def render(cls, page, ns, path):
-  #def render(cls, page, format, data, stats, data_path):        
+  def render(cls, page, ns, path): 
     datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
     if not datum:
       logging.warning('No stored data found (%s/%s)' % (page.campaign, ns))
@@ -121,6 +120,8 @@ class Gchart_Renderer(Renderer):
       stats = Statistics.get_by_campaign_and_namespace(page.campaign, ns)
       path = path.lstrip('stats').strip('.')
       obj = stats and path and getattr_by_path(stats, path)
+      if isinstance(obj, Histogram):
+        obj = obj.to_dict()
     else:
       logging.warning('Did not expect data_path: %s' % data_path)        
       
