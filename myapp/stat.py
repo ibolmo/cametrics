@@ -58,13 +58,18 @@ class NoSummary(object):
         
     if name not in stats.histograms:
       stats.histograms.append(name)
-
-    key = '%s.%s.%s' % (stats.key(), name, index)
+      
+    key = '%s.%s' % (stats.key(), name)
     if not _Hists.has_key(key):
-      hist = _Hists[key] = Histogram.get_by_key_name_or_insert(key, statistic = stats, name = name, index = index)
+      hist = _Hists[key] = Histogram.get_by_key_name_or_insert(key, statistic = stats, name = name)
     else:
       hist = _Hists[key]
-    hist.count += 1            
+      
+    try:
+      value = getattr(hist, index)
+    except:
+      value = 0
+    setattr(hist, index, value + 1)     
         
 class Summary(NoSummary):
   @classmethod

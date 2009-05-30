@@ -71,10 +71,9 @@ class Json_Renderer(Renderer):
       data = '{}'
     else:
       path = path.lstrip('stats').strip('.')
-      if path:
-        data = getattr_by_path(stats, path)
-      else:
-        data = stats.to_dict()
+      data = path and getattr_by_path(stats, path) or stats
+      if isinstance(data, (Histogram, Statistics)):
+        data = data.to_dict()
         util.replace_datastore_types(data)
     return data
     

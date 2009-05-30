@@ -67,20 +67,18 @@ class Statistics (SerializableExpando):
     
   def __getattr__(self, key):
     if key in self.histograms:
-      entity = {}
-      for bucket in Histogram.all().filter('statistic =', self).filter('name =', key):
-        entity[bucket.index] = bucket.count
-      return entity
+      return Histogram.get_by_key_name('%s.%s' % (self.key(), key))
     else:
       return super(Statistics, self).__getattr__(key)
     
   def to_dict(self):
-    entity = super(Statistics, self).to_dict()
-    
-    for hist in Histogram.all().filter('statistic =', self):
-      if (entity.get(hist.name) is None):
-        entity[hist.name] = {}
-      entity[hist.name][hist.index] = hist.count
+    entity = super(Statistics, self).to_dict()    
+    key = self.key()
+    hists = Histogram.get_by_key_name(['%s.%s' % (key, hist) for hist in self.histograms])
+    logging.info(hists)
+    for hist in hists:
+      if hist:
+        entity[hist.name] = hist.to_dict()
     return entity
 
 class Histogram(SerializableExpando):
@@ -88,12 +86,6 @@ class Histogram(SerializableExpando):
   
   statistic = db.ReferenceProperty(Statistics, collection_name = 'statistic')
   name = db.StringProperty(required = True)
-  index = db.StringProperty(required = True)
-  count = db.IntegerProperty(default = 0)
-
-  @staticmethod
-  def has(stat):
-    return Histogram.all(keys_only = True).filter('statistic =', stat).count(1)
 
 class TaskModel(db.Expando):
   object = db.ReferenceProperty(required = True)
