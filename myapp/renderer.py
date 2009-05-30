@@ -167,21 +167,22 @@ class Gmap_Renderer(Renderer):
       
     if path.startswith('values'):
       data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
+
+      options = Gmap_Renderer.encode(data)
+      callback = page.request.get('callback')
+      if gmtype == 'polyline':
+        options.update(cls.options)
+        callback = callback or '%s.addOverlay' % (page.request.get('class') or 'map')
+        # add user paramters
+        text = '%s(new GPolyline.fromEncoded(%s));' % (callback, options)
+      else:
+        text = '%s(%s);' % (callback, options)
     else:
       logging.warning('Did not expect path: %s' % path)
-      
-    options = Gmap_Renderer.encode(data)
-    callback = page.request.get('callback')
-    if gmtype == 'polyline':
-      options.update(cls.options)
-      callback = callback or '%s.addOverlay' % (page.request.get('class') or 'map')
-      # add user paramters
-      text = '%s(new GPolyline.fromEncoded(%s));' % (callback, options)
-    else:
-      text = '%s(%s);' % (callback, options)
-      
+      text = 'null'
+    
     return super(Gmap_Renderer, cls).render(page, text, 'javascript')
-          
+                
   @staticmethod
   def encode(points):
     """ Encode a coordinates into an encoded string.
