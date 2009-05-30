@@ -1,5 +1,7 @@
 from ragendja.settings_pre import *
 
+DEBUG = True
+
 DJANGO_STYLE_MODEL_KIND = False
 
 import config

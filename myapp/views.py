@@ -6,14 +6,14 @@ from django.views.generic.create_update import create_object, delete_object, upd
 from ragendja.template import render_to_response
 
 import logging, renderer
-from myapp.forms import CampaignForm
+from forms import CampaignForm
 from models import Campaign, TaskModel
 
 from django.contrib.auth.decorators import login_required
 
 @login_required
 def list_campaigns(request):
-  return object_list(request, Campaign.all().filter('organizer =', request.user.key()), paginate_by = 10, template_name = 'campaign_list.html')
+  return object_list(request, Campaign.all().filter('organizer =', request.user), paginate_by = 10, template_name = 'campaign_list.html')
 
 @login_required
 def show_campaign(request, key):
@@ -30,7 +30,7 @@ def add_campaign(request):
         return redirect(reverse('myapp.views.show_campaign', kwargs = dict(key = '%(key)s')), campaign)
   else:
     form = CampaignForm()
-  return render_to_response(request, 'myapp/campaign_form.html', {'form': form})
+  return render_to_response(request, 'campaign_form.html', {'form': form})
 
 @login_required
 def edit_campaign(request, key):

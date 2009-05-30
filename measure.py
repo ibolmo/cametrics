@@ -53,19 +53,36 @@ class MainPage(webapp.RequestHandler):
         models.append(create_datum(self.campaign, path, self.request))
     
     models += _Stats.values() + stat._Hists.values()
-    try:
-      keys = db.put(models)
-    except:
-      error = True
-      logging.warning('Could not save all models')
+    send_to_datastore(models)
     self.response.set_status(error and 304 or 201)
+
+def send_to_datastore(models):
+  lm = len(models)
+  first, second = (models[:lm / 2], models[lm / 2:])
+  if first:
+    try:
+      lf = len(first)
+      logging.debug('Saving first: %s/%s' % (lf, lm))
+      db.put(first)
+      logging.info('::STATS:: db.put(%s)' % lf)
+    except:
+      logging.warning('Could not save first set')
+      send_to_datastore(first)
+  
+  if second:
+    try:
+      ls = len(second)
+      logging.debug('Saving second: %s/%s' % (ls, lm))
+      db.put(second)
+      logging.info('::STATS:: db.put(%s)' % ls)
+    except:
+      logging.warning('Could not save second set')
+      send_to_datastore(second)
 
 def create_datum(campaign, ns, obj = {}):
   ns = ns.strip('/').replace('/', '.')    
   value = obj.get('value')
   kind = obj.get('type', 'number')
-  
-  logging.debug('POST | value: %s | kind: %s' % (value, kind))
     
   datum = Storage(campaign = campaign, namespace = ns, type = kind, value = value)
   
@@ -80,6 +97,8 @@ def create_datum(campaign, ns, obj = {}):
   if not hasattr(datum, '_invalid'):
     helper.calculate(datum)
     return datum
+  else:
+    logging.warning('datum invalid %s/%s, %s, %s' % (campaign, ns, datum.value, datum.type))
 
 def cleanup_relations(sender, **kwargs):
   campaign = kwargs.get('instance')

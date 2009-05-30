@@ -9,6 +9,8 @@ def get(prop):
   for Class in Summaries:
     if hasattr(Class, 'match_type') and Class.match_type and prop in Class.match_type:
       return Class
+  
+  logging.debug('No Summary for %s' % prop)
   return NoSummary
 
 class NoSummary(object):
