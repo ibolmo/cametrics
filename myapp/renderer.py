@@ -58,7 +58,11 @@ class Json_Renderer(Renderer):
   @classmethod
   def get_stored_data(cls, campaign, ns):
     data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-    return map(lambda datum: datum.to_json(), data)
+    def prepare(datum):
+      datum = datum.to_dict()
+      util.replace_datastore_types(datum)
+      return datum
+    return map(prepare, data)
   
   @classmethod
   def get_statistics(cls, campaign, ns, path):
@@ -67,7 +71,11 @@ class Json_Renderer(Renderer):
       data = '{}'
     else:
       path = path.lstrip('stats').strip('.')
-      data = path and simplejson.dumps(getattr_by_path(stats, path)) or stats.to_json()
+      if path:
+        data = getattr_by_path(stats, path)
+      else:
+        data = stats.to_dict()
+        util.replace_datastore_types(data)
     return data
     
   @classmethod
@@ -79,11 +87,11 @@ class Json_Renderer(Renderer):
     else:
       datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
       data = {
-        'type': simplejson.dumps(datum and datum.type),
+        'type': datum and datum.type,
         'values': cls.get_stored_data(page.campaign, ns),
         'stats': cls.get_statistics(page.campaign, ns, path)
       }
-    return super(Json_Renderer, cls).render(page, data, 'json')
+    return super(Json_Renderer, cls).render(page, simplejson.dumps(data), 'json')
 
 class Gchart_Renderer(Renderer):  
   @staticmethod

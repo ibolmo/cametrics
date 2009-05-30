@@ -57,27 +57,15 @@ class MainPage(webapp.RequestHandler):
     self.response.set_status(error and 304 or 201)
 
 def send_to_datastore(models):
-  lm = len(models)
-  first, second = (models[:lm / 2], models[lm / 2:])
-  if first:
+  lm = len(models)    
+  if lm:
     try:
-      lf = len(first)
-      logging.debug('Saving first: %s/%s' % (lf, lm))
-      db.put(first)
-      logging.info('::STATS:: db.put(%s)' % lf)
+      db.put(models);
+      logging.info('::STATS:: db.put(%s)' % lm)
     except:
-      logging.warning('Could not save first set')
-      send_to_datastore(first)
-  
-  if second:
-    try:
-      ls = len(second)
-      logging.debug('Saving second: %s/%s' % (ls, lm))
-      db.put(second)
-      logging.info('::STATS:: db.put(%s)' % ls)
-    except:
-      logging.warning('Could not save second set')
-      send_to_datastore(second)
+      logging.warning('Could not save whole set')
+      send_to_datastore(models[:lm / 2])
+      send_to_datastore(models[lm / 2:])
 
 def create_datum(campaign, ns, obj = {}):
   ns = ns.strip('/').replace('/', '.')    
