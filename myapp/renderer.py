@@ -85,9 +85,7 @@ class Json_Renderer(Renderer):
     elif path.startswith('stats'):
       data = cls.get_statistics(page.campaign, ns, path)
     else:
-      datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
       data = {
-        'type': datum and datum.type,
         'values': cls.get_stored_data(page.campaign, ns),
         'stats': cls.get_statistics(page.campaign, ns, path)
       }
@@ -107,18 +105,14 @@ class Gchart_Renderer(Renderer):
       return {}
     
   @classmethod
-  def render(cls, page, ns, path): 
-    datum = Storage.all().filter('campaign = ', page.campaign).filter('namespace =', ns).get()
-    if not datum:
-      logging.warning('No stored data found (%s/%s)' % (page.campaign, ns))
-      return page.response.set_status(404)
+  def render(cls, page, ns, path):    
+    stats = Statistics.get_by_campaign_and_namespace(page.campaign, ns)
     
     obj = None
     if path.startswith('values'):
       data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
       obj = [d.value for d in data]
     elif path.startswith('stats'):
-      stats = Statistics.get_by_campaign_and_namespace(page.campaign, ns)
       path = path.lstrip('stats').strip('.')
       obj = stats and path and getattr_by_path(stats, path)
       if isinstance(obj, Histogram):
@@ -126,8 +120,8 @@ class Gchart_Renderer(Renderer):
     else:
       logging.warning('Did not expect path: %s' % path)        
       
-    logging.info('Getting visualization for: %s' % (not obj and 'none' or datum.type))
-    url = visualize.get(not obj and 'none' or datum.type).get_url(page.request, obj)
+    logging.info('Getting visualization for: %s' % (not obj and 'none' or stats.type))
+    url = visualize.get(not obj and 'none' or stats.type).get_url(page.request, obj)
     logging.info('Redirecting to: %s' % url)
     if url:
       if DEBUG:

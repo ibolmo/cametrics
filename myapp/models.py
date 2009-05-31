@@ -47,8 +47,6 @@ class Storage(SerializableExpando):
   namespace = db.StringProperty(required = True)
   type = db.StringProperty(required = True)
   created_on = db.DateTimeProperty(auto_now_add = 1)
-  
-  prev = db.SelfReferenceProperty(collection_name = 'previous')
   stats = db.ReferenceProperty(collection_name = 'statistics')
     
 class Statistics (SerializableExpando):
@@ -56,10 +54,9 @@ class Statistics (SerializableExpando):
   
   campaign = db.ReferenceProperty(Campaign)
   namespace = db.StringProperty(required = True)
-  #head = db.ReferenceProperty(Storage, collection_name = 'head')
-  #tail = db.ReferenceProperty(Storage, collection_name = 'tail')
   count = db.IntegerProperty(default = 0)
   histograms = db.StringListProperty()
+  type = db.StringProperty(required = True)
   
   @staticmethod
   def get_by_campaign_and_namespace(campaign, namespace):

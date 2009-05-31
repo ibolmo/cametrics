@@ -76,7 +76,7 @@ def create_datum(campaign, ns, obj = {}):
   
   key = '%s.%s' % (campaign, ns)
   if (not _Stats.has_key(key)):
-    datum.stats = _Stats[key] = Statistics.get_by_key_name_or_insert(key, campaign = campaign, namespace = ns)
+    datum.stats = _Stats[key] = Statistics.get_by_key_name_or_insert(key, campaign = campaign, namespace = ns, type = kind)
   else:
     datum.stats = _Stats[key]
   
