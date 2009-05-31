@@ -1,5 +1,4 @@
 import os, logging, math, re, urlparse
-from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
 
 from models import Storage, Statistics, Histogram
@@ -8,90 +7,87 @@ import util, visualize
 DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Dev')
 
 def get(prop):
-  for cls_name in globals().keys():
-    if not cls_name.endswith('_Renderer'):
-      continue
-    if (cls_name.startswith(prop.capitalize())):
-      return globals()[cls_name].render
-  return lambda ns, data_path: HttpResponse('Unsupported format: %s' % format, status = 500)
+  glbs = globals()
+  Renderers = map(lambda p: glbs[p], [p for p in glbs if '__' not in p and p is not 'get'])
+  for Class in Renderers:
+    if hasattr(Class, 'match_formats') and Class.match_formats and prop in Class.match_formats:
+      return Class
 
-def getattr_by_path(obj, attr, *default):
-  """Like getattr(), but can go down a hierarchy like 'attr.subattr'"""
-  value = obj
-  for i, part in enumerate(attr.split('.')):
-    if isinstance(value, dict):
-      if not value.has_key(part) and len(default) > i:
-        return default[i]
-      value = value.get(part)
-      if callable(value):
-        value = value()
-    else:
-      if not hasattr(value, part) and len(default) > i:
-        return default[i]
-      try:
-        value = getattr(value, part)
-      except:
-        value = None
-      if callable(value):
-        value = value()
-  return value
+  logging.debug('No Renderer for %s' % prop)
+  return Renderer
 
-class Renderer(object):
-  mimetypes = {
-    'json': DEBUG and 'text/html' or 'application/json',
-    'html': 'text/html',
-    'csv': 'text/csv',
-    'plain': 'text/plain',
-    'javascript': 'text/javascript',
-  }
-  
-  @staticmethod
-  def to_dict(datum):
-    return datum and datum.to_dict() or None
-    
+MIMETYPES = {
+  'json': DEBUG and 'text/html' or 'application/json',
+  'html': 'text/html',
+  'csv': 'text/csv',
+  'plain': 'text/plain',
+  'javascript': 'text/javascript',
+}
+
+class NoRenderer(object):  
   @classmethod
-  def render(cls, page, data, format):
-    page.response.headers.add_header('Content-Type', Renderer.mimetypes.get(format, 'text/plain'))
-    page.response.out.write(data)
-    page.response.set_status(200)
-
-class Json_Renderer(Renderer):
-  @classmethod
-  def get_stored_data(cls, campaign, ns):
-    data = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-    def prepare(datum):
-      datum = datum.to_dict()
-      util.replace_datastore_types(datum)
-      return datum
-    return map(prepare, data)
+  def get_values(cls, campaign, ns, path):
+    return []
   
   @classmethod
   def get_statistics(cls, campaign, ns, path):
-    stats = Statistics.get_by_campaign_and_namespace(campaign, ns)
-    if (not stats):
-      data = '{}'
-    else:
+    return {}
+  
+  @classmethod
+  def render_values(cls, page, path):
+    return cls.render(page, cls.get_stored_data(page.campaign, page.namespace, path))
+    
+  @classmethod
+  def render_stats(cls, page, path):
+    return cls.render(page, cls.get_statistics(page.campaign, page.namespace, path))
+  
+  @classmethod
+  def render(cls, page, data):
+    page.response.headers.add_header('Content-Type', MIMETYPES.get(page.format, 'text/plain'))
+    page.response.out.write(data)
+    page.response.set_status(data and 200 or 204)
+
+class Renderer(NoRenderer):  
+  @classmethod
+  def get_values(cls, campaign, ns, path):
+    query = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns)
+    return [datum for datum in query] # todo, paginator
+  
+  @classmethod
+  def get_statistics(cls, campaign, ns, path):
+    data = Statistics.get_by_campaign_and_namespace(campaign, ns)
+    if (data and path):
       path = path.lstrip('stats').strip('.')
-      data = path and getattr_by_path(stats, path) or stats
-      if isinstance(data, (Histogram, Statistics)):
-        data = data.to_dict()
-        util.replace_datastore_types(data)
+      if path:
+        data = util.getattr_by_path(stats, path)
+    return data
+
+class JSONRenderer(Renderer):
+  match_formats = ['json']
+  
+  @classmethod
+  def get_values(cls, campaign, ns, path):
+    data = super(JSONRenderer, cls).get_values(campaign, ns, path)
+    return map(lambda d: util.replace_datastore_types(d.to_dict()), data)
+  
+  @classmethod
+  def get_statistics(cls, campaign, ns, path):
+    data = super(JSONRenderer, cls).get_statistics(campaign, ns, path)
+    if isinstance(data, (Histogram, Statistics)):
+        data = util.replace_datastore_types(data.to_dict())
     return data
     
   @classmethod
-  def render(cls, page, ns, path):  
-    if path.startswith('values'):
-      data = cls.get_stored_data(page.campaign, ns)
-    elif path.startswith('stats'):
-      data = cls.get_statistics(page.campaign, ns, path)
-    else:
-      data = {
-        'values': cls.get_stored_data(page.campaign, ns),
-        'stats': cls.get_statistics(page.campaign, ns, path)
-      }
-    return super(Json_Renderer, cls).render(page, simplejson.dumps(data), 'json')
-
-class Gchart_Renderer(Renderer):  
+  def render(cls, page, data = None):  
+    data = data or {
+      'values': cls.get_values(page.campaign, page.namespace, ''),
+      'stats': cls.get_statistics(page.campaign, page.namespace, '')
+    }
+    return super(JSONRenderer, cls).render(page, simplejson.dumps(data))
+    
+class GChartRenderer(Renderer):
+  match_formats = ['gc', 'gchart']
+  
   @staticmethod
   def get_dqs(qs):
     logging.debug('Gchart_Renderer::qs = %s' % qs)
@@ -114,7 +110,7 @@ class Gchart_Renderer(Renderer):
       obj = [d.value for d in data]
     elif path.startswith('stats'):
       path = path.lstrip('stats').strip('.')
-      obj = stats and path and getattr_by_path(stats, path)
+      obj = stats and path and util.getattr_by_path(stats, path)
       if isinstance(obj, Histogram):
         obj = obj.to_dict()
     else:
@@ -128,18 +124,8 @@ class Gchart_Renderer(Renderer):
         return page.response.out.write('<img src="%s" />' % url)
       return page.redirect(url)
     page.response.set_status(500)
-
-class Gc_Renderer(Gchart_Renderer):
-  pass
   
-class Gmap_Renderer(Renderer):
-  options = {
-    'color': '#FF0000',
-    'weight': 2,
-    'zoomFactor': 32,
-    'numLevels': 4  
-  }
-  
+class GMapRenderer(Renderer):
   ''' Google Map API Renderer
   
   Transforms a longitude/latitude object (filtered, if either are not present) into three variations (using the `type` request argument):
@@ -152,6 +138,14 @@ class Gmap_Renderer(Renderer):
     class - Name of the GMap class to addOverlay with default options or user overriden options
     ... - Any other option available to the GPolyline.fromEncoded object options, the parameter is the object key. For example color=#FF0000 (only appropriate for when you pass the class parameter)
   '''
+  
+  options = {
+    'color': '#FF0000',
+    'weight': 2,
+    'zoomFactor': 32,
+    'numLevels': 4  
+  }
+  
   @classmethod
   def render(cls, page, ns, path):
     gmtype = page.request.get('type', 'raw')
@@ -162,7 +156,7 @@ class Gmap_Renderer(Renderer):
     if path.startswith('values'):
       data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
 
-      options = Gmap_Renderer.encode(data)
+      options = GMapRenderer.encode(data)
       callback = page.request.get('callback')
       if gmtype == 'polyline':
         options.update(cls.options)
@@ -174,7 +168,7 @@ class Gmap_Renderer(Renderer):
     else:
       logging.warning('Did not expect path: %s' % path)
       text = 'null'    
-    return super(Gmap_Renderer, cls).render(page, text, 'javascript')
+    return super(GMapRenderer, cls).render(page, text, 'javascript')
                 
   @staticmethod
   def encode(points):
@@ -211,8 +205,8 @@ class Gmap_Renderer(Renderer):
       plat = late5
       plng = lnge5                       
       
-      encoded_points += Gmap_Renderer.encodeSignedNumber(dlat) + Gmap_Renderer.encodeSignedNumber(dlng)
-      encoded_levels += Gmap_Renderer.encodeNumber(level) 
+      encoded_points += GMapRenderer.encodeSignedNumber(dlat) + GMapRenderer.encodeSignedNumber(dlng)
+      encoded_levels += GMapRenderer.encodeNumber(level) 
     
     return {
       'points': encoded_points,
@@ -237,7 +231,4 @@ class Gmap_Renderer(Renderer):
     sgn_num = num << 1
     if num < 0:
       sgn_num = ~(sgn_num)
-    return Gmap_Renderer.encodeNumber(sgn_num)
-      
-class Gm_Renderer(Gmap_Renderer):
-  pass
+    return GMapRenderer.encodeNumber(sgn_num)

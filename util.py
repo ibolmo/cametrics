@@ -8,7 +8,7 @@ special_keys = re.compile(r'\.((?:stats|values).*)')
 
 def getParts(ns):
   x = special_keys.split(ns)
-  return len(x) and x[0] or None, len(x) > 1 and x[1] or None
+  return len(x) and x[0] or '', len(x) > 1 and x[1] or ''
   
 # From: http://github.com/DocSavage/bloog/blob/346e5fb7c1fd87259dc79f2c4ae852badb6f2b79/models/__init__.py
 import datetime
@@ -69,7 +69,31 @@ def replace_datastore_types(entity):
       entity[key] = [isinstance(item, (datetime.datetime, datetime.date, datetime.time, datastore_types.Key, users.User)) and get_replacement(item) or item for item in values]
     else:
       entity[key] = isinstance(value, (datetime.datetime, datetime.date, datetime.time, datastore_types.Key, users.User)) and get_replacement(value) or value
-        
+  return entity
+
+def getattr_by_path(obj, attr, *default):
+  """Like getattr(), but can go down a hierarchy like 'attr.subattr'"""
+  value = obj
+  for i, part in enumerate(attr.split('.')):
+    if isinstance(value, dict):
+      if not value.has_key(part) and len(default) > i:
+        return default[i]
+      value = value.get(part)
+      if callable(value):
+        value = value()
+    else:
+      if not hasattr(value, part) and len(default) > i:
+        return default[i]
+      try:
+        value = getattr(value, part)
+      except:
+        value = None
+      if callable(value):
+        value = value()
+  return value
+
+
+
 class Mapper(object):
   # Subclasses should replace this with a model class (eg, model.Person).
   KIND = None

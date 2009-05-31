@@ -23,12 +23,16 @@ class MainPage(webapp.RequestHandler):
       logging.warning('No campaign (%s) found.' % key)
       return self.error(404)
     
-    ns = (path or '').strip('/').replace('/', '.')
-    format = format or self.request.get('format', 'json')
-    ns, data_path = util.getParts(ns)
-
-    logging.debug("%s, %s, %s; %s" % (key, ns, format, data_path))
-    renderer.get(format)(self, ns, data_path or '')
+    self.format = format or self.request.get('format', 'json')
+    self.namespace, path = util.getParts((path or '').strip('/').replace('/', '.'))
+  
+    logging.debug("%s, %s, %s; %s" % (key, self.namespace, self.format, path))
+    helper = renderer.get(self.format)
+    if path.startswith('values'): # this could be automated
+      return helper.render_values(self, path)
+    elif path.startswith('stats'):
+      return helper.render_stats(self, path)
+    helper.render(self)
 
   def post(self, key, path, format):
     if (not key):
