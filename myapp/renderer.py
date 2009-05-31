@@ -42,7 +42,7 @@ class NoRenderer(object):
     return cls.render(page, cls.get_statistics(page.campaign, page.namespace, path))
   
   @classmethod
-  def render(cls, page, data):
+  def render(cls, page, data = None):
     page.response.headers.add_header('Content-Type', MIMETYPES.get(page.format, 'text/plain'))
     page.response.out.write(data)
     page.response.set_status(data and 200 or 204)
@@ -78,7 +78,7 @@ class JSONRenderer(Renderer):
     return data
     
   @classmethod
-  def render(cls, page, data = None):  
+  def render(cls, page, data = None):
     data = data or {
       'values': cls.get_values(page.campaign, page.namespace, ''),
       'stats': cls.get_statistics(page.campaign, page.namespace, '')
@@ -87,37 +87,27 @@ class JSONRenderer(Renderer):
     
 class GChartRenderer(Renderer):
   match_formats = ['gc', 'gchart']
-  
-  @staticmethod
-  def get_dqs(qs):
-    logging.debug('Gchart_Renderer::qs = %s' % qs)
-    if (qs):
-      try:
-        return urlparse.parse_qs(qs, keep_blank_values = True, strict_parsing = True)
-      except ValueError:
-        logging.critical('Could not parse_qs(%s)' % qs)
-    else:
-      logging.warning('No arguments passed to Google Charts API')
-      return {}
-    
+
   @classmethod
-  def render(cls, page, ns, path):    
-    stats = Statistics.get_by_campaign_and_namespace(page.campaign, ns)
-    
-    obj = None
-    if path.startswith('values'):
-      data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-      obj = [d.value for d in data]
-    elif path.startswith('stats'):
-      path = path.lstrip('stats').strip('.')
-      obj = stats and path and util.getattr_by_path(stats, path)
-      if isinstance(obj, Histogram):
-        obj = obj.to_dict()
-    else:
-      logging.warning('Did not expect path: %s' % path)        
+  def get_values(cls, campaign, ns, path):
+    data = super(GChartRenderer, cls).get_values(campaign, ns, path)
+    return map(lambda d: hasattr(d, 'value') and d.value or None, data)  
+  
+  @classmethod
+  def get_statistics(cls, campaign, ns, path):
+    data = super(GChartRenderer, cls).get_statistics(campaign, ns, path)
+    if isinstance(data, Histogram):
+        data = data.to_dict()
+    return data
       
-    logging.info('Getting visualization for: %s' % (not obj and 'none' or stats.type))
-    url = visualize.get(not obj and 'none' or stats.type).get_url(page.request, obj)
+  @classmethod
+  def render(cls, page, data = None):
+    if not data:
+      return NoRenderer.render(page)
+    
+    stats = Statistics.get_by_campaign_and_namespace(page.campaign, page.namespace)
+    logging.info('Getting visualization for: %s' % stats.type)
+    url = visualize.get(stats.type).get_url(page.request, data)
     logging.info('Redirecting to: %s' % url)
     if url:
       if DEBUG:
