@@ -59,7 +59,7 @@ class Renderer(NoRenderer):
     if (data and path):
       path = path.lstrip('stats').strip('.')
       if path:
-        data = util.getattr_by_path(stats, path)
+        data = util.getattr_by_path(data, path)
     return data
 
 class JSONRenderer(Renderer):
