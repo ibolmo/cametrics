@@ -175,6 +175,9 @@ class DatetimeSummary(Summary):
     for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%s_of_the_year']):
       if (cls.tally(stats = datum.stats, name = bucket % 's', index = timetuple[i]) is False):
         break
+    cls.tally(stats = datum.stats, name = 'weekday.hour', index = '%s.%s' % (timetuple[-2], timetuple[3]))
+    cls.tally(stats = datum.stats, name = 'month.day', index = '%s.%s' % (timetuple[1], timetuple[2]))
+    cls.tally(stats = datum.stats, name = 'month.weekday', index = '%s.%s' % (timetuple[1], timetuple[-2]))
 
 '''
 ### Location

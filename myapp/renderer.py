@@ -141,7 +141,7 @@ class Gc_Renderer(Gchart_Renderer):
 class Gmap_Renderer(Renderer):
   options = {
     'color': '#FF0000',
-    'weight': 10,
+    'weight': 2,
     'zoomFactor': 32,
     'numLevels': 4  
   }
@@ -179,8 +179,7 @@ class Gmap_Renderer(Renderer):
         text = '%s(%s);' % (callback, options)
     else:
       logging.warning('Did not expect path: %s' % path)
-      text = 'null'
-    
+      text = 'null'    
     return super(Gmap_Renderer, cls).render(page, text, 'javascript')
                 
   @staticmethod
