@@ -32,14 +32,16 @@ class NoRenderer(object):
   @classmethod
   def get_statistics(cls, campaign, ns, path):
     return {}
-  
-  @classmethod
-  def render_values(cls, page, path):
-    return cls.render(page, cls.get_stored_data(page.campaign, page.namespace, path))
     
   @classmethod
+  def render_values(cls, page, path):
+    data = cls.get_values(page.campaign, page.namespace, path)
+    return cls.render(page, data)
+      
+  @classmethod
   def render_stats(cls, page, path):
-    return cls.render(page, cls.get_statistics(page.campaign, page.namespace, path))
+    stats = cls.get_statistics(page.campaign, page.namespace, path)
+    return cls.render(page, stats)
   
   @classmethod
   def render(cls, page, data = None):
@@ -51,7 +53,7 @@ class Renderer(NoRenderer):
   @classmethod
   def get_values(cls, campaign, ns, path):
     query = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns)
-    return [datum for datum in query] # todo, paginator
+    return [datum for datum in query] # todo, paginator/generator
   
   @classmethod
   def get_statistics(cls, campaign, ns, path):
@@ -105,7 +107,7 @@ class GChartRenderer(Renderer):
     if not data:
       return NoRenderer.render(page)
     
-    stats = Statistics.get_by_campaign_and_namespace(page.campaign, page.namespace)
+    stats = Statistics.get_by_campaign_and_namespace(page.campaign, page.namespace) # todo, how to clean the type assoc to the campaign/namespace
     logging.info('Getting visualization for: %s' % stats.type)
     url = visualize.get(stats.type).get_url(page.request, data)
     logging.info('Redirecting to: %s' % url)
@@ -128,6 +130,7 @@ class GMapRenderer(Renderer):
     class - Name of the GMap class to addOverlay with default options or user overriden options
     ... - Any other option available to the GPolyline.fromEncoded object options, the parameter is the object key. For example color=#FF0000 (only appropriate for when you pass the class parameter)
   '''
+  match_formats = ['gm', 'gmap']
   
   options = {
     'color': '#FF0000',
@@ -137,28 +140,34 @@ class GMapRenderer(Renderer):
   }
   
   @classmethod
-  def render(cls, page, ns, path):
+  def render_values(cls, page, path):
     gmtype = page.request.get('type', 'raw')
-    logging.debug('Rendering Gmap of type: %s.' % gmtype)
     if gmtype == 'raw':
-      return Json_Renderer.render(page, ns, path)
+      return JSONRenderer.render_values(page, path)
+    data = cls.get_values(page.campaign, page.namespace, path)
+    options = GMapRenderer.encode(data)
+    callback = page.request.get('callback', '')  
+    if gmtype == 'polyline':
+      options.update(cls.options)
+      callback = callback or '%s.addOverlay' % (page.request.get('class') or 'map')
       
-    if path.startswith('values'):
-      data = Storage.all().filter('campaign = ', page.campaign).filter('namespace = ', ns).fetch(1000) # todo, paginator
-
-      options = GMapRenderer.encode(data)
-      callback = page.request.get('callback')
-      if gmtype == 'polyline':
-        options.update(cls.options)
-        callback = callback or '%s.addOverlay' % (page.request.get('class') or 'map')
-        # add user paramters
-        text = '%s(new GPolyline.fromEncoded(%s));' % (callback, options)
-      else:
-        text = '%s(%s);' % (callback, options)
+      get = page.request.GET.copy()
+      try: # todo, refactor
+        del get['callback']
+        del get['type']
+        del get['class']
+      except:
+        pass
+      options.update(get)
+      
+    options = simplejson.dumps(options)
+    if gmtype == 'polyline':
+      data = '%s(new GPolyline.fromEncoded(%s));' % (callback, options)
+    elif callback:
+      data = '%s(%s);' % (callback, options)
     else:
-      logging.warning('Did not expect path: %s' % path)
-      text = 'null'    
-    return super(GMapRenderer, cls).render(page, text, 'javascript')
+      data = '%s' % options    
+    return cls.render(page, data)
                 
   @staticmethod
   def encode(points):

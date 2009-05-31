@@ -171,4 +171,3 @@ class Delete(Mapper):
   
   def map(self, entity):
     return ([], [entity])
-  
