@@ -42,7 +42,7 @@ class NoRenderer(object):
   @classmethod
   def render_stats(cls, page, path = ''):
     stats = cls.get_statistics(page.campaign, page.namespace, path)
-    order = page.request.get('order', 'desc').lower()
+    order = page.request.get('order', '').lower()
     if order:
       if isinstance(stats, dict):
         stats = sorted(stats.items(), key=itemgetter(1), reverse = order == 'desc')
