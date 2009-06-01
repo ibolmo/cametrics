@@ -140,12 +140,13 @@ class GMapRenderer(Renderer):
   }
   
   marker_options = {}
+  protected = ['callback', 'type', 'class']
   
   @classmethod
   def render_values(cls, page, path = ''):
     cls.callback = page.request.get('callback')
     cls.klass = page.request.get('class', 'map')
-    get = util.dictcomp(page.request.GET.copy(), ['callback', 'type', 'class'])
+    get = util.dictcomp(page.request.GET.copy(), cls.protected)
     try:
       getattr(cls, 'render_%s' % page.request.get('type', 'raw'))(page, get)
     except Exception, msg:
@@ -184,12 +185,16 @@ class GMapRenderer(Renderer):
         %s
       })(%s);
     '''
-    data = cls.get_values(page.campaign, page.namespace) # todo: generator
+    data = cls.get_values(page.campaign, page.namespace)
     data = 'return {markers: [%s], options: options};' % ', '.join(['new GMarker(new GLatLng(%f,%f), options)' % (datum.latitude, datum.longitude) for datum in data])
     if cls.callback:
       data = '%s(%s);' % (cls.callback, data[7:-1])
     marker_options = cls.marker_options.copy()
     marker_options.update(get)
+    marker_options = simplejson.dumps(marker_options)
+    icon = page.request.get('icon')
+    if icon:
+      marker_options = marker_options.replace('"%s"' % icon, icon)      
     return cls.render(page, template % (data, marker_options))
     
   @staticmethod
