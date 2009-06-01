@@ -61,15 +61,22 @@ class MainPage(webapp.RequestHandler):
     self.response.set_status(error and 304 or 201)
 
 def send_to_datastore(models):
-  lm = len(models)    
-  if lm:
-    try:
-      db.put(models);
-      logging.info('::STATS:: db.put(%s)' % lm)
-    except:
-      logging.warning('Could not save whole set')
-      send_to_datastore(models[:lm / 2])
-      send_to_datastore(models[lm / 2:])
+  payload = [models]
+  
+  while payload:
+    models = payload.pop(0)
+    l = len(models)
+    if l:
+      try:
+        db.put(models)
+        logging.info('::STATS:: db.put(%s)', l)
+      except:
+        logging.info('::STATS:: !db.put(%s)', l)
+        if l == 1:
+          logging.warning('Could not save: %s', models)
+          continue
+        payload.append(models[:l / 2])
+        payload.append(models[l / 2:])
 
 def create_datum(campaign, ns, obj = {}):
   ns = ns.strip('/').replace('/', '.')    
@@ -80,7 +87,8 @@ def create_datum(campaign, ns, obj = {}):
   
   key = '%s.%s' % (campaign, ns)
   if (not _Stats.has_key(key)):
-    datum.stats = _Stats[key] = Statistics.get_by_key_name_or_insert(key, campaign = campaign, namespace = ns, type = kind)
+    datum.stats = _Stats[key] = Statistics.get_by_key_name_or_insert(key, campaign = campaign, namespace = ns)
+    datum.stats.type = kind
   else:
     datum.stats = _Stats[key]
   

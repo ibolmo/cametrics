@@ -39,6 +39,10 @@ class Campaign(db.Model):
   homepage = db.StringProperty()
   organizer = db.ReferenceProperty(collection_name = 'campaigns')
   created_on = db.DateTimeProperty(auto_now_add = 1)
+  
+  @classmethod
+  def kind(cls):
+    return 'Campaign'
     
 class Storage(SerializableExpando):
   json_does_not_include = ['campaign', 'namespace', 'type', 'prev', 'stats']
@@ -48,6 +52,10 @@ class Storage(SerializableExpando):
   type = db.StringProperty(required = True)
   created_on = db.DateTimeProperty(auto_now_add = 1)
   stats = db.ReferenceProperty(collection_name = 'statistics')
+  
+  @classmethod
+  def kind(cls):
+    return 'Storage'
     
 class Statistics (SerializableExpando):
   json_does_not_include = ['campaign', 'namespace', 'histograms']
@@ -56,7 +64,11 @@ class Statistics (SerializableExpando):
   namespace = db.StringProperty(required = True)
   count = db.IntegerProperty(default = 0)
   histograms = db.StringListProperty()
-  type = db.StringProperty(required = True)
+  type = db.StringProperty()
+  
+  @classmethod
+  def kind(cls):
+    return 'Statistics'
   
   @staticmethod
   def get_by_campaign_and_namespace(campaign, namespace):
@@ -83,10 +95,18 @@ class Histogram(SerializableExpando):
   
   statistic = db.ReferenceProperty(Statistics, collection_name = 'statistic')
   name = db.StringProperty(required = True)
+  
+  @classmethod
+  def kind(cls):
+    return 'Histogram'
 
 class TaskModel(db.Expando):
   object = db.ReferenceProperty(required = True)
   task = db.StringProperty(required = True)
+  
+  @classmethod
+  def kind(cls):
+    return 'TaskModel'
   
   def execute(self):
      obj = self.properties()['object'].get_value_for_datastore(self)
