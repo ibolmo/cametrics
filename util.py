@@ -4,6 +4,9 @@ from google.appengine.ext import db
 def generateModel(name, properties = {}, base = db.Model):
   return type(name, (base, ), properties)
 
+def dictcomp(obj, without = []):
+  return dict((k, v) for k, v in obj.iteritems() if k not in without)
+
 special_keys = re.compile(r'\.((?:stats|values).*)')
 
 def getParts(ns):

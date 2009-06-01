@@ -26,20 +26,20 @@ MIMETYPES = {
 
 class NoRenderer(object):  
   @classmethod
-  def get_values(cls, campaign, ns, path):
+  def get_values(cls, campaign, ns, path = ''):
     return []
   
   @classmethod
-  def get_statistics(cls, campaign, ns, path):
+  def get_statistics(cls, campaign, ns, path = ''):
     return {}
     
   @classmethod
-  def render_values(cls, page, path):
+  def render_values(cls, page, path = ''):
     data = cls.get_values(page.campaign, page.namespace, path)
     return cls.render(page, data)
       
   @classmethod
-  def render_stats(cls, page, path):
+  def render_stats(cls, page, path = ''):
     stats = cls.get_statistics(page.campaign, page.namespace, path)
     return cls.render(page, stats)
   
@@ -51,12 +51,12 @@ class NoRenderer(object):
 
 class Renderer(NoRenderer):  
   @classmethod
-  def get_values(cls, campaign, ns, path):
+  def get_values(cls, campaign, ns, path = ''):
     query = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns)
     return [datum for datum in query] # todo, paginator/generator
   
   @classmethod
-  def get_statistics(cls, campaign, ns, path):
+  def get_statistics(cls, campaign, ns, path = ''):
     data = Statistics.get_by_campaign_and_namespace(campaign, ns)
     if (data and path):
       path = path.lstrip('stats').strip('.')
@@ -68,12 +68,12 @@ class JSONRenderer(Renderer):
   match_formats = ['json']
   
   @classmethod
-  def get_values(cls, campaign, ns, path):
+  def get_values(cls, campaign, ns, path = ''):
     data = super(JSONRenderer, cls).get_values(campaign, ns, path)
     return map(lambda d: util.replace_datastore_types(d.to_dict()), data)
   
   @classmethod
-  def get_statistics(cls, campaign, ns, path):
+  def get_statistics(cls, campaign, ns, path = ''):
     data = super(JSONRenderer, cls).get_statistics(campaign, ns, path)
     if isinstance(data, (Histogram, Statistics)):
         data = util.replace_datastore_types(data.to_dict())
@@ -82,8 +82,8 @@ class JSONRenderer(Renderer):
   @classmethod
   def render(cls, page, data = None):
     data = data or {
-      'values': cls.get_values(page.campaign, page.namespace, ''),
-      'stats': cls.get_statistics(page.campaign, page.namespace, '')
+      'values': cls.get_values(page.campaign, page.namespace),
+      'stats': cls.get_statistics(page.campaign, page.namespace)
     }
     return super(JSONRenderer, cls).render(page, simplejson.dumps(data))
     
@@ -91,12 +91,12 @@ class GChartRenderer(Renderer):
   match_formats = ['gc', 'gchart']
 
   @classmethod
-  def get_values(cls, campaign, ns, path):
+  def get_values(cls, campaign, ns, path = ''):
     data = super(GChartRenderer, cls).get_values(campaign, ns, path)
     return map(lambda d: hasattr(d, 'value') and d.value or None, data)  
   
   @classmethod
-  def get_statistics(cls, campaign, ns, path):
+  def get_statistics(cls, campaign, ns, path = ''):
     data = super(GChartRenderer, cls).get_statistics(campaign, ns, path)
     if isinstance(data, Histogram):
         data = data.to_dict()
@@ -132,7 +132,7 @@ class GMapRenderer(Renderer):
   '''
   match_formats = ['gm', 'gmap']
   
-  options = {
+  polyline_options = {
     'color': '#FF0000',
     'weight': 2,
     'zoomFactor': 32,
@@ -140,34 +140,40 @@ class GMapRenderer(Renderer):
   }
   
   @classmethod
-  def render_values(cls, page, path):
-    gmtype = page.request.get('type', 'raw')
-    if gmtype == 'raw':
-      return JSONRenderer.render_values(page, path)
-    data = cls.get_values(page.campaign, page.namespace, path)
-    options = GMapRenderer.encode(data)
-    callback = page.request.get('callback', '')  
-    if gmtype == 'polyline':
-      options.update(cls.options)
-      callback = callback or '%s.addOverlay' % (page.request.get('class') or 'map')
-      
-      get = page.request.GET.copy()
-      try: # todo, refactor
-        del get['callback']
-        del get['type']
-        del get['class']
-      except:
-        pass
-      options.update(get)
-      
-    options = simplejson.dumps(options)
-    if gmtype == 'polyline':
-      data = '%s(new GPolyline.fromEncoded(%s));' % (callback, options)
-    elif callback:
-      data = '%s(%s);' % (callback, options)
-    else:
-      data = '%s' % options    
+  def render_values(cls, page, path = ''):
+    cls.callback = page.request.get('callback')
+    cls.klass = page.request.get('class', 'map')
+    get = util.dictcomp(page.request.GET.copy(), ['callback', 'type', 'class'])
+    try:
+      getattr(cls, 'render_%s' % page.request.get('type', 'raw'))(page, get)
+    except Exception, msg:
+      cls.render(page, '/* Check the "type" parameter */')
+  
+  @classmethod
+  def render_raw(cls, page, get):
+    data = simplejson.dumps(JSONRenderer.get_values(page.campaign, page.namespace))
+    if cls.callback:
+      data = '%s(%s);' % (cls.callback, data)
     return cls.render(page, data)
+    
+  @classmethod
+  def render_polyline(cls, page, get):
+    data = cls.get_values(page.campaign, page.namespace)
+    options = GMapRenderer.encode(data)
+    options.update(cls.polyline_options)
+    options.update(get)
+    options = simplejson.dumps(options)
+    return cls.render(page, '%s(new GPolyline.fromEncoded(%s));' % (cls.callback or cls.klass, options))
+
+  @classmethod
+  def render_encode(cls, page, get):
+    data = cls.get_values(page.campaign, page.namespace)
+    options = GMapRenderer.encode(data)
+    
+    options = simplejson.dumps(options)
+    if cls.callback:
+      options = '%s(%s);' % (cls.callback, options)
+    return cls.render(page, options)
                 
   @staticmethod
   def encode(points):
