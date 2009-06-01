@@ -1,5 +1,6 @@
 import os, logging, math, re, urlparse
 from django.utils import simplejson
+from operator import itemgetter
 
 from models import Storage, Statistics, Histogram
 import util, visualize
@@ -41,6 +42,10 @@ class NoRenderer(object):
   @classmethod
   def render_stats(cls, page, path = ''):
     stats = cls.get_statistics(page.campaign, page.namespace, path)
+    order = page.request.get('order', 'desc').lower()
+    if order:
+      if isinstance(stats, dict):
+        stats = sorted(stats.items(), key=itemgetter(1), reverse = order == 'desc')
     return cls.render(page, stats)
   
   @classmethod
@@ -51,8 +56,8 @@ class NoRenderer(object):
 
 class Renderer(NoRenderer):  
   @classmethod
-  def get_values(cls, campaign, ns, path = ''):
-    query = Storage.all().filter('campaign = ', campaign).filter('namespace = ', ns)
+  def get_values(cls, campaign, ns, path = '', keys_only = False):
+    query = Storage.all(keys_only = keys_only).filter('campaign = ', campaign).filter('namespace = ', ns).order('-created_on')
     return [datum for datum in query] # todo, paginator/generator
   
   @classmethod
