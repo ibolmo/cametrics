@@ -139,6 +139,8 @@ class GMapRenderer(Renderer):
     'numLevels': 4  
   }
   
+  marker_options = {}
+  
   @classmethod
   def render_values(cls, page, path = ''):
     cls.callback = page.request.get('callback')
@@ -147,7 +149,7 @@ class GMapRenderer(Renderer):
     try:
       getattr(cls, 'render_%s' % page.request.get('type', 'raw'))(page, get)
     except Exception, msg:
-      cls.render(page, '/* Check the "type" parameter */')
+      cls.render(page, '/* Check the "type" parameter :: %s*/' % msg)
   
   @classmethod
   def render_raw(cls, page, get):
@@ -174,7 +176,22 @@ class GMapRenderer(Renderer):
     if cls.callback:
       options = '%s(%s);' % (cls.callback, options)
     return cls.render(page, options)
-                
+
+  @classmethod
+  def render_markers(cls, page, get):
+    template = '''
+      (function(options){
+        %s
+      })(%s);
+    '''
+    data = cls.get_values(page.campaign, page.namespace) # todo: generator
+    data = 'return {markers: [%s], options: options};' % ', '.join(['new GMarker(new GLatLng(%f,%f), options)' % (datum.latitude, datum.longitude) for datum in data])
+    if cls.callback:
+      data = '%s(%s);' % (cls.callback, data[7:-1])
+    marker_options = cls.marker_options.copy()
+    marker_options.update(get)
+    return cls.render(page, template % (data, marker_options))
+    
   @staticmethod
   def encode(points):
     """ Encode a coordinates into an encoded string.
