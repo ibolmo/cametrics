@@ -172,12 +172,12 @@ class DatetimeSummary(Summary):
     NoSummary.calculate(datum) # No need for hits histogram
     
     timetuple = datum.datetime.timetuple()
-    for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%s_of_the_year']):
-      if (cls.tally(stats = datum.stats, name = bucket % 's', index = timetuple[i]) is False):
-        break
-    cls.tally(stats = datum.stats, name = 'weekday.hour', index = '%s.%s' % (timetuple[-2], timetuple[3]))
-    cls.tally(stats = datum.stats, name = 'month.day', index = '%s.%s' % (timetuple[1], timetuple[2]))
-    cls.tally(stats = datum.stats, name = 'month.weekday', index = '%s.%s' % (timetuple[1], timetuple[-2]))
+    for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%sth']):
+      cls.tally(stats = datum.stats, name = bucket % 's', index = timetuple[i])
+    cls.tally(stats = datum.stats, name = 'weekdayth', index = datum.datetime.strftime('%U'))
+    cls.tally(stats = datum.stats, name = 'hour.weekday', index = '%s.%s' % (timetuple[3], timetuple[-2]))
+    cls.tally(stats = datum.stats, name = 'day.hour', index = '%s.%s' % (timetuple[2], timetuple[3]))
+    cls.tally(stats = datum.stats, name = 'weekday.month', index = '%s.%s' % (timetuple[-2], timetuple[1]))
 
 '''
 ### Location

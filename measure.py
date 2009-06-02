@@ -24,16 +24,18 @@ class MainPage(webapp.RequestHandler):
       return self.error(404)
     
     self.format = format or self.request.get('format', 'json')
-    self.namespace, path = util.getParts((path or '').strip('/').replace('/', '.'))
+    self.namespace, self.path = util.getParts((path or '').strip('/').replace('/', '.'))
   
-    logging.debug("%s, %s, %s; %s" % (key, self.namespace, self.format, path))
+    logging.debug("%s, %s, %s; %s" % (key, self.namespace, self.path, self.format))
     helper = renderer.get(self.format)
-    if path.startswith('values'): # this could be automated
-      return helper.render_values(self, path)
-    elif path.startswith('stats'):
-      return helper.render_stats(self, path)
+    if self.path.startswith('values'): # this could be automated
+      self.path = self.path.lstrip('values').strip('.')
+      return helper.render_values(self)
+    elif self.path.startswith('stats'):
+      self.path = self.path.lstrip('stats').strip('.')
+      return helper.render_stats(self)
     helper.render(self)
-
+    
   def post(self, key, path, format):
     if (not key):
       return self.error(500)
