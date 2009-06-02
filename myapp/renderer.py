@@ -27,7 +27,7 @@ MIMETYPES = {
 
 class NoRenderer(object):  
   @classmethod
-  def get_values(cls, campaign, ns, path = ''):
+  def get_values(cls, campaign, ns, path = '', keys_only = True):
     return []
   
   @classmethod
@@ -35,13 +35,13 @@ class NoRenderer(object):
     return {}
     
   @classmethod
-  def render_values(cls, page, path = ''):
-    data = cls.get_values(page.campaign, page.namespace, path)
+  def render_values(cls, page):
+    data = cls.get_values(page.campaign, page.namespace, page.path)
     return cls.render(page, data)
       
   @classmethod
-  def render_stats(cls, page, path = ''):
-    stats = cls.get_statistics(page.campaign, page.namespace, path)
+  def render_stats(cls, page):
+    stats = cls.get_statistics(page.campaign, page.namespace, page.path)
     order = page.request.get('order', '').lower()
     if order:
       if isinstance(stats, dict):
@@ -64,9 +64,7 @@ class Renderer(NoRenderer):
   def get_statistics(cls, campaign, ns, path = ''):
     data = Statistics.get_by_campaign_and_namespace(campaign, ns)
     if (data and path):
-      path = path.lstrip('stats').strip('.')
-      if path:
-        data = util.getattr_by_path(data, path)
+      data = util.getattr_by_path(data, path)
     return data
 
 class JSONRenderer(Renderer):
@@ -103,7 +101,7 @@ class GChartRenderer(Renderer):
   @classmethod
   def get_statistics(cls, campaign, ns, path = ''):
     data = super(GChartRenderer, cls).get_statistics(campaign, ns, path)
-    if isinstance(data, Histogram):
+    if isinstance(data, (Histogram, Statistics)):
         data = data.to_dict()
     return data
       

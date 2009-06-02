@@ -59,9 +59,10 @@ class Visual(NoVisual):
     chart = cls.get_chart(request)
     
     if (isinstance(obj, dict)):
-      chart.add_data([0] + obj.values()) # hrm..
+      chart.add_data(obj.values())
     else:
       chart.add_data(obj)
+    chart.add_data([0])
     
     cls.add_labels(chart, obj)    
     return cls._get_url(request, chart)
