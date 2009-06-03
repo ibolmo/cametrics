@@ -59,30 +59,32 @@ class Visual(NoVisual):
     chart = cls.get_chart(request)
     
     if (isinstance(obj, dict)):
-      chart.add_data(obj.values())
+      values = obj.values()
+      keys = obj.keys()
     else:
-      chart.add_data(obj)
+      values = obj
+      keys = range(1, len(values) + 1)
+      
+    chart.add_data(values)
     chart.add_data([0])
     
-    cls.add_labels(chart, obj)    
+    cls.add_labels(chart, keys)    
     return cls._get_url(request, chart)
   
 class NumberVisual(Visual):
   match_type = stat.NumberSummary.match_type
   
   @classmethod
-  def add_labels(cls, chart, obj):
+  def add_labels(cls, chart, keys):
     flip = isinstance(chart, (StackedHorizontalBarChart, GroupedHorizontalBarChart))
     logging.debug('chart is %s' % chart)
     
-    if (isinstance(obj, dict)):
-      if (isinstance(chart, (Pie2DChart, Pie3DChart))):
-        logging.debug('pie getting labeled')
-        chart.set_pie_labels(obj.keys())
-      else:
-        chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, obj.keys())
+    if (isinstance(chart, (Pie2DChart, Pie3DChart))):
+      chart.set_pie_labels(keys)
     else:
-      chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, range(1, len(obj) + 1))
+      if isinstance(chart, (StackedHorizontalBarChart, GroupedHorizontalBarChart)):
+        keys.reverse()
+      chart.set_axis_labels(flip and Axis.LEFT or Axis.BOTTOM, keys)
     
     t, s = list(chart.annotated_data())[0]
     if t == 'x':
@@ -91,18 +93,8 @@ class NumberVisual(Visual):
       lower, upper = chart.data_y_range()
     chart.set_axis_range(flip and Axis.BOTTOM or Axis.LEFT, lower, upper)
     
-class StringVisual(Visual):
+class StringVisual(NumberVisual):
   match_type = stat.StringSummary.match_type  
-  
-  @classmethod
-  def get_url(cls, request, obj):
-    if isinstance(obj, dict):
-      return NumberVisual.get_url(request, obj)
-  
-  @classmethod
-  def add_labels(cls, chart, obj):
-    if isinstance(obj, dict):
-      return NumberVisual.add_labels(chart, obj)
     
 class DatetimeVisual(StringVisual):
   match_type = stat.DatetimeSummary.match_type
