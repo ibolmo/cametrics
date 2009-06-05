@@ -1,0 +1,10 @@
+Options +FollowSymLinks +ExecCGI
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  RewriteRule (.*).(?:md|markdown)$ /utilities/md2html.php?file=%{REQUEST_FILENAME} [QSA,L]
+
+  RewriteRule (.*).(?:rst)$ /utilities/rst2html.php?file=%{REQUEST_FILENAME} [QSA,L]
+
+</IfModule>
