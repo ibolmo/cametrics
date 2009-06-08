@@ -1,0 +1,529 @@
+This is pdfTeX, Version 3.1415926-1.40.9 (MiKTeX 2.7) (preloaded format=pdflatex 2009.6.7)  8 JUN 2009 00:20
+entering extended mode
+**report.tex
+(report.tex
+LaTeX2e <2005/12/01>
+Babel <v3.8l> and hyphenation patterns for english, dumylang, nohyphenation, ge
+rman, ngerman, german-x-2008-06-18, ngerman-x-2008-06-18, french, loaded.
+("C:\Program Files\MiKTeX\tex\latex\base\article.cls"
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
+("C:\Program Files\MiKTeX\tex\latex\base\size10.clo"
+File: size10.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+("C:\Program Files\MiKTeX\tex\generic\babel\babel.sty"
+Package: babel 2008/07/06 v3.8l The Babel package
+
+*************************************
+* Local config file bblopts.cfg used
+*
+("C:\Program Files\MiKTeX\tex\latex\00miktex\bblopts.cfg"
+File: bblopts.cfg 2006/07/31 v1.0 MiKTeX 'babel' configuration
+)
+("C:\Program Files\MiKTeX\tex\generic\babel\english.ldf"
+Language: english 2005/03/30 v3.3o English support from the babel system
+
+("C:\Program Files\MiKTeX\tex\generic\babel\babel.def"
+File: babel.def 2008/07/06 v3.8l Babel common definitions
+\babel@savecnt=\count87
+\U@D=\dimen103
+)
+\l@canadian = a dialect from \language\l@american 
+\l@australian = a dialect from \language\l@british 
+\l@newzealand = a dialect from \language\l@british 
+))
+("C:\Program Files\MiKTeX\tex\latex\ae\ae.sty"
+Package: ae 2001/02/12 1.3 Almost European Computer Modern
+
+("C:\Program Files\MiKTeX\tex\latex\base\fontenc.sty"
+Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
+
+("C:\Program Files\MiKTeX\tex\latex\base\t1enc.def"
+File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
+)
+LaTeX Font Info:    Try loading font information for T1+aer on input line 100.
+
+("C:\Program Files\MiKTeX\tex\latex\ae\t1aer.fd"
+File: t1aer.fd 1997/11/16 Font definitions for T1/aer.
+)))
+("C:\Program Files\MiKTeX\tex\latex\aeguill\aeguill.sty"
+Package: aeguill 2003/08/02 1.02 AE fonts with french guillemets (D. Roegel)
+)
+("C:\Program Files\MiKTeX\tex\latex\base\shortvrb.sty"
+Package: shortvrb 2006/02/02 v2.1d Standard LaTeX documentation package (FMi)
+)
+("C:\Program Files\MiKTeX\tex\latex\base\inputenc.sty"
+Package: inputenc 2006/05/05 v1.1b Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+("C:\Program Files\MiKTeX\tex\latex\base\latin1.def"
+File: latin1.def 2006/05/05 v1.1b Input encoding file
+))
+("C:\Program Files\MiKTeX\tex\latex\tools\tabularx.sty"
+Package: tabularx 1999/01/07 v2.07 `tabularx' package (DPC)
+
+("C:\Program Files\MiKTeX\tex\latex\tools\array.sty"
+Package: array 2005/08/23 v2.4b Tabular extension package (FMi)
+\col@sep=\dimen104
+\extrarowheight=\dimen105
+\NC@list=\toks16
+\extratabsurround=\skip43
+\backup@length=\skip44
+)
+\TX@col@width=\dimen106
+\TX@old@table=\dimen107
+\TX@old@col=\dimen108
+\TX@target=\dimen109
+\TX@delta=\dimen110
+\TX@cols=\count88
+\TX@ftn=\toks17
+)
+("C:\Program Files\MiKTeX\tex\latex\tools\longtable.sty"
+Package: longtable 2004/02/01 v4.11 Multi-page Table package (DPC)
+\LTleft=\skip45
+\LTright=\skip46
+\LTpre=\skip47
+\LTpost=\skip48
+\LTchunksize=\count89
+\LTcapwidth=\dimen111
+\LT@head=\box26
+\LT@firsthead=\box27
+\LT@foot=\box28
+\LT@lastfoot=\box29
+\LT@cols=\count90
+\LT@rows=\count91
+\c@LT@tables=\count92
+\c@LT@chunks=\count93
+\LT@p@ftn=\toks18
+)
+("C:\Program Files\MiKTeX\tex\latex\amsmath\amsmath.sty"
+Package: amsmath 2000/07/18 v2.13 AMS math features
+\@mathmargin=\skip49
+
+For additional information on amsmath, use the `?' option.
+("C:\Program Files\MiKTeX\tex\latex\amsmath\amstext.sty"
+Package: amstext 2000/06/29 v2.01
+
+("C:\Program Files\MiKTeX\tex\latex\amsmath\amsgen.sty"
+File: amsgen.sty 1999/11/30 v2.0
+\@emptytoks=\toks19
+\ex@=\dimen112
+))
+("C:\Program Files\MiKTeX\tex\latex\amsmath\amsbsy.sty"
+Package: amsbsy 1999/11/29 v1.2d
+\pmbraise@=\dimen113
+)
+("C:\Program Files\MiKTeX\tex\latex\amsmath\amsopn.sty"
+Package: amsopn 1999/12/14 v2.01 operator names
+)
+\inf@bad=\count94
+LaTeX Info: Redefining \frac on input line 211.
+\uproot@=\count95
+\leftroot@=\count96
+LaTeX Info: Redefining \overline on input line 307.
+\classnum@=\count97
+\DOTSCASE@=\count98
+LaTeX Info: Redefining \ldots on input line 379.
+LaTeX Info: Redefining \dots on input line 382.
+LaTeX Info: Redefining \cdots on input line 467.
+\Mathstrutbox@=\box30
+\strutbox@=\box31
+\big@size=\dimen114
+LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
+\macc@depth=\count99
+\c@MaxMatrixCols=\count100
+\dotsspace@=\muskip10
+\c@parentequation=\count101
+\dspbrk@lvl=\count102
+\tag@help=\toks20
+\row@=\count103
+\column@=\count104
+\maxfields@=\count105
+\andhelp@=\toks21
+\eqnshift@=\dimen115
+\alignsep@=\dimen116
+\tagshift@=\dimen117
+\tagwidth@=\dimen118
+\totwidth@=\dimen119
+\lineht@=\dimen120
+\@envbody=\toks22
+\multlinegap=\skip50
+\multlinetaggap=\skip51
+\mathdisplay@stack=\toks23
+LaTeX Info: Redefining \[ on input line 2666.
+LaTeX Info: Redefining \] on input line 2667.
+)
+("C:\Program Files\MiKTeX\tex\latex\graphics\graphicx.sty"
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+("C:\Program Files\MiKTeX\tex\latex\graphics\keyval.sty"
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks24
+)
+("C:\Program Files\MiKTeX\tex\latex\graphics\graphics.sty"
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+("C:\Program Files\MiKTeX\tex\latex\graphics\trig.sty"
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+("C:\Program Files\MiKTeX\tex\latex\00miktex\graphics.cfg"
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: pdftex.def on input line 90.
+
+("C:\Program Files\MiKTeX\tex\latex\pdftex-def\pdftex.def"
+File: pdftex.def 2008/09/08 v0.04l Graphics/color for pdfTeX
+\Gread@gobject=\count106
+))
+\Gin@req@height=\dimen121
+\Gin@req@width=\dimen122
+)
+("C:\Program Files\MiKTeX\tex\latex\graphics\color.sty"
+Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
+
+("C:\Program Files\MiKTeX\tex\latex\00miktex\color.cfg"
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+)
+Package color Info: Driver file: pdftex.def on input line 130.
+)
+("C:\Program Files\MiKTeX\tex\latex\multirow\multirow.sty"
+\bigstrutjot=\dimen123
+)
+("C:\Program Files\MiKTeX\tex\latex\base\ifthen.sty"
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+)
+("C:\Program Files\MiKTeX\tex\latex\koma-script\typearea.sty"
+Package: typearea 2009/04/03 v3.03a KOMA-Script package (type area)
+
+Package typearea, 2009/04/03 v3.03a KOMA-Script package (type area)
+                  Copyright (C) Frank Neukam, 1992-1994
+                  Copyright (C) Markus Kohm, 1994-
+
+("C:\Program Files\MiKTeX\tex\latex\koma-script\scrkbase.sty"
+Package: scrkbase 2009/04/03 v3.03a KOMA-Script package (KOMA-Script-dependent 
+basics and keyval usage)
+
+("C:\Program Files\MiKTeX\tex\latex\koma-script\scrbase.sty"
+Package: scrbase 2009/04/03 v3.03a KOMA-Script package (KOMA-Script-independent
+ basics and keyval usage)
+
+("C:\Program Files\MiKTeX\tex\latex\koma-script\scrlfile.sty"
+Package: scrlfile 2009/03/25 v3.03 KOMA-Script package (loading files)
+
+Package scrlfile, 2009/03/25 v3.03 KOMA-Script package (loading files)
+                  Copyright (C) Markus Kohm
+
+)))
+\ta@bcor=\skip52
+\ta@div=\count107
+Package typearea Info: You've used standard option `a4paper'.
+(typearea)             This is correct!
+(typearea)             Internaly I'm using `paper=a4'.
+(typearea)             If you'd like to set the option with \KOMAoptions,
+(typearea)             you'd have to use `paper=a4' there
+(typearea)             instead of `a4paper', too.
+\ta@hblk=\skip53
+\ta@vblk=\skip54
+\ta@temp=\skip55
+
+
+Package typearea Warning: Bad type area settings!
+(typearea)                The detected line width is about 25%
+(typearea)                larger than the heuristically detected line width.
+(typearea)                You should e.g. decrease DIV, increase fontsize
+(typearea)                or change papersize.
+
+Package typearea Info: These are the values describing the layout:
+(typearea)             DIV  = 12
+(typearea)             BCOR = 0.0pt
+(typearea)             \paperwidth      = 597.50793pt
+(typearea)              \textwidth      = 448.13095pt
+(typearea)              DIV departure   = -25%
+(typearea)              \evensidemargin = 2.4185pt
+(typearea)              \oddsidemargin  = 2.4185pt
+(typearea)             \paperheight     = 845.04694pt
+(typearea)              \textheight     = 634.0pt
+(typearea)              \topmargin      = -34.84941pt
+(typearea)              \headheight     = 15.0pt
+(typearea)              \headsep        = 18.0pt
+(typearea)              \topskip        = 10.0pt
+(typearea)              \footskip       = 42.0pt
+(typearea)              \baselineskip   = 12.0pt
+(typearea)              on input line 1110.
+)
+\admonitionwidth=\skip56
+\docinfowidth=\skip57
+\locallinewidth=\skip58
+\lineblockindentation=\skip59
+ ("C:\Program Files\MiKTeX\tex\latex\hyperref\hyperref.sty"
+Package: hyperref 2009/05/23 v6.78s Hypertext links for LaTeX
+
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\ifpdf.sty"
+Package: ifpdf 2009/04/10 v2.0 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in pdf mode detected.
+)
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\ifvtex.sty"
+Package: ifvtex 2008/11/04 v1.4 Switches for detecting VTeX and its modes (HO)
+Package ifvtex Info: VTeX not detected.
+)
+("C:\Program Files\MiKTeX\tex\latex\ifxetex\ifxetex.sty"
+Package: ifxetex 2009/01/23 v0.5 Provides ifxetex conditional
+)
+("C:\Program Files\MiKTeX\tex\latex\oberdiek\hycolor.sty"
+Package: hycolor 2008/09/08 v1.4 Code for color options of hyperref/bookmark (H
+O)
+
+("C:\Program Files\MiKTeX\tex\latex\oberdiek\xcolor-patch.sty"
+Package: xcolor-patch 2008/09/08 xcolor patch
+))
+\@linkdim=\dimen124
+\Hy@linkcounter=\count108
+\Hy@pagecounter=\count109
+
+("C:\Program Files\MiKTeX\tex\latex\hyperref\pd1enc.def"
+File: pd1enc.def 2009/05/23 v6.78s Hyperref: PDFDocEncoding definition (HO)
+)
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\etexcmds.sty"
+Package: etexcmds 2007/12/12 v1.2 Prefix for e-TeX command names (HO)
+
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\infwarerr.sty"
+Package: infwarerr 2007/09/09 v1.2 Providing info/warning/message (HO)
+)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)
+("C:\Program Files\MiKTeX\tex\latex\00miktex\hyperref.cfg"
+File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
+)
+("C:\Program Files\MiKTeX\tex\latex\oberdiek\kvoptions.sty"
+Package: kvoptions 2009/04/10 v3.1 Keyval support for LaTeX options (HO)
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 2842.
+Package hyperref Info: Hyper figures OFF on input line 2953.
+Package hyperref Info: Link nesting OFF on input line 2958.
+Package hyperref Info: Hyper index ON on input line 2961.
+Package hyperref Info: Plain pages OFF on input line 2968.
+Package hyperref Info: Backreferencing OFF on input line 2973.
+
+Implicit mode ON; LaTeX internals redefined
+Package hyperref Info: Bookmarks ON on input line 3163.
+("C:\Program Files\MiKTeX\tex\latex\ltxmisc\url.sty"
+\Urlmuskip=\muskip11
+Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 3400.
+
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\bitset.sty"
+Package: bitset 2007/09/28 v1.0 Data type bit set (HO)
+
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\intcalc.sty"
+Package: intcalc 2007/09/27 v1.1 Expandable integer calculations (HO)
+)
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\bigintcalc.sty"
+Package: bigintcalc 2007/11/11 v1.1 Expandable big integer calculations (HO)
+
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\pdftexcmds.sty"
+Package: pdftexcmds 2009/04/10 v0.4 LuaTeX support for pdfTeX utility functions
+ (HO)
+
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\ifluatex.sty"
+Package: ifluatex 2009/04/10 v1.1 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+Package pdftexcmds Info: LuaTeX not detected on input line 145.
+)))
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\kvsetkeys.sty"
+Package: kvsetkeys 2007/09/29 v1.3 Key value parser with default handler suppor
+t (HO)
+)
+\Fld@menulength=\count110
+\Field@Width=\dimen125
+\Fld@charsize=\dimen126
+\Field@toks=\toks25
+Package hyperref Info: Hyper figures OFF on input line 4317.
+Package hyperref Info: Link nesting OFF on input line 4322.
+Package hyperref Info: Hyper index ON on input line 4325.
+Package hyperref Info: backreferencing OFF on input line 4332.
+Package hyperref Info: Link coloring ON on input line 4335.
+Package hyperref Info: Link coloring with OCG OFF on input line 4342.
+Package hyperref Info: PDF/A mode OFF on input line 4347.
+
+("C:\Program Files\MiKTeX\tex\generic\oberdiek\atbegshi.sty"
+Package: atbegshi 2008/07/31 v1.9 At begin shipout hook (HO)
+)
+\Hy@abspage=\count111
+\c@Item=\count112
+)
+*hyperref using default driver hpdftex*
+("C:\Program Files\MiKTeX\tex\latex\hyperref\hpdftex.def"
+File: hpdftex.def 2009/05/23 v6.78s Hyperref driver for pdfTeX
+\Fld@listcount=\count113
+) (report.aux)
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+
+("C:\Program Files\MiKTeX\tex\context\base\supp-pdf.tex"
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count114
+\scratchdimen=\dimen127
+\scratchbox=\box32
+\nofMPsegments=\count115
+\nofMParguments=\count116
+\everyMPshowfont=\toks26
+\MPscratchCnt=\count117
+\MPscratchDim=\dimen128
+\MPnumerator=\count118
+\everyMPtoPDFconversion=\toks27
+)
+Package hyperref Info: Link coloring ON on input line 64.
+ ("C:\Program Files\MiKTeX\tex\latex\hyperref\nameref.sty"
+Package: nameref 2007/05/29 v2.31 Cross-referencing by name of section
+
+("C:\Program Files\MiKTeX\tex\latex\oberdiek\refcount.sty"
+Package: refcount 2008/08/11 v3.1 Data extraction from references (HO)
+)
+\c@section@level=\count119
+)
+LaTeX Info: Redefining \ref on input line 64.
+LaTeX Info: Redefining \pageref on input line 64.
+ (report.out)
+(report.out)
+\@outlinefile=\write3
+\AtBeginShipoutBox=\box33
+ [1
+
+{C:/Users/Olmo/AppData/Local/MiKTeX/2.7/pdftex/config/pdftex.map}]
+LaTeX Font Info:    Try loading font information for T1+aett on input line 91.
+ ("C:\Program Files\MiKTeX\tex\latex\ae\t1aett.fd"
+File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
+) [2] [3] [4] [5]
+Underfull \hbox (badness 10000) in paragraph at lines 297--299
+[]|
+ []
+
+
+Overfull \hbox (0.6432pt too wide) in paragraph at lines 297--299
+\T1/aer/bx/n/10 ManyEyes| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 301--303
+[]| \T1/aer/bx/n/10 My-cro-
+ []
+
+
+Overfull \hbox (17.28885pt too wide) in alignment at lines 292--311
+ [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (17.28885pt too wide) in alignment at lines 311--472
+ [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \vbox (17.1343pt too high) has occurred while \output is active []
+
+
+[6] [7] [8] [9] [10]
+\c@listcnt0=\count120
+ [11] [12] [13] [14]
+<system_overview.png, id=506, 775.89874pt x 420.57124pt>
+File: system_overview.png Graphic file (type png)
+
+<use system_overview.png> [15 <system_overview.png (PNG copy)>]
+Overfull \hbox (35.21114pt too wide) in paragraph at lines 903--905
+\T1/aer/m/n/10 but as an ex-am-ple us-ing the \T1/aett/m/n/10 .gchart \T1/aer/m
+/n/10 for-mat and a \T1/aett/m/n/10 query_string \T1/aer/m/n/10 of: \T1/aett/m/
+n/10 ?cht=p3&chs=250x100&chco=054700
+ []
+
+[16]
+Overfull \hbox (78.70822pt too wide) in paragraph at lines 911--912
+[]\T1/aett/m/n/10 http://cametrics.appspot.com/measure/public_key/participant/v
+isits/stats/weekday.gc?cht=bhs 
+ []
+
+[17] [18] [19] <input_overview.png, id=573, 829.0975pt x 247.92625pt>
+File: input_overview.png Graphic file (type png)
+
+<use input_overview.png> [20 <input_overview.png (PNG copy)>]
+<send_to_datastore.png, id=587, 811.03pt x 273.02pt>
+File: send_to_datastore.png Graphic file (type png)
+
+<use send_to_datastore.png> [21 <send_to_datastore.png (PNG copy)>]
+<output_overview.png, id=594, 720.6925pt x 435.6275pt>
+File: output_overview.png Graphic file (type png)
+
+<use output_overview.png> [22 <output_overview.png (PNG copy)>] [23]
+LaTeX Font Info:    Try loading font information for OMS+aer on input line 1157
+.
+
+("C:\Program Files\MiKTeX\tex\latex\ae\omsaer.fd"
+File: omsaer.fd 1999/12/27
+)
+LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 1157.
+
+
+<rrt-chart.png, id=614, 702.625pt x 301.125pt>
+File: rrt-chart.png Graphic file (type png)
+ <use rrt-chart.png>
+<sts-chart.png, id=615, 702.625pt x 301.125pt>
+File: sts-chart.png Graphic file (type png)
+ <use sts-chart.png> [24]
+[25 <rrt-chart.png (PNG copy)> <sts-chart.png (PNG copy)>] [26] [27] [28]
+[29] [30] (report.aux) ) 
+Here is how much of TeX's memory you used:
+ 6392 strings out of 95304
+ 86565 string characters out of 1183208
+ 193609 words of memory out of 1500000
+ 9194 multiletter control sequences out of 110000
+ 33732 words of font info for 72 fonts, out of 3000000 for 5000
+ 14 hyphenation exceptions out of 8191
+ 42i,8n,41p,1605b,498s stack positions out of 5000i,500n,10000p,200000b,50000s
+pdfTeX warning (dest): name{cametrics-a-novel-data-logg
+er-aggregator-and-visualizer-cloud-service} has been referenced but does not ex
+ist, replaced by a fixed one
+
+<C:/Program Files/MiKTeX/fonts/type1/bluesky/cm/cmbx10.pfb><C:/Program Files/Mi
+KTeX/fonts/type1/bluesky/cm/cmbx12.pfb><C:/Program Files/MiKTeX/fonts/type1/blu
+esky/cm/cmbx7.pfb><C:/Program Files/MiKTeX/fonts/type1/bluesky/cm/cmr10.pfb><C:
+/Program Files/MiKTeX/fonts/type1/bluesky/cm/cmr17.pfb><C:/Program Files/MiKTeX
+/fonts/type1/bluesky/cm/cmr7.pfb><C:/Program Files/MiKTeX/fonts/type1/bluesky/c
+m/cmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/bluesky/cm/cmti10.pfb><C:/Pro
+gram Files/MiKTeX/fonts/type1/bluesky/cm/cmtt10.pfb>
+Output written on report.pdf (30 pages, 444886 bytes).
+PDF statistics:
+ 753 PDF objects out of 1000 (max. 8388607)
+ 250 named destinations out of 1000 (max. 131072)
+ 475 words of extra memory for PDF output out of 10000 (max. 10000000)
+

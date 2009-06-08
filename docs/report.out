@@ -1,0 +1,54 @@
+\BOOKMARK [0][-]{abstract.0}{Abstract}{}
+\BOOKMARK [0][-]{contents.0}{Contents}{}
+\BOOKMARK [0][-]{introduction.0}{Introduction}{}
+\BOOKMARK [0][-]{related-work.0}{Related Work}{}
+\BOOKMARK [1][-]{criteria.1}{Criteria}{related-work.0}
+\BOOKMARK [1][-]{manyeyes.1}{ManyEyes11}{related-work.0}
+\BOOKMARK [1][-]{track-n-graph.1}{Track-n-Graph12}{related-work.0}
+\BOOKMARK [1][-]{mycrocosm.1}{Mycrocosm13}{related-work.0}
+\BOOKMARK [1][-]{trendrr.1}{Trendrr14}{related-work.0}
+\BOOKMARK [1][-]{timetric.1}{Timetric15}{related-work.0}
+\BOOKMARK [0][-]{contributions.0}{Contributions}{}
+\BOOKMARK [0][-]{system-design.0}{System Design}{}
+\BOOKMARK [1][-]{design-principles.1}{Design Principles}{system-design.0}
+\BOOKMARK [2][-]{flexibility.2}{Flexibility}{design-principles.1}
+\BOOKMARK [2][-]{accessibility.2}{Accessibility}{design-principles.1}
+\BOOKMARK [2][-]{extensibility.2}{Extensibility}{design-principles.1}
+\BOOKMARK [1][-]{platform-selection.1}{Platform Selection}{system-design.0}
+\BOOKMARK [2][-]{home-brew-or-framework-symfony-doctrine-postgresql-solution.2}{Home Brew or Framework \(Symfony, Doctrine, PostgreSQL\) Solution}{platform-selection.1}
+\BOOKMARK [2][-]{google-s-app-engine.2}{Google's App Engine20}{platform-selection.1}
+\BOOKMARK [3][-]{limitations-and-requirements.3}{Limitations and Requirements}{google-s-app-engine.2}
+\BOOKMARK [1][-]{inputs.1}{Inputs}{system-design.0}
+\BOOKMARK [1][-]{required-outputs.1}{Required Outputs}{system-design.0}
+\BOOKMARK [1][-]{processing.1}{Processing}{system-design.0}
+\BOOKMARK [1][-]{proposed-system.1}{Proposed System}{system-design.0}
+\BOOKMARK [0][-]{system-architecture.0}{System Architecture}{}
+\BOOKMARK [1][-]{structure.1}{Structure}{system-architecture.0}
+\BOOKMARK [2][-]{uri-format.2}{URI Format}{structure.1}
+\BOOKMARK [2][-]{modules.2}{Modules}{structure.1}
+\BOOKMARK [3][-]{models.3}{Models}{modules.2}
+\BOOKMARK [3][-]{stat.3}{Stat}{modules.2}
+\BOOKMARK [3][-]{renderer.3}{Renderer}{modules.2}
+\BOOKMARK [3][-]{visualize.3}{Visualize}{modules.2}
+\BOOKMARK [1][-]{client-libraries.1}{Client Libraries}{system-architecture.0}
+\BOOKMARK [2][-]{bulk-uploads.2}{Bulk Uploads}{client-libraries.1}
+\BOOKMARK [2][-]{request-size.2}{Request Size}{client-libraries.1}
+\BOOKMARK [1][-]{input-processing.1}{Input Processing}{system-architecture.0}
+\BOOKMARK [2][-]{framework-of-input-processing.2}{Framework of Input Processing}{input-processing.1}
+\BOOKMARK [1][-]{output-generation.1}{Output Generation}{system-architecture.0}
+\BOOKMARK [2][-]{framework-of-output-processing.2}{Framework of Output Processing}{output-generation.1}
+\BOOKMARK [0][-]{evaluation.0}{Evaluation}{}
+\BOOKMARK [1][-]{test-setup.1}{Test Setup}{evaluation.0}
+\BOOKMARK [1][-]{client-setup.1}{Client Setup}{evaluation.0}
+\BOOKMARK [1][-]{server-setup.1}{Server Setup}{evaluation.0}
+\BOOKMARK [1][-]{results.1}{Results}{evaluation.0}
+\BOOKMARK [1][-]{developer-survey.1}{Developer Survey}{evaluation.0}
+\BOOKMARK [0][-]{conclusions.0}{Conclusions}{}
+\BOOKMARK [0][-]{future-work.0}{Future Work}{}
+\BOOKMARK [1][-]{filtering-granularity-and-selecting-data.1}{Filtering, Granularity, and Selecting Data}{future-work.0}
+\BOOKMARK [1][-]{summaries-of-summaries.1}{Summaries of Summaries}{future-work.0}
+\BOOKMARK [1][-]{event-system.1}{Event System}{future-work.0}
+\BOOKMARK [1][-]{more-internal-logging.1}{More Internal Logging}{future-work.0}
+\BOOKMARK [1][-]{summary-and-visualization-snapshot-system.1}{Summary and Visualization Snapshot System}{future-work.0}
+\BOOKMARK [1][-]{memcached-and-persistence.1}{Memcached and Persistence}{future-work.0}
+\BOOKMARK [1][-]{removing-or-guessing-the-type-input-argument.1}{Removing or Guessing the 'type' input argument}{future-work.0}
