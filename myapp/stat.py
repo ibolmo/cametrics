@@ -172,7 +172,7 @@ class DatetimeSummary(Summary):
     NoSummary.calculate(datum) # No need for hits histogram
     
     timetuple = datum.datetime.timetuple()
-    for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s', 'day%sth']):
+    for i, bucket in enumerate(['year%s', 'month%s', 'day%s', 'hour%s', 'minute%s', 'second%s', 'weekday%s']):
       cls.tally(stats = datum.stats, name = bucket % 's', index = timetuple[i])
     cls.tally(stats = datum.stats, name = 'weekdayth', index = datum.datetime.strftime('%U'))
     cls.tally(stats = datum.stats, name = 'hour.weekday', index = '%s.%s' % (timetuple[3], timetuple[-2]))
