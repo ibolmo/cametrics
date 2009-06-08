@@ -75,20 +75,8 @@ Service}
 
 \author{Olmo Maldonado, \href{mailto:ibolmo@ucla.edu}{ibolmo@ucla.edu},
 UCLA Department of Electrical Engineering}
+
 \maketitle
-
-
-EE 299, Masters Project, Spring 2009
-
-%___________________________________________________________________________
-\pagebreak{}
-
-\hypertarget{abstract}{}
-\pdfbookmark[0]{Abstract}{abstract}
-\section*{Abstract}
-\label{abstract}
-
-Logging and visualization of data collected is becoming practical to implement in many projects due to a growing number of tools and web services. There are difficulties in transferring custom visualizations or measurements between projects, however, because of losing compatibility or a heavy learning curve in understanding the logging and visualization tools. Likewise, the actual logging system, visualization tool, and storage protocols are all separate from each other. This makes management and deployment a consuming process. In order to mitigate these challenges, we propose to standardize the measurement interface, centralize all the collected data, and to format the retrieval and visualization of the measured data. Cametrics, or campaign metrics, does this by providing a developer with client libraries with a simple \texttt{initialize} and \texttt{measure} functions. Furthermore, the data is stored in Google App Engine's datastore, which allows the system to scale to demand. Cametrics can also accept any type of data, and is able to return any format that the organizer requests. Cametrics has large support for standard statistical summaries, which can be visualized with Google Charts or Maps API. This paper details the design choices and requirements made to complete the first iteration of Cametrics. Moreover, we discuss the issues, limitations, evaluation, and future work needed for Cametrics.
 
 
 %___________________________________________________________________________
@@ -102,6 +90,8 @@ Logging and visualization of data collected is becoming practical to implement i
 \item {} \href{\#cametrics-a-novel-data-logger-aggregator-and-visualizer-cloud-service}{Cametrics: A Novel Data Logger, Aggregator, and Visualizer Cloud Service}
 
 \item {} \href{\#abstract}{Abstract}
+
+\item {} \href{\#acknowledgements}{Acknowledgements}
 
 \item {} \href{\#introduction}{Introduction}
 
@@ -122,13 +112,21 @@ Logging and visualization of data collected is becoming practical to implement i
 \end{list}
 
 \item {} \href{\#contributions}{Contributions}
+\begin{list}{}{}
+\item {} \href{\#simple-and-flexible}{Simple and Flexible}
+
+\item {} \href{\#extensible}{Extensible}
+
+\item {} \href{\#scalable}{Scalable}
+
+\item {} \href{\#moving-towards-parsimonious}{Moving Towards Parsimonious}
+
+\end{list}
 
 \item {} \href{\#system-design}{System Design}
 \begin{list}{}{}
-\item {} \href{\#design-principles}{Design Principles}
-\begin{list}{}{}
 \item {} \href{\#flexibility}{Flexibility}
-
+\begin{list}{}{}
 \item {} \href{\#accessibility}{Accessibility}
 
 \item {} \href{\#extensibility}{Extensibility}
@@ -137,7 +135,7 @@ Logging and visualization of data collected is becoming practical to implement i
 
 \item {} \href{\#platform-selection}{Platform Selection}
 \begin{list}{}{}
-\item {} \href{\#home-brew-or-framework-symfony-doctrine-postgresql-solution}{Home Brew or Framework (Symfony, Doctrine, PostgreSQL) Solution}
+\item {} \href{\#home-brew-platforms-and-framework-based-solutions}{Home Brew Platforms and Framework Based Solutions}
 
 \item {} \href{\#google-s-app-engine}{Google's App Engine}
 \begin{list}{}{}
@@ -229,8 +227,6 @@ Logging and visualization of data collected is becoming practical to implement i
 \begin{list}{}{}
 \item {} \href{\#filtering-granularity-and-selecting-data}{Filtering, Granularity, and Selecting Data}
 
-\item {} \href{\#summaries-of-summaries}{Summaries of Summaries}
-
 \item {} \href{\#event-system}{Event System}
 
 \item {} \href{\#more-internal-logging}{More Internal Logging}
@@ -238,8 +234,6 @@ Logging and visualization of data collected is becoming practical to implement i
 \item {} \href{\#summary-and-visualization-snapshot-system}{Summary and Visualization Snapshot System}
 
 \item {} \href{\#memcached-and-persistence}{Memcached and Persistence}
-
-\item {} \href{\#removing-or-guessing-the-type-input-argument}{Removing or Guessing the 'type' input argument}
 
 \end{list}
 
@@ -254,20 +248,56 @@ Logging and visualization of data collected is becoming practical to implement i
 
 %___________________________________________________________________________
 
+\hypertarget{abstract}{}
+\pdfbookmark[0]{Abstract}{abstract}
+\section*{Abstract}
+\label{abstract}
+
+Due to the pervasiveness of tools and visualization services, it is becoming common practice to measure and visualize system utilization and performance.  Currently, however, there are no unified platforms for this purpose {--} typically, each project implements a custom logging and visualization platform. These custom platforms require a long setup time and heavy developer learning curve, often have issues managing the storage of project data, and do not have all the features needed pre-implemented. In order to mitigate these challenges, we propose to standardize the measurement interface, centralize all the collected data, and to format the retrieval and visualization of the measured data. Cametrics, or campaign metrics, is a platform that provides a developer with client libraries with simple \texttt{initialize} and \texttt{measure} functions as an interface to the logging and visualization system. Furthermore, the data itself is stored in Google App Engine's datastore, which allows the system to scale to demand. Cametrics accepts a variety of data types (location, date/time, representative strings, and numbers), and is able to return standard set of output formats (Google Chart, JSON raw data) that the organizer requests through its simple, easy to use interface. Cametrics currently has support for standard statistical summaries, which can be visualized with Google Charts or Maps API. This paper details the design choices and requirements made to complete the first iteration of Cametrics. Moreover, we discuss the issues, limitations, evaluation, and future work needed for Cametrics.
+
+
+%___________________________________________________________________________
+\pagebreak{}
+
+
+
+%___________________________________________________________________________
+
+\hypertarget{acknowledgements}{}
+\pdfbookmark[0]{Acknowledgements}{acknowledgements}
+\section*{Acknowledgements}
+\label{acknowledgements}
+
+I would like to express my gratitude to following for their invaluable help:
+\begin{quote}
+
+\textbf{Mr. Sasank Reddy}, for his mentorship, tenacity, and enthusiam of the project. Without his support and leadership the project would not have moved forward
+
+\textbf{Mr. Eric Yuen} and \textbf{Dr. Eric Graham}, for participating in the What's Invasive Pilot Campaign. Without a real-world usage of the system Cametrics would not have been vetted and tested as thoroughly as you two have put it through.
+
+\textbf{Dr. Deborah Estrin} for her support, patience, and guidance in my work and education.
+\end{quote}
+
+
+%___________________________________________________________________________
+\pagebreak{}
+
+
+
+%___________________________________________________________________________
+
 \hypertarget{introduction}{}
 \pdfbookmark[0]{Introduction}{introduction}
 \section*{Introduction}
 \label{introduction}
 
-Logging and measuring usage of a system is an important feedback for system debugging and design. A developer can monitor the usage of a website by injecting logging calls inside of their scripts that log to a flat file or database. After some time, the developer creates a script to parse the log and uses third party libraries to construct a visualization of the data. A trend of number of users per month, for example would be a metric to understand if a website is becoming more popular. What if the developer wanted to visualize the geolocation of the user's IP address? The developer has to create yet another script to mine the logs of their web server for all the visitor IP addresses and then geocode the IP address. Then, he would take the GPS coordinates and use another third party service to display the data on a world map. As the complexity of the visualization or requirements of the developer grows more and more, more scripts are created which may eventually become incompatible across projects or difficult to maintain because of the rapid development of the scripts.
+Logging and measuring usage of a system is an important feedback for system debugging and design. A developer can monitor the usage of a website by injecting logging calls inside of their scripts that log to a flat file or database. After some time, the developer creates a script to parse the log and uses third party libraries to construct a visualization of the data. A trend of number of users per month, for example would be a metric to understand if a website is becoming more popular. What if the developer wanted to visualize the geolocation of the user's IP address? The developer has to create yet another script to mine the logs of their web server for all the visitor IP addresses and then geocode the IP address. Then, he would take the GPS coordinates and use another third party service to display the data on a world map. As the complexity of the visualization or requirements of the developer grows more and more, more scripts are created which may eventually become incompatible across projects or difficult to maintain because of the rapid development of the scripts. This is an ongoing challenge in participatory sensing (coordinated data gathering by individuals, groups, and communities to explore the world around them) campaigns. Campaigns are targeted and coordinated data collection efforts between an organizer (anyone with an interest in coordinating a data-gathering campaign) and a large number of participants of the campaign. In order to manage the campaign, an organizer typically creates a new web site to personalize the campaign for the participants and other guests that might like to join the campaign. Although the act of creating a new website is trivial, migrating subsystems like a logging system are non-trivial due to organizers expertise in the subsystem. Moreover, the original author of the scripts may not be the current organizer of the campaign. Due to the environment of participatory sensing there is a need to minimize the amount of code and settings changes that an organizer must do in order for the system to be a fully functional campaign.
 
-This is an ongoing challenge in participatory sensing (coordinated data gathering by individuals, groups, and communities to explore the world around them) campaigns. Campaigns are targeted and coordinated data collection efforts between an organizer (anyone with an interest in coordinating a data-gathering campaign) and a large number of participants of the campaign. In order to manage the campaign, an organizer typically creates a new web site to personalize the campaign for the participants and other guests that might like to join the campaign. Although the act of creating a new website is trivial, migrating subsystems like a logging system are non-trivial due to organizers expertise in the subsystem. Moreover, the original author of the scripts may not be the current organizer of the campaign. Due to the environment of participatory sensing there is a need to minimize the amount of code and settings changes that an organizer must do in order for the system to be a fully functional campaign.
+In this paper, we discuss such a participatory sensing campaign: What's Invasive\raisebox{.5em}[0em]{\scriptsize\hyperlink{id2}{1}}. What's Invasive is a pilot campaign that is an effort to equip the Santa Monica National Park Service with smart phones that can be used to map the Santa Monica Mountains for invasive species by taking geo-tagged images. Invasive species are plant strains that are not native to the area that if otherwise left alone would consume resources, which may endanger the indigenous plants.
 
-In this paper, we discuss such a participatory sensing campaign: What's Invasive\raisebox{.5em}[0em]{\scriptsize\hyperlink{id2}{1}}. What's Invasive is a test pilot campaign that is an effort to equip the National Park Services with GPS-ready smart phones that can be used to map the Santa Monica mountains for invasive species. Invasive species are species that are not native to the area that if otherwise left alone would consume resources, which may endanger the indigenous plants.
+Cametrics, or campaign metrics, was created to reduce the complexity in migrating the logging systems between new campaigns and to reduce the amount of code to produce visualization of the data collected from participants and/or the systems that the campaign is running on. After extensive work, and research, we have found that Cametrics' scope is no longer narrowed to just campaigns. Cametrics has become a general-purpose logging, aggregator, and visualization web service that any device that supports the HTTP protocol can use to log data, which can then be rendered as visualization or any other requested format. Cametrics lives in the cloud and is capable of scaling between large numbers of concurrent users. Most important, due to the mission to be simple and flexible, Cametrics is easy to get started and producing visualizations. This is a divergence from other logging and visualization web services. Furthermore, Cametrics is unique in its way it aggregates the data by having standard summarization classes per data type. Cametrics also supports large number of types, which is contrary to many web services, which would constrict an organizer to a fixed set of types. For example, location types are now supported and summarized to simplify the organizer's time in understanding the area covered by a participant. If the system does not support a format or type, Cametrics can be easily be extended by a developer contributed classes which will work as plug and play classes.
 
-Cametrics, or campaign metrics, was created to reduce the complexity in migrating the logging systems between new campaigns and to reduce the amount of code to produce visualization of the data collected from participants and/or the systems that the campaign is running on. After extensive work, and research, we have found that Cametrics' scope is no longer narrowed to just campaigns. Cametrics has become a general-purpose logging, aggregator, and visualization web service that any device that supports the HTTP protocol can use to log data, which can then be rendered as visualization or any other requested format. Cametrics lives in the cloud and is capable of scaling between large numbers of concurrent users. Most important, due to the mission to be simple and flexible, Cametrics is easy to get started and producing visualizations. This is a divergence from other logging and visualization web services. Furthermore, Cametrics is unique in its way it aggregates the data by having standard summarization classes per data type. Cametrics also supports large number of types, which is contrary to many web services, which would constrict an organizer to a fixed set of types. For example, location and GPS data types are now supported and summarized to simplify the organizer's time in understanding the area covered by a participant. If the system does not support a format or type, Cametrics can be easily be extended by a developer contributed classes which will work as plug and play classes.
-
-In this paper, we discuss related web services that have a similar scope as Cametrics and how they compare. We list the contributions made by this research and how we stand apart from the previous works. The requirements and choices made on the design of the system and the architecture of the system are also included. Lastly, we conclude with the evaluation of the system with quantitative and qualitative measurements and future work that is interesting or are required for Cametrics to move forward.
+In this paper, we discuss related web services that have a similar scope as Cametrics and how they compare. We list the contributions made by this research and how we stand apart from the previous works. Also, the requirements and choices made on the design of the system and the architecture of the system are included. Lastly, we conclude with the evaluation of the system with quantitative and qualitative measurements and future work that is interesting or is required for Cametrics to become even more useful.
 \begin{figure}[b]\hypertarget{id2}$^{1}$
 \href{http://whatsinvasive.com/}{http://whatsinvasive.com/}
 \end{figure}
@@ -284,9 +314,8 @@ In this paper, we discuss related web services that have a similar scope as Came
 \pdfbookmark[0]{Related Work}{related-work}
 \section*{Related Work}
 \label{related-work}
-% need intro to section 
 
-The following table compares other web services against Cametrics.
+In an effort to understand Cametrics' contributions, we compared Cametrics to seven other popular visualization systems. All of the web services are free for anyone to try and some cost for using premium services. All of the services, target a consumer to measure and visualize their lives for introspection. The table below summarizes how these services met the criteria, or system requirements. This section also includes an evaluation of each service.
 
 \leavevmode
 \begin{longtable}[c]{|p{0.18\locallinewidth}|p{0.114\locallinewidth}|p{0.104\locallinewidth}|p{0.114\locallinewidth}|p{0.104\locallinewidth}|p{0.104\locallinewidth}|p{0.124\locallinewidth}|}
@@ -506,7 +535,7 @@ Embeds a flash object, which may not be available to the client browser
 \subsection*{Criteria}
 \label{criteria}
 
-The following defines the criteria evaluation.
+The following defines the evaluation of the criteria.
 \begin{description}
 \item[{API}] \leavevmode 
 If the service provides a HTTP RESTful API (independent of the features the API supports).
@@ -548,7 +577,7 @@ If the system has the ability to provide the user with a manner to publish to a 
 \subsection*{ManyEyes\raisebox{.5em}[0em]{\scriptsize\hyperlink{id22}{11}}}
 \label{manyeyes}
 
-ManyEyes, by the IBM's Visual Communication Lab, allows the community to take public data sets and visualize them from a slew of available visuals. Due their strong focus on visualizations, they have lacked support many of the criteria. The social and the wide variety of visualization options, however, could and should be implemented in Cametrics in the future.
+ManyEyes, by the IBM's Visual Communication Lab, allows the community to take public data sets and visualize them from a slew of available visuals. Due their strong focus on visualizations, they have lacked support many of the criteria. We plan to support a ManyEyes format, to help the organizers use the ManyEyes social and wide variety of visualization options.
 \begin{figure}[b]\hypertarget{id22}$^{11}$
 \href{http://manyeyes.alphaworks.ibm.com/manyeyes/}{http://manyeyes.alphaworks.ibm.com/manyeyes/}
 \end{figure}
@@ -558,24 +587,21 @@ ManyEyes, by the IBM's Visual Communication Lab, allows the community to take pu
 
 \hypertarget{track-n-graph}{}
 \pdfbookmark[1]{Track-n-Graph12}{track-n-graph}
-\subsection*{Track-n-Graph\raisebox{.5em}[0em]{\scriptsize\hyperlink{id24}{12}}}
+\subsection*{Track-n-Graph\raisebox{.5em}[0em]{\scriptsize\hyperlink{id25}{12}}}
 \label{track-n-graph}
 
 Track-n-Graph is a tool to track anything about your own personal life. Track-n-Graph depends highly on user's input on the type, unit, and other attributes so that the data set that is uploaded can be visualized correctly. All steps in the flow of the data the users have a critical role. Track-n-Graph's lack of an API, for instance, forces the users to go on their web site to upload bulk sets of data in addition to the user having to setup a schema of the data appropriately before any uploads can occur.
-\begin{figure}[b]\hypertarget{id24}$^{12}$
-\href{http://www.trackngraph.com/www/}{http://www.trackngraph.com/www/}
-\end{figure}
 
 
 %___________________________________________________________________________
 
 \hypertarget{mycrocosm}{}
 \pdfbookmark[1]{Mycrocosm13}{mycrocosm}
-\subsection*{Mycrocosm\raisebox{.5em}[0em]{\scriptsize\hyperlink{id26}{13}}}
+\subsection*{Mycrocosm\raisebox{.5em}[0em]{\scriptsize\hyperlink{id27}{13}}}
 \label{mycrocosm}
 
-Mycrocosm is a form of microblogging with the use of visualization. Assogba, et. al., had similar objectives with Mycrocosm as Cametrics. Mycrocosm attempts to reduce the time to report/collect the user data by simplifying the user interface to report new data to the system. To enter data a user follows a simple Domain Specific Language (DSL) to denote new data sets or new values for a data set. Furthermore, Mycrocosm appears to be schemaless, which has the added benefit of reducing the complexity of the DSL. For time inputs, for example, the user just has to have 'time' as part of the input string and the type of the data set is automatically associated with time intervals. Unfortunately, they do not have an API or an aggregation (summary) of the data passed to the data sets.
-\begin{figure}[b]\hypertarget{id26}$^{13}$
+Mycrocosm is a form of microblogging with the use of visualization. Assogba, et. al., had similar objectives with Mycrocosm as Cametrics. Mycrocosm attempts to reduce the time to report/collect the user data by simplifying the user interface to report new data to the system. To enter data a user follows a simple Domain Specific Language (DSL) to denote new data sets or new values for a data set. Furthermore, Mycrocosm appears to be schemaless, which has the added benefit of reducing the complexity of the DSL. For time inputs, for example, the user just has to have 'time' as part of the input string and the type of the data set is automatically associated with time intervals. Unfortunately, they do not have an API nor do they perform any type of aggregation (summary) of the data that is passed in.
+\begin{figure}[b]\hypertarget{id25}$^{12}$
 \href{http://mycro.media.mit.edu/}{http://mycro.media.mit.edu/}
 \end{figure}
 
@@ -584,11 +610,11 @@ Mycrocosm is a form of microblogging with the use of visualization. Assogba, et.
 
 \hypertarget{trendrr}{}
 \pdfbookmark[1]{Trendrr14}{trendrr}
-\subsection*{Trendrr\raisebox{.5em}[0em]{\scriptsize\hyperlink{id28}{14}}}
+\subsection*{Trendrr\raisebox{.5em}[0em]{\scriptsize\hyperlink{id29}{14}}}
 \label{trendrr}
 
 Trendrr takes public data sources and creates trend lines from the data received. Trendrr has custom data input, but is limited to the allowed data types that can be passed. Trendrr also has restrictions on how to select or delete portions of the data. Otherwise, Trendrr follows similar features as Cametrics in that they support an API for client input. This allows a generic device to create a data source stream for \emph{many} others to use the feed for their own purposes.
-\begin{figure}[b]\hypertarget{id28}$^{14}$
+\begin{figure}[b]\hypertarget{id27}$^{13}$
 \href{http://trendrr.com/}{http://trendrr.com/}
 \end{figure}
 
@@ -597,11 +623,11 @@ Trendrr takes public data sources and creates trend lines from the data received
 
 \hypertarget{timetric}{}
 \pdfbookmark[1]{Timetric15}{timetric}
-\subsection*{Timetric\raisebox{.5em}[0em]{\scriptsize\hyperlink{id30}{15}}}
+\subsection*{Timetric\raisebox{.5em}[0em]{\scriptsize\hyperlink{id34}{15}}}
 \label{timetric}
 
 Timetric is a tool for visualizing statistical data. Timetric became very close to supporting most of the criteria that would satisfy the requirements for the project. Unfortunately, their focus of their service is strictly on time series events, in other words on number value inputs. Aggregation of the data is also an unsupported feature.
-\begin{figure}[b]\hypertarget{id30}$^{15}$
+\begin{figure}[b]\hypertarget{id29}$^{14}$
 \href{http://timetric.com/}{http://timetric.com/}
 \end{figure}
 
@@ -618,8 +644,47 @@ Timetric is a tool for visualizing statistical data. Timetric became very close 
 \section*{Contributions}
 \label{contributions}
 
-Camertrics is a new take on the data visualization, aggregation, and logging. In all the services, no one attempts to log data as it is being pushed by a script. The only one comparable to that is trendrr but they use public data streams, which do not have the same data rate as participatory campaigns and therefore are difficult to make clear comparison if they can support such a feature. Moreover, some of the services are strict in the type of data that is passed into the system. In contrast, Cametrics accepts any data type as passed by the organizer. If the system does not support the type, it is a matter of extending a subclass and following the interface defined in the parent class. Afterwards the system is capable of supporting the type. Likewise, formats as returned by Cametrics are independent on the limitations of the system. New formats can be added in hours and organizers can contribute their own Renderer classes. By far the biggest contribution is the simplicity in getting started and visualizing the data collected, or being collected. All other services require the user to build the visualization, for Cametrics the visualization is automated and can be customized to fit their needs.
-% open source project, free, and can be used personally 
+Cametrics is a new take on the data visualization, aggregation, and logging. With Cametrics it is easy to start measurements and visualizing the data collected. If the large support for data types or formats does not include a specific type or format, Cametrics can be extended with developer-contributed summary or renderer classes. Because Cametrics is in the cloud, Cametrics will scale to meet growing demand. Furthermore, our design focus is on parsimony -{}- instead of storing all the raw data, we instead focus on providing statistical summaries that provide all the functionality while reducing storage and privacy requirements.
+
+
+%___________________________________________________________________________
+
+\hypertarget{simple-and-flexible}{}
+\pdfbookmark[1]{Simple and Flexible}{simple-and-flexible}
+\subsection*{Simple and Flexible}
+\label{simple-and-flexible}
+
+Cametrics provides the organizers with client libraries to programmatically submit data. The client libraries have a standard, simple, interface with two primary functions: \texttt{initialize} and \texttt{measure}. To get started, the organizer registers to the Cametrics website and authors a new campaign. Immediately afterwards, the organizer uses the \texttt{secret{\_}key} for the campaign in the \texttt{initialize} method of the client library and data can be submitted every time that the script executes the \texttt{measure}. Moreover, the flexibility of the \texttt{measure} function's three arguments (\texttt{namespace}, \texttt{value}, and \texttt{type}) allow the organizer to structure the data in their own representation. Furthermore, the organizer has the flexibility of choosing the correct data type (number, location, datetime, timestamp, string, and more) for the value passed so that Cametrics can summarize the data set with statistical computations. As soon as the first datum is collected to the system, the organizer has access to the visualization of the data or the summaries computed by Cametrics. The access to the visualization and the data is likewise simple and flexible because of the standard URI format to access any of the campaign's data sets (using the \texttt{namespace} for each of the \texttt{measure} instances) and the numerous formats (JSON, Google Charts API, Google Maps API) supported by the system. From the authoring of a campaign to the visualization of the data, the organizer can have a complete measurement and visualization system within 15 minutes.
+
+
+%___________________________________________________________________________
+
+\hypertarget{extensible}{}
+\pdfbookmark[1]{Extensible}{extensible}
+\subsection*{Extensible}
+\label{extensible}
+
+If the organizer has a special data type that the system does not support, the system is capable of extending the supported data types by accepting an organizer developed summary classes. To extend the data types supported is a very simple process because the summary modules have a simple interface of a \texttt{prepare} and \texttt{calculate}. In these functions the organizer does not need to understand the make up of the system, the functions need to focus on modifying the object with additional attributes that make up the statistical computations on the data. Similarly, if Cametrics does not support a format to render the values or statistics of a data set, the organizer can provide an implementation of the Renderer class.
+
+
+%___________________________________________________________________________
+
+\hypertarget{scalable}{}
+\pdfbookmark[1]{Scalable}{scalable}
+\subsection*{Scalable}
+\label{scalable}
+
+Cametrics is supported by Google App Engine's cloud service. This allows Cametrics to support large volume of incoming data and the processing power for numerous summarizations and visualizations of the data. Moreover, a clone of Cametrics, Cametrics-stress, is used periodically stress test the system for bottlenecks in the critical paths to ensure quality service.
+
+
+%___________________________________________________________________________
+
+\hypertarget{moving-towards-parsimonious}{}
+\pdfbookmark[1]{Moving Towards Parsimonious}{moving-towards-parsimonious}
+\subsection*{Moving Towards Parsimonious}
+\label{moving-towards-parsimonious}
+
+Due to the focus on summarization and visualization of data, Cametrics' design is moving towards parsimony in how much data Cametrics retains. We saw this to be the case with the What's Invasive campaign. We found that the use of the system has been primarily on the summary and histograms for the data sets collected. The few instances that required the raw information from the data set only required specific datum from the overall corpus. For example, the first datum, last datum, first datum of the day, and first datum of the week are of interest to the organizer to use. This motivates for the design of a bookmarking system, which would only save datum that meet bookmarking conditions defined by the organizer.
 
 
 %___________________________________________________________________________
@@ -634,22 +699,14 @@ Camertrics is a new take on the data visualization, aggregation, and logging. In
 \section*{System Design}
 \label{system-design}
 
-
-%___________________________________________________________________________
-
-\hypertarget{design-principles}{}
-\pdfbookmark[1]{Design Principles}{design-principles}
-\subsection*{Design Principles}
-\label{design-principles}
-
 The design of the system should support flexibility, accessibility, and extensibility principles.
 
 
 %___________________________________________________________________________
 
 \hypertarget{flexibility}{}
-\pdfbookmark[2]{Flexibility}{flexibility}
-\subsubsection*{Flexibility}
+\pdfbookmark[1]{Flexibility}{flexibility}
+\subsection*{Flexibility}
 \label{flexibility}
 
 The developer should not have to learn a new language or have formal training on database system design to understand how to create or organize data sets. The system should conform to the developer's own concept of how the data is organized -{}- be it hierarchical or relational. Likewise, the system should encourage code reuse, simplicity (KISS), and intuitiveness when defining new data sets and recalling values or statistics from the system.
@@ -682,31 +739,31 @@ Since campaigns are rapidly being deployed and user requirements per campaign fl
 \subsection*{Platform Selection}
 \label{platform-selection}
 
-In selecting a platform to build Cametrics, one has a large variety of options that range from building your own personal framework, using a framework solution, or using a cloud service. Although there is great benefit, and practice, in creating your own framework or utilizing a known, and popular, framework solution, which includes an ORM, and a standard DB (which can then be deployed to Amazon's EC2) we found Google's App Engine to be most appropriate for the system.
+In selecting a platform to build Cametrics, one has a large variety of options that range from building your own personal platform, using a framework solution, or using a cloud service. Although there is great benefit, and practice, in creating your own platform or utilizing a known, and popular, framework solution, which includes an ORM, and a standard DB (which can then be deployed to Amazon's EC2) we found Google's App Engine to be most appropriate for the system.
 
 
 %___________________________________________________________________________
 
-\hypertarget{home-brew-or-framework-symfony-doctrine-postgresql-solution}{}
-\pdfbookmark[2]{Home Brew or Framework (Symfony, Doctrine, PostgreSQL) Solution}{home-brew-or-framework-symfony-doctrine-postgresql-solution}
-\subsubsection*{Home Brew or Framework (Symfony, Doctrine, PostgreSQL) Solution}
-\label{home-brew-or-framework-symfony-doctrine-postgresql-solution}
+\hypertarget{home-brew-platforms-and-framework-based-solutions}{}
+\pdfbookmark[2]{Home Brew Platforms and Framework Based Solutions}{home-brew-platforms-and-framework-based-solutions}
+\subsubsection*{Home Brew Platforms and Framework Based Solutions}
+\label{home-brew-platforms-and-framework-based-solutions}
 
-The strength in creating an in-house solution by starting from scratch or selecting from a popular solution such as Symfony\raisebox{.5em}[0em]{\scriptsize\hyperlink{id35}{16}}, Doctrine\raisebox{.5em}[0em]{\scriptsize\hyperlink{id36}{17}}, and PostgreSQL\raisebox{.5em}[0em]{\scriptsize\hyperlink{id37}{18}}, is in the flexibility in owning your own system. There's no quota limit, no time limit (assuming you remove execution limit in the programming language configurations -{}- PHP's \texttt{set{\_}time{\_}limit}, for example), and there's no unexpected platform limitations that we might encounter by using a specific version of a language or missing dependencies due to system security measures by the platform developers. In summary, there are less things that one will be surprised by.
+The strength in creating an in-house solution by starting from scratch or selecting from a popular solution such as Symfony\raisebox{.5em}[0em]{\scriptsize\hyperlink{id35}{16}}, Doctrine\raisebox{.5em}[0em]{\scriptsize\hyperlink{id36}{17}}, and PostgreSQL\raisebox{.5em}[0em]{\scriptsize\hyperlink{id37}{18}}, is in the flexibility in owning your own system. There's no quota limit, no time limit (assuming you remove execution limit in the programming language configurations -{}- PHP's \texttt{set{\_}time{\_}limit}, for example), and there's no unexpected platform limitations that we might encounter by using a specific version of a language or missing dependencies due to system security measures by the platform developers. In summary, there are less platform restrictions.
 
 The downfall of a home brew or even using popular frameworks is the learning curve. This is especially true for the home brew system, which has minimal documentation and maintenance support from a community. For the popular framework solution, it is less of a problem because the frameworks tend to have a large and active community to improve documentation and troubleshooting of the system usage and bugs; but due to the large number of framework components one would have to learn multiple tools before one can understand how to troubleshoot errors. Additionally there is no guarantee that the system is scalable or responsive. Due to the prototype nature of most projects, one cannot load the testing environment with stress tests or real world usage. On average, most systems have to go an extensive testing to realize that a large portion of code worked but was extremely ineffective to return results in a responsive manner.
 
-A counter argument would be to use Amazon's EC2\raisebox{.5em}[0em]{\scriptsize\hyperlink{id38}{19}} to compliment the home brew or framework solution so that it \emph{becomes} scalable. In other words, use more resources only when necessary. While this may be true, we argue that the system is not scalable. The system was simple fed more fuel to consume. Using EC2 will not address the non-scalable portions of the system and will only accrue costs which will then make the service impossible to run for free or without support from the community.
-\begin{figure}[b]\hypertarget{id35}$^{16}$
+A counter argument would be to use Amazon's EC2\raisebox{.5em}[0em]{\scriptsize\hyperlink{id40}{19}} to compliment the home brew or framework solution so that it \emph{becomes} scalable. In other words, use more resources only when necessary. While this may be true, we argue that the system is not scalable. The system was simple fed more fuel to consume. Using EC2 will not address the non-scalable portions of the system and will only accrue costs which will then make the service impossible to run for free or without support from the community. For example, the original design of the Histograms created a new Histogram each time that the summary module tallied. If this design was used in the Amazon's EC2, the explosion of the number of new histograms that are created and needed to be saved as the summary modules tally (which can be very dramatic, especially with the location summaries) would not have been noticed because EC2 would just cope with the increase of demand. After a long period of time, the storage requirements and processing costs would also balloon and eventually one would realize that the design of the models has a direct impact on the cost of running the system.
+\begin{figure}[b]\hypertarget{id34}$^{15}$
 \href{http://symfony-project.org/}{http://symfony-project.org/}
 \end{figure}
-\begin{figure}[b]\hypertarget{id36}$^{17}$
+\begin{figure}[b]\hypertarget{id35}$^{16}$
 \href{http://doctrine-project.org/}{http://doctrine-project.org/}
 \end{figure}
-\begin{figure}[b]\hypertarget{id37}$^{18}$
+\begin{figure}[b]\hypertarget{id36}$^{17}$
 \href{http://postgresql.org/}{http://postgresql.org/}
 \end{figure}
-\begin{figure}[b]\hypertarget{id38}$^{19}$
+\begin{figure}[b]\hypertarget{id37}$^{18}$
 \href{http://aws.amazon.com/ec2/}{http://aws.amazon.com/ec2/}
 \end{figure}
 
@@ -715,16 +772,15 @@ A counter argument would be to use Amazon's EC2\raisebox{.5em}[0em]{\scriptsize\
 
 \hypertarget{google-s-app-engine}{}
 \pdfbookmark[2]{Google's App Engine20}{google-s-app-engine}
-\subsubsection*{Google's App Engine\raisebox{.5em}[0em]{\scriptsize\hyperlink{id41}{20}}}
+\subsubsection*{Google's App Engine\raisebox{.5em}[0em]{\scriptsize\hyperlink{id42}{20}}}
 \label{google-s-app-engine}
 
 Almost the reciprocal of the previous platform considerations, Google App Engine has a standard look and feel. The platform runs under Python 2.5.2, and only Python. All necessary packages to run a full-fledge system is already included in the SDK and makes getting started a breeze. This should satisfy a concern that the system may become unmanageable between the number of administrators and developers that shift and join the team as the years and use of the system progresses. Furthermore, the SDK makes the distribution of ``Cametrics'' as an open source project more appealing for others to use for their own projects to host to other people or domains.
 
 The app engine also has a unique technology not common to the previous platforms: BigTable [\hyperlink{bigtable}{BigTable}]. The BigTable has an interesting property that each entity (or record) is unique from each other. One record may have x-number of attributes (or columns) associated to the entity. This can differ from the kind (or table) definition that was defined in a model (schema) file. This is a very appealing property. One of the criteria discussed previously in the \href{\#criteria}{Criteria} section is flexibility. If the columns are not fixed and we can create new columns for an object at run time, then this allows us to create decorator modules that receive the records, which then modify the record columns without knowledge of the rest of the system.
-.. {\textasciicircum}{\textasciicircum} may not be done
 
 We are also guaranteed that the system will be accessible and scalable. The deployed application Cametrics, will run on Google's infrastructure and it is very unlikely that their systems will go down without anyone noticing. Outsourcing the maintenance of the system is very appealing because this allows us to focus strictly on the code quality and usage of the system. The site is almost guaranteed to be scalable not because we are in the ``cloud'' but because we are forced to be scalable. Google has a 30 second deadline that if a script does not finish within 30 seconds all operations seize and a \texttt{DeadlineExceptionError} is raised and the system has to respond within a few microseconds to handle the exception or the exception will terminate the running code. In the \href{\#limitations-and-requirements}{Limitations and Requirements} we discuss other Google App Engine limitations and how they forced a specific manner of designing the internals of the system.
-\begin{figure}[b]\hypertarget{id41}$^{20}$
+\begin{figure}[b]\hypertarget{id40}$^{19}$
 \href{http://code.google.com/appengine/}{http://code.google.com/appengine/}
 \end{figure}
 \begin{figure}[b]\hypertarget{bigtable}[BigTable]\newcounter{listcnt0}
@@ -765,7 +821,7 @@ Google App Engine has a strict execution time deadline. In other systems, one co
 
 \hypertarget{quotas}{}
 \pdfbookmark[4]{Quotas21}{quotas}
-\subparagraph*{Quotas\raisebox{.5em}[0em]{\scriptsize\hyperlink{id43}{21}}}
+\subparagraph*{Quotas\raisebox{.5em}[0em]{\scriptsize\hyperlink{id45}{21}}}
 \label{quotas}
 
 Everyday an application under the Google App Engine platform has to execute within a certain quota that is limited per day and per rate. For example, the CPU Time spent in a day may not exceed 46.30 CPU hours. Requests, for example, may not exceed 133328 requests in a day and cannot exceed 500 requests per seconds. Understandably these quotas and requirements are set to prevent system overloading and for ensuring equal share of the platform.
@@ -775,7 +831,7 @@ With billing enabled, these limits may change and daily limits are increased. Fo
 However, even with billing enabled there are fixed requirements that a developer must obey. File count limit, for example, states that an application may not have more than 1000 files in an application. This prevents users using the App Engine as a data warehouse. Likewise, one cannot exceed 1 MB per record size in the datastore. There are many more quota limits and many more hidden, or at least not well outlined, that an application has to follow.
 
 Even with these requirements, a developer learns how to adjust the design of the system and perhaps it is warranted to claim that out of necessity a stronger and faster system is built.
-\begin{figure}[b]\hypertarget{id43}$^{21}$
+\begin{figure}[b]\hypertarget{id42}$^{20}$
 \href{http://code.google.com/appengine/docs/quotas.html}{http://code.google.com/appengine/docs/quotas.html}
 \end{figure}
 
@@ -854,7 +910,7 @@ Cametrics is the culmination of addressing all the previous design and user requ
 \section*{System Architecture}
 \label{system-architecture}
 
-To best describe the architecture, we will use a concrete example. At this time a participatory sensing campaign, What's Invasive\raisebox{.5em}[0em]{\scriptsize\hyperlink{id46}{22}}, is using Cametrics to provide the participants with feedback in the form of statistics of their number of contributions, the coverage of the area by the participants, the variety and quantity of the invasive plants that have been discovered, and more. The objective of the What's Invasive campaign is to empower the National Park Services in the Santa Monica Mountains with new tracking and discovery technology against invasive species. An invasive species is a species that is not indigenous in the area and that are consuming resources from native species.
+To best describe the architecture, we will use a concrete example. At this time a participatory sensing campaign, What's Invasive\raisebox{.5em}[0em]{\scriptsize\hyperlink{id50}{22}}, is using Cametrics to provide the participants with feedback in the form of statistics of their number of contributions, the coverage of the area by the participants, the variety and quantity of the invasive plants that have been discovered, and more. The objective of the What's Invasive campaign is to empower the National Park Services in the Santa Monica Mountains with new tracking and discovery technology against invasive species. An invasive species is a species that is not indigenous in the area and that are consuming resources from native species.
 
 Campaign participants run a campaign client called Campaignr [\hyperlink{campaignr}{Campaignr}], which posts sensor data (GPS, tags, and images) to an organizer's script on their web server. For demonstration purposes, the organizer's script is using the Cametrics PHP Client, but this step may have been unnecessary if the organizer had prepared the Campaignr client to post appropriately to the Cametrics server using HTTP methods. In the organizer's script, Cametrics is initialized with a \texttt{secret key} (given to the organizer when they author a campaign via the Cametrics website -{}- the only required step before they can begin using Cametrics). The organizer's script will process the data and call the static \texttt{measure} function to log a value to Cametrics. This value may be a number, string, location, datetime, and many more. See the discussion in the \href{\#input-processing}{Input Processing} subsection for more information. At the end of the PHP script, all the recorded data is \texttt{POST}-ed to the Cametrics server. Cametrics then processes the input and calculates summaries, which can be used immediately after the request. The organizer's website can then include the visualization by requesting to the Cametrics server for the namespace, path, and format of the data. For example in the following figure, the organizer's website is requesting that Cametrics provide all the \texttt{values} that have been posted to the \texttt{namespace} entries with the \texttt{gc} (Google Charts API) format.
 \begin{figure}[htbp]
@@ -862,7 +918,7 @@ Campaign participants run a campaign client called Campaignr [\hyperlink{campaig
 
 \scalebox{0.500000}{\includegraphics{system_overview.png}}
 \caption{An overview of a simple participatory sensing campaign using Cametrics.}\end{figure}
-\begin{figure}[b]\hypertarget{id46}$^{22}$
+\begin{figure}[b]\hypertarget{id45}$^{21}$
 \href{http://whatsinvasive.com/}{http://whatsinvasive.com/}
 \end{figure}
 \begin{figure}[b]\hypertarget{campaignr}[Campaignr]
@@ -876,6 +932,8 @@ Campaign participants run a campaign client called Campaignr [\hyperlink{campaig
 \pdfbookmark[1]{Structure}{structure}
 \subsection*{Structure}
 \label{structure}
+
+Cametrics platform consists of a URI Format, modules, client libraries, input, and output processing. This section details each of the components that make up the complete system.
 
 
 %___________________________________________________________________________
@@ -901,29 +959,23 @@ The path is an accessor mechanism into the data set. The path is best described 
 The format similar to file extensions in a file system. By appending a \texttt{.json} to a path, Cametrics returns a JSON\raisebox{.5em}[0em]{\scriptsize\hyperlink{id52}{24}} formatted object. The \href{\#renderer}{Renderer} modules define supported formats for Cametrics and have a simple interface for an external developer to contribute their own formats. For the What's Invasive campaign, for instance, a request was made to support rendering location values into a Google Maps API\raisebox{.5em}[0em]{\scriptsize\hyperlink{id53}{25}} ready objects, such as polylines or markers. By overwriting a few of the base classes that \texttt{Renderer} module provides, we were able to transform the location traces from one representation (a Python dictionary) into a JavaScript string that uses the Google Map API's \texttt{GMarker}, \texttt{GLatLng} and \texttt{GPolyLine}.
 
 \item[{query{\_}string:}] \leavevmode 
-The query string is the analogous of passing arguments to a function. Each argument is passed along the Render and Visuals modules. More documentation is available on the website\raisebox{.5em}[0em]{\scriptsize\hyperlink{id54}{26}}, but as an example using the \texttt{.gchart} format and a \texttt{query{\_}string} of: \texttt{?cht=p3{\&}chs=250x100{\&}chco=054700} informs the Google Chart Renderer that the object should be represented as a 3D-pie chart (\texttt{p3}), the size of the chart should be \textbf{250} by \textbf{150} pixels (\texttt{chs}), and the color of the chart (\texttt{chco}) should be \textbf{{\#}054700}. Notice that the parameters are exactly as if someone was using the Google Chart API directly. The Google Chart formatter happens to generate a URL with the data (\texttt{chd}) and other data dependent parameters like the x- and y- labels. Having to provide a \texttt{query{\_}string} is a bit convoluting, so most formatters have default options. A future work would be to adjust the default parameters by how organizers (or participants) like to view their data by following the system usage.
+The query string is the analogous of passing arguments to a function. Each argument is passed along the Render and Visuals modules. More documentation is available on the website\raisebox{.5em}[0em]{\scriptsize\hyperlink{id55}{26}}, but as an example using the \texttt{.gchart} format and a \texttt{query{\_}string} of: \texttt{?cht=p3{\&}chs=250x100{\&}chco=054700} informs the Google Chart Renderer that the object should be represented as a 3D-pie chart (\texttt{p3}), the size of the chart should be \textbf{250} by \textbf{150} pixels (\texttt{chs}), and the color of the chart (\texttt{chco}) should be \textbf{{\#}054700}. Notice that the parameters are exactly as if someone was using the Google Chart API directly. The Google Chart formatter happens to generate a URL with the data (\texttt{chd}) and other data dependent parameters like the x- and y- labels. Having to provide a \texttt{query{\_}string} is a bit convoluting, so most formatters have default options. A future work would be to adjust the default parameters by how organizers (or participants) like to view their data by following the system usage.
 
 \end{description}
 
-The following is a complete example of a possible URL that Cametrics supports:
-\begin{quote}
-
-\texttt{http://cametrics.appspot.com/measure/public{\_}key/participant/visits/stats/weekday.gc?cht=bhs}
-\end{quote}
-
-This will use the \texttt{participant.visits} namespace, and access the statistics (\texttt{stats}) calculated for all the datetime (defined in the statistic object, or the data) entries and return a stacked Google Chart's (\texttt{gc} an alias for \texttt{gchart}) bar graph of all the weekdays (Sunday through Saturday) that the participant has visited the website.
+The following is a complete example of a possible URL that Cametrics supports: \texttt{http://cametrics.appspot.com/measure/public{\_}key/participant/visits/stats/weekday.gc?cht=bhs}. This will use the \texttt{participant.visits} namespace, and access the statistics (\texttt{stats}) calculated for all the datetime (defined in the statistic object, or the data) entries and return a stacked Google Chart's (\texttt{gc} an alias for \texttt{gchart}) bar graph of all the weekdays (Sunday through Saturday) that the participant has visited the website.
 
 With exception of \texttt{path} and \texttt{query{\_}string}, Cametrics also uses the URI format to accept HTTP POST. For bulk uploads, Cametrics currently only accepts bulk uploads POSTs to an empty \texttt{namespace}.
-\begin{figure}[b]\hypertarget{id51}$^{23}$
+\begin{figure}[b]\hypertarget{id50}$^{22}$
 \href{http://www.geotude.com/about/nutshell}{http://www.geotude.com/about/nutshell}
 \end{figure}
-\begin{figure}[b]\hypertarget{id52}$^{24}$
+\begin{figure}[b]\hypertarget{id51}$^{23}$
 \href{http://www.json.org/}{http://www.json.org/}
 \end{figure}
-\begin{figure}[b]\hypertarget{id53}$^{25}$
+\begin{figure}[b]\hypertarget{id52}$^{24}$
 \href{http://code.google.com/apis/maps/}{http://code.google.com/apis/maps/}
 \end{figure}
-\begin{figure}[b]\hypertarget{id54}$^{26}$
+\begin{figure}[b]\hypertarget{id53}$^{25}$
 \href{http://cametrics.appspot.com/}{http://cametrics.appspot.com/}
 \end{figure}
 
@@ -971,10 +1023,10 @@ StringSummary inherits from the Summary class, which keeps a tally of all the va
 
 DatetimeSummary accepts date, datetime, and timestamp values and normalizes the datum entities with the timestamp and datetime attributes so that the calculate method and other subclasses can properly work with the datum. The calculate method creates a number of interesting histograms: years, months, days, hours, minutes, seconds, weekdays, dayth, weekdayth, hour.weekday, day.hour, and weekday.month. Each of these are just counters for the the series of the data passed to Cametrics. From these buckets one can discern the most active months, hours, minutes, weekday (Mon.-Sun.) and even seconds (although this may be removed if we find that this histogram is rarely used). The dayth and weekdayth buckets are histograms for day and weekday in the year. After a year this can provide a clear picture of a trend in contributions. The hour.weekday, day.hour, and weekday.month have special meanings. The hour.weekday is a timecard that can be visualized with a bubble scatter plot. The size of the bubble is the value at the hour.weekday, and the indexing to the chart is done by the '.' separated values. For example, \texttt{'8.1' = 2} indicates that there were two events that occured at 8 am on Monday (\texttt{1}). This is similar to the other \texttt{'.'} separated attributes.
 
-LocationSummary accepts location and gps type inputs. For each data passed, LocationSummary prepare normalizes each datum entry with longitude and latitude. In the calculate method, we are currently augmenting the datum entry with a min, max longitude and latitude for creating a boundary of the data set. Moreover, the calculate method adds a geotudes\raisebox{.5em}[0em]{\scriptsize\hyperlink{id56}{27}} histograms which up to 7 grid resolutions. For example, an input of \texttt{-118.44271302223206,34.06945813747638} would have up to \texttt{37561.95.35.07.52.48.16} indexable values.
+LocationSummary accepts location and gps type inputs. For each data passed, LocationSummary prepare normalizes each datum entry with longitude and latitude. In the calculate method, we are currently augmenting the datum entry with a min, max longitude and latitude for creating a boundary of the data set. Moreover, the calculate method adds a geotudes\raisebox{.5em}[0em]{\scriptsize\hyperlink{id58}{27}} histograms which up to 7 grid resolutions. For example, an input of \texttt{-118.44271302223206,34.06945813747638} would have up to \texttt{37561.95.35.07.52.48.16} indexable values.
 
 Currently the system does not support Intervals (start and stop timestamps), will soon be added due to its importance.
-\begin{figure}[b]\hypertarget{id56}$^{27}$
+\begin{figure}[b]\hypertarget{id55}$^{26}$
 \href{http://www.geotude.com/about/nutshell}{http://www.geotude.com/about/nutshell}
 \end{figure}
 
@@ -992,13 +1044,23 @@ The NoRenderer defines the interface that all other renderer classes should use.
 
 The JSONRenderer matches the JSON format, and converts all values into JSON ready objects by replacing the datastore specific types into types that can be simplejson\raisebox{.5em}[0em]{\scriptsize\hyperlink{id59}{28}} can convert into a JSON string. Additionally, the render method returns a JSON object with the values and stats if the path is empty. Otherwise, if the path is stats or values it returns the JSON object for the object as described in the \href{\#uri-format}{URI Format} section.
 
-The GChartRenderer matches gc and gchart formats and redirect the user to a generated url as specified by the Google Chart API. Similar to the JSONRenderer, the GChartRenderer converts the values and stats into dictionaries or objects that the Visualize module can accept. The Visualize module then has the logic necessary to transform the object passed to it (either a list of values, statistic dictionary, or an object within the statistic).
+The GChartRenderer matches gc and gchart formats and redirect the user to a generated url as specified by the Google Chart API. Similar to the JSONRenderer, the GChartRenderer converts the values and stats into dictionaries or objects that the Visualize module can accept. The Visualize module then has the logic necessary to transform the object passed to it (either a list of values, statistic dictionary, or an object within the statistic). The following figure is an example of a rendering of in the What's Invasive Campaign (as of June 8th, 2009).
+\begin{figure}[htbp]
+\centering
 
-GMapRenderer matches gm or gmap formats and currently only support the rendering of values. Using the \texttt{type} parameter in the query string (see \href{\#uri-format}{URI Format}) the GMapRenderer renders the values as a JSON list (when type is \texttt{raw}), a JSON dictionary for an encoded polyline (when type is \texttt{encoded}), a GMap API-ready encoded polyline (when type is \texttt{polyline}), or as a GMap API-ready markers (when type is \texttt{markers}). The last two cases follow a simple example\raisebox{.5em}[0em]{\scriptsize\hyperlink{id60}{29}} {[}by the Google Map API. The GMapRenderer also supports \texttt{callback} and \texttt{class} parameter in the query string which will format the string returned by the renderer to do a standard JavaScript function call with the first parameter as the object returned, or similarly to use a map class to directly add the overlay (polyline or markers) directly.
-\begin{figure}[b]\hypertarget{id59}$^{28}$
+\scalebox{0.500000}{\includegraphics{gchart_example.png}}
+\caption{An example of the GChartRenderer redirecting a page to a Google Charts API image for the What's Invasive Campaign}\end{figure}
+
+GMapRenderer matches gm or gmap formats and currently only support the rendering of values. Using the \texttt{type} parameter in the query string (see \href{\#uri-format}{URI Format}) the GMapRenderer renders the values as a JSON list (when type is \texttt{raw}), a JSON dictionary for an encoded polyline (when type is \texttt{encoded}), a GMap API-ready encoded polyline (when type is \texttt{polyline}), or as a GMap API-ready markers (when type is \texttt{markers}). The last two cases follow a simple example\raisebox{.5em}[0em]{\scriptsize\hyperlink{id62}{29}} {[}by the Google Map API. The GMapRenderer also supports \texttt{callback} and \texttt{class} parameter in the query string which will format the string returned by the renderer to do a standard JavaScript function call with the first parameter as the object returned, or similarly to use a map class to directly add the overlay (polyline or markers) directly. The following figure is an example of the GMapRenderer in action. Each of the markers is a separate invasive specifies dataset in the What's Invasive campaign.
+\begin{figure}[htbp]
+\centering
+
+\scalebox{0.500000}{\includegraphics{gmap_example.png}}
+\caption{An example of the GMapRenderer populating a GMap class instance in the What's Invasive campaign.}\end{figure}
+\begin{figure}[b]\hypertarget{id58}$^{27}$
 \href{http://undefined.org/python/\#simplejson}{http://undefined.org/python/{\#}simplejson}
 \end{figure}
-\begin{figure}[b]\hypertarget{id60}$^{29}$
+\begin{figure}[b]\hypertarget{id59}$^{28}$
 \href{http://code.google.com/apis/maps/documentation/overlays.html\#Encoded_Polylines}{http://code.google.com/apis/maps/documentation/overlays.html{\#}Encoded{\_}Polylines}
 \end{figure}
 
@@ -1015,10 +1077,10 @@ The Visualize classes follow the same pattern as the previous classes. The class
 The NumberVisual which matches the same types as the NumberSummary types, simply overrides the \texttt{add{\_}labels} method so that the order and position of the values and keys are appropriate when visualizing numerical data.
 
 The other visual: String, Datetime, and Location, lack a complete implementation and currently behave as a NumberVisual. The Datetime visual will soon incorporate visualization for timelines and support for the '.' separated histograms like the \texttt{hour.weekday} histogram (a timecard\raisebox{.5em}[0em]{\scriptsize\hyperlink{id64}{31}}).
-\begin{figure}[b]\hypertarget{id63}$^{30}$
+\begin{figure}[b]\hypertarget{id62}$^{29}$
 \href{http://pygooglechart.slowchop.com/}{http://pygooglechart.slowchop.com/}
 \end{figure}
-\begin{figure}[b]\hypertarget{id64}$^{31}$
+\begin{figure}[b]\hypertarget{id63}$^{30}$
 \href{http://dustin.github.com/2009/01/11/timecard.html}{http://dustin.github.com/2009/01/11/timecard.html}
 \end{figure}
 
@@ -1030,7 +1092,7 @@ The other visual: String, Datetime, and Location, lack a complete implementation
 \subsection*{Client Libraries}
 \label{client-libraries}
 
-At this time, Cametrics has released a PHP client. Python and JavaScript clients are next to being released. The two main functions of the PHP client are \texttt{initialize} and \texttt{measure}. The \texttt{initialize} function's first argument is the \texttt{secret{\_}key} as given by the Cametrics website in the campaign details page, and the second argument is for modifying the default options that the client uses like changing the hostname (typically, for local testing) or modify the request size required before the client can post to the server.
+At this time, Cametrics has released a PHP client. Python and JavaScript clients are next in the pipeline to be released. The two main functions of the PHP client are \texttt{initialize} and \texttt{measure}. The \texttt{initialize} function's first argument is the \texttt{secret{\_}key} as given by the Cametrics website in the campaign details page, and the second argument is for modifying the default options that the client uses like changing the hostname (typically, for local testing) or modify the request size required before the client can post to the server.
 
 
 %___________________________________________________________________________
@@ -1145,6 +1207,13 @@ The current performance of the output (the limits), is yet to be fully quantifie
 \section*{Evaluation}
 \label{evaluation}
 
+The organizers may use a Cametrics client library or directly \texttt{POST} to the dataset URI as discussed in the \href{\#uri-format}{URI Format} section. The What's Invasive campaign used the PHP Cametrics client to measure participant contributions and locations. Prior to deploying the system for the pilot campaign, we were concerned of the impact of using the PHP client compared to logging all the data and posting the data in bulk to the server. We were concerned that the scripts, server, and the response delay between the script and Cametrics might prevent data from being logged. The following is a stress test that uses the FunkLoad {[}{\#}{]}{\_}functional and load web tester tool to simulate a participant contributing data. In order to understand the scalability, or the maximum number of successful pages for various concurrent users (the number of participants contributing data within a second window), we tested for up to 40 concurrent users. From previous campaigns we have not found that more than 10 users have been contributing data at the same time, so 40 concurrent users is a good estimate if the system needed to scale to a campaign with a significant number of contributors.
+
+In order to evaluate if the system is simple, flexible, and scalable we opted to use a survey on the organizers running the What's Invasive campaign. The survey will inform us if the concept and features of Cametrics has been fully understood and utilized in the system. The  responses will also give a measure as to how the system has been behaving from the organizer's perspective. These qualitative measurements will focus our efforts in documentation, feature development, or any additional features that the system may be lacking.
+\begin{figure}[b]\hypertarget{id64}$^{31}$
+\href{http://funkload.nuxeo.org/}{http://funkload.nuxeo.org/}
+\end{figure}
+
 
 %___________________________________________________________________________
 
@@ -1172,10 +1241,7 @@ The current performance of the output (the limits), is yet to be fully quantifie
 \subsection*{Client Setup}
 \label{client-setup}
 
-The client is on a \textbf{separate} network than the sever and is using the FunkLoad functional and load web tester\raisebox{.5em}[0em]{\scriptsize\hyperlink{id66}{32}} tool to simulate the user/device.
-\begin{figure}[b]\hypertarget{id66}$^{32}$
-\href{http://funkload.nuxeo.org/}{http://funkload.nuxeo.org/}
-\end{figure}
+The client is on a \textbf{separate} network than the sever and is using the FunkLoad functional and load web tester tool to simulate the user/device.
 
 
 %___________________________________________________________________________
@@ -1196,8 +1262,8 @@ Server Specification:
 \item[] Bandwidth: 1500GB
 \end{lineblock}
 
-The server also has the FunkLoad Monitor Server\raisebox{.5em}[0em]{\scriptsize\hyperlink{id68}{33}} to monitor the health of the server to understand the different load the system has with and without the use of Cametrics.
-\begin{figure}[b]\hypertarget{id68}$^{33}$
+The server also has the FunkLoad Monitor Server\raisebox{.5em}[0em]{\scriptsize\hyperlink{id66}{32}} to monitor the health of the server to understand the different load the system has with and without the use of Cametrics.
+\begin{figure}[b]\hypertarget{id66}$^{32}$
 \href{http://funkload.nuxeo.org/\#monitor-server}{http://funkload.nuxeo.org/{\#}monitor-server}
 \end{figure}
 
@@ -1212,16 +1278,6 @@ The server also has the FunkLoad Monitor Server\raisebox{.5em}[0em]{\scriptsize\
 The following results summarize the average response time and the number of requests per a 45 second deadline. We do not compare the ideal case (using \texttt{syslog}) because the charts would not be of significance. In comparison, the ideal case performs linearly to the number of concurrent users on the system. In the other hand, as seen below in the graphs server (the machine sending measurements to Cametrics) exhibits a worsening of performance as the number of concurrent users increases.
 
 Now, the What's Invasive campaign needs to support 9 participants and the worst case of 40 concurrent users is a very unlikely condition. When looking at the following charts, however, it is best to treat the typical case in the range of 4-12 concurrent users.
-\begin{figure}[htbp]
-\centering
-
-\scalebox{0.500000}{\includegraphics{rrt-chart.png}}
-\caption{Seven average response times against a varying number of concurrent users.}\end{figure}
-\begin{figure}[htbp]
-\centering
-
-\scalebox{0.500000}{\includegraphics{sts-chart.png}}
-\caption{Successful requests per 45 seconds against various concurrent users for seven different test cases}\end{figure}
 \begin{description}
 \item[{v1 Cametrics PHP client:}] \leavevmode 
 This is the first iteration of the PHP client (using CURL). In this version, the client does a POST on each time the script executes the \texttt{measure} function. As discussed before, we saw the worst-case performance in this version because of the large number of requests occurring.
@@ -1247,6 +1303,20 @@ In order to understand the request size implications, we created a last test cas
 \end{description}
 
 As seen from the ongoing stress tests, the server is the direct effect as to how fast the PHP (and the other clients in other languages) client will perform. First, the optimizations that have been described in this paper had a significant improvement on the performance of the client. Second, the limits imposed on the client in order to ensure that Cametrics does not raise a Deadline exception do show a negative effect on the performance. This requires further investigation on Cametrics' POST critical path and to ensure that it returns a 200 status code (or \texttt{ACK}) to the client so that the client can return finish as soon as possible.
+\begin{figure}[htbp]
+\centering
+
+\scalebox{0.500000}{\includegraphics{rrt-chart.png}}
+\caption{Seven average response times against a varying number of concurrent users.}\end{figure}
+
+The above figure shows an improving trend in the request response time, or the time before the server acknowledges (with a 201 HTTP status code) that the data has been saved, between the various test cases. Although improvements made to the client by implementing a bulk upload feature (starting from ``v1 with Bulk, CURL'') and selecting CURL as the optimal function to use for POST-ing data to Cametrics, significant changes to the backend had most significant improvement in the response time. This supports that our development on the clients should be minimal and our focus should be on the Google App Engine-end to have the most benefit for the organizers.
+\begin{figure}[htbp]
+\centering
+
+\scalebox{0.500000}{\includegraphics{sts-chart.png}}
+\caption{Successful requests per 45 seconds against various concurrent users for seven different test cases}\end{figure}
+
+Similar to the previous figure, this figure shows an improving trend in the iterations of Cametrics. From this figure we can see that sockets is the only scalable function, and may be worth to do an 8th test case with sockets and having no limit on the client side. Similar, to the previous graph we can see that improvements on the Cametrics-end has the most significant improvement in the successful tests/45 seconds. Specifically, for concurrent users of less than 12 , most test cases improve. Additional testing and debugging is required to understand why concurrent users of greater than 12 has a significant impact on the number of responses.
 
 
 %___________________________________________________________________________
@@ -1260,9 +1330,21 @@ Although the number of developers currently helping to test is small the survey 
 
 When asked, ``what was the most difficult concept to understand of Cametrics,'' there was disparity in the responses but one of the developers indicated that the concept and purpose behind Cametrics was not easily understood. From other responses in the survey, the namespace and type concept were not clearly understood by some of the developers. This indicates that the project has not done a good job in documenting, giving examples, or provides enough guideline on how to understand the capabilities and limits of Cametrics.
 
-The rest of the responses, however, indicate that Cametrics is shown to be flexible and responsive. When asked, ``What is the Cametrics' best feature'' overwhelmingly the Summaries and Statistics were chosen as the best feature. Coming in second were the flexibility and visualizations of the system. Even though one of the organizers indicated that the concepts were not understood, they found that it was not difficult to setup (about 1-10 minute estimated setup times) for the organizers.
+The rest of the responses, however, indicate that Cametrics is shown to be flexible and responsive. When asked, ``What is the Cametrics' best feature'' overwhelmingly the Summaries and Statistics were chosen as the best feature. In addition, flexibility and visualizations of the system were considered valuable features. Even though one of the organizers indicated that the concepts were not understood, they found that it was not difficult to setup (about 1-10 minute estimated setup times) for the organizers. The following figure is an example of the latest statistics, or results, page that utilize Cametrics thoroughly. All the summaries presented, are from Cametrics requests.
+\begin{figure}[htbp]
+\centering
 
-As shown in the previous evaluation, the stress tests do indicate that Cametrics may seem to be slow or unresponsive. When asked, ``How is the ''feel`` of the system ...'' for uploading and accessing the data, the average response showed about 2-3 second wait time. The uploading of data seemed more responsive (according to one of the organizers) and this may be because of an ongoing analysis and optimization on that critical path. More investigation and test cases are needed to understand why the developers showed that Cametrics had a 2-3 second response for accessing the data.
+\scalebox{0.500000}{\includegraphics{stats_example.png}}
+\caption{A campaign's result page created by an organizer for the What's Invasive campaign}\end{figure}
+
+The organizers of the What's Invasive campaign were able to individualize the statistics for each user by creating additional namespace (data sets) for each participant and the following figure is an example of the personalize statistics page for the participant (since June 8th, 2009).
+\begin{figure}[htbp]
+\centering
+
+\scalebox{0.500000}{\includegraphics{indv_stats_example.png}}
+\caption{A participant's statistics page created by an organizer for the What's Invasive campaign}\end{figure}
+
+As shown in the previous evaluation, the stress tests do indicate that Cametrics may seem to be slow or unresponsive. When asked, ``How is the ''feel`` of the system ...'' for uploading and accessing the data, the average response showed about 2-3 second wait time. The uploading of data seemed more responsive (according to one of the organizers) and this may be because of an ongoing analysis and optimization on that critical path. Some of the organizers responded that the system had a 2-3 second response for accessing the data. This may be due that some of the data sets had a large volume of data to be rendered and visualized. For example, the location data type has large number of data points that need to be converted to \texttt{GMarker} which will then be added to a map that is loaded on the page. From the organizer's perspective, the delay may be from Cametrics or from the JavaScript engine rendering the data into the Document Object Model. In either case, we can minimize the delay for the organizer to see an effect on the web page by reducing the amount of data that needs to be processed (on Cametrics and by the JavaScript engine). Reducing the necessary points for maps will investigated in the future.
 
 When asked, if they ``intend to continue using ...'' and if they would suggest to their friends to use Cametrics, an overwhelming response of yes from all the developers indicate all the organizers approve that project as a tool that may have a significant part in their projects. As such, it is warranted to keep optimizing and improving the summaries.
 
@@ -1279,7 +1361,7 @@ When asked, if they ``intend to continue using ...'' and if they would suggest t
 \section*{Conclusions}
 \label{conclusions}
 
-The project thus far is successful in being simple, flexible, and extensible. The organizers have indicated in the surveys that it took them less than 3 minutes to setup and start logging data. Moreover, the organizers spent about the same time to embed on their web pages. Cametrics is flexible by allowing the organizer to set their data set key (the namespace) as they would like without having to have a mapping between a hashed key to their data set. Moreover, the system already accepted a large number of input types: string, integer, float, long, datetime, timestamp, location, gps, and more planned. All of these have summaries and histograms that automatically have visualizations that the organizer can use on run time. A feat. not yet possible with any other service. Although Cametrics has had a run in with scalability issues with the Google App Engine, learning from the difficulties has improved the design of the system and the future work will improve even further what Cametrics has already succeeded in doing well.
+According to the organizer survey, the project thus far is successful in being simple, flexible, and extensible. The organizers have indicated authoring and implementing the necessary code changes took less than 3 minutes. Moreover, the organizers spent about the same time to embed visualizations of the data sets on their web pages. Cametrics is flexible by allowing the organizer to set their data set key (the namespace) as they would like without having to have a mapping between a hashed key to their data set. Moreover, the system already accepted a large number of input types. All of these have summaries and histograms that automatically have visualizations that the organizer can use on run time. Although Cametrics has had a run in with scalability issues with the Google App Engine, learning from the difficulties has improved the design of the system and the future work will improve even further what Cametrics has already succeeded in doing well.
 
 
 %___________________________________________________________________________
@@ -1309,23 +1391,13 @@ An ever-growing request is to select particular data from the data set -{}- the 
 
 %___________________________________________________________________________
 
-\hypertarget{summaries-of-summaries}{}
-\pdfbookmark[1]{Summaries of Summaries}{summaries-of-summaries}
-\subsection*{Summaries of Summaries}
-\label{summaries-of-summaries}
-
-Pardon the confusion. An example should help make this idea concrete. At this time, Cametrics adds a created{\_}on attribute for each of the datum that are \texttt{POST}-ed. Summaries of Summaries would mean that the created{\_}on would not be an additional attribute on the datum, but rather an additional data set automatically created for the datum. This would mean that there would be a direct association between the \texttt{namespace} that the user used to POST the datum, and the \texttt{namespace.created{\_}on} that Cametrics would automatically create for the user. More needs to be researched in how these associations would occur (because of the complexity in the queries), and how the responses by the Renderer and Visualize modules should behave.
-
-
-%___________________________________________________________________________
-
 \hypertarget{event-system}{}
 \pdfbookmark[1]{Event System}{event-system}
 \subsection*{Event System}
 \label{event-system}
 
-As of recent there are more web articles on ``Web Hooks''\raisebox{.5em}[0em]{\scriptsize\hyperlink{id70}{34}}. Web Hooks are similar to callbacks in Event based languages. A user registered to a web service can register a callback, or web hook, in the service for when an event would occur. This is becoming more and more common in popular web services and we think that Cametrics would benefit greatly if we implemented an Event System. An organizer, for instance, can register a URL for when a value passed into Cametrics is higher or lower a threads hold. This can signify an anomaly from the expected trend. Moreover, histograms or other objects in the summaries can be listened to for an event to occur and the organizer would be notified via a web hook that the event has occurred. This is an asynchronous, and cheap, call. It would simply be a POST to their server of the event and reference to the object that caused the event. Other interesting applications would be a PHP client that would update a local cache of the organizer. Any new data or summaries, after a set number of new data (to minimize calls between servers), would be posted to the organizer's server's caching system. This way the calls between their server and Cametrics (for visualizations, for example) are minimized -{}- in other words a cooperative caching mechanism.
-\begin{figure}[b]\hypertarget{id70}$^{34}$
+As of recent there are more web articles on ``Web Hooks''\raisebox{.5em}[0em]{\scriptsize\hyperlink{id68}{33}}. Web Hooks are similar to callbacks in Event based languages. A user registered to a web service can register a callback, or web hook, in the service for when an event would occur. This is becoming more and more common in popular web services and we think that Cametrics would benefit greatly if we implemented an Event System. An organizer, for instance, can register a URL for when a value passed into Cametrics is higher or lower a threads hold. This can signify an anomaly from the expected trend. Moreover, histograms or other objects in the summaries can be listened to for an event to occur and the organizer would be notified via a web hook that the event has occurred. This is an asynchronous, and cheap, call. It would simply be a POST to their server of the event and reference to the object that caused the event. Other interesting applications would be a PHP client that would update a local cache of the organizer. Any new data or summaries, after a set number of new data (to minimize calls between servers), would be posted to the organizer's server's caching system. This way the calls between their server and Cametrics (for visualizations, for example) are minimized -{}- in other words a cooperative caching mechanism.
+\begin{figure}[b]\hypertarget{id68}$^{33}$
 \href{http://blog.webhooks.org/}{http://blog.webhooks.org/}
 \end{figure}
 
@@ -1358,15 +1430,5 @@ Currently the system does an aggregation of all the running data. This is only p
 \label{memcached-and-persistence}
 
 Through the work with the What's Invasive campaign one notices that on average the same statistics and histograms are used across multiple requests. If these objects can persist in Memcached without having to go to the datastore, a large portion of the delay between requests can be cut by accessing these objects directly from the Memcached. Similarly, for visualizations, many of the requests for GChart, values, or statistics may not have changed since the previous request. To improve the responsiveness of these requests, Memcached can be updated as data comes in or as requested by a user visiting an organizer's site. Due to quota limits on the Memcached, significant research on the use of the Memcached for various functions of Cametrics is necessary to understand if this is feasible.
-
-
-%___________________________________________________________________________
-
-\hypertarget{removing-or-guessing-the-type-input-argument}{}
-\pdfbookmark[1]{Removing or Guessing the 'type' input argument}{removing-or-guessing-the-type-input-argument}
-\subsection*{Removing or Guessing the 'type' input argument}
-\label{removing-or-guessing-the-type-input-argument}
-
-This may not be a high priority future work, since I think that one of the strengths of Cametrics is that the type of the input can be defined by the organizer/developer. As mentioned, is the type does not fit the summary that the developer is looking then them or via a request, a new Summary can match the new type for the correct summarization. Removing, or at least reducing, the number of times the type is used in the Cametrics can help to reduce the amount of developer responsibilities so this may be beneficial if completed.
 
 \end{document}

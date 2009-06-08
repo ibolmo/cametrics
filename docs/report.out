@@ -1,5 +1,6 @@
-\BOOKMARK [0][-]{abstract.0}{Abstract}{}
 \BOOKMARK [0][-]{contents.0}{Contents}{}
+\BOOKMARK [0][-]{abstract.0}{Abstract}{}
+\BOOKMARK [0][-]{acknowledgements.0}{Acknowledgements}{}
 \BOOKMARK [0][-]{introduction.0}{Introduction}{}
 \BOOKMARK [0][-]{related-work.0}{Related Work}{}
 \BOOKMARK [1][-]{criteria.1}{Criteria}{related-work.0}
@@ -9,13 +10,16 @@
 \BOOKMARK [1][-]{trendrr.1}{Trendrr14}{related-work.0}
 \BOOKMARK [1][-]{timetric.1}{Timetric15}{related-work.0}
 \BOOKMARK [0][-]{contributions.0}{Contributions}{}
+\BOOKMARK [1][-]{simple-and-flexible.1}{Simple and Flexible}{contributions.0}
+\BOOKMARK [1][-]{extensible.1}{Extensible}{contributions.0}
+\BOOKMARK [1][-]{scalable.1}{Scalable}{contributions.0}
+\BOOKMARK [1][-]{moving-towards-parsimonious.1}{Moving Towards Parsimonious}{contributions.0}
 \BOOKMARK [0][-]{system-design.0}{System Design}{}
-\BOOKMARK [1][-]{design-principles.1}{Design Principles}{system-design.0}
-\BOOKMARK [2][-]{flexibility.2}{Flexibility}{design-principles.1}
-\BOOKMARK [2][-]{accessibility.2}{Accessibility}{design-principles.1}
-\BOOKMARK [2][-]{extensibility.2}{Extensibility}{design-principles.1}
+\BOOKMARK [1][-]{flexibility.1}{Flexibility}{system-design.0}
+\BOOKMARK [2][-]{accessibility.2}{Accessibility}{flexibility.1}
+\BOOKMARK [2][-]{extensibility.2}{Extensibility}{flexibility.1}
 \BOOKMARK [1][-]{platform-selection.1}{Platform Selection}{system-design.0}
-\BOOKMARK [2][-]{home-brew-or-framework-symfony-doctrine-postgresql-solution.2}{Home Brew or Framework \(Symfony, Doctrine, PostgreSQL\) Solution}{platform-selection.1}
+\BOOKMARK [2][-]{home-brew-platforms-and-framework-based-solutions.2}{Home Brew Platforms and Framework Based Solutions}{platform-selection.1}
 \BOOKMARK [2][-]{google-s-app-engine.2}{Google's App Engine20}{platform-selection.1}
 \BOOKMARK [3][-]{limitations-and-requirements.3}{Limitations and Requirements}{google-s-app-engine.2}
 \BOOKMARK [1][-]{inputs.1}{Inputs}{system-design.0}
@@ -46,9 +50,7 @@
 \BOOKMARK [0][-]{conclusions.0}{Conclusions}{}
 \BOOKMARK [0][-]{future-work.0}{Future Work}{}
 \BOOKMARK [1][-]{filtering-granularity-and-selecting-data.1}{Filtering, Granularity, and Selecting Data}{future-work.0}
-\BOOKMARK [1][-]{summaries-of-summaries.1}{Summaries of Summaries}{future-work.0}
 \BOOKMARK [1][-]{event-system.1}{Event System}{future-work.0}
 \BOOKMARK [1][-]{more-internal-logging.1}{More Internal Logging}{future-work.0}
 \BOOKMARK [1][-]{summary-and-visualization-snapshot-system.1}{Summary and Visualization Snapshot System}{future-work.0}
 \BOOKMARK [1][-]{memcached-and-persistence.1}{Memcached and Persistence}{future-work.0}
-\BOOKMARK [1][-]{removing-or-guessing-the-type-input-argument.1}{Removing or Guessing the 'type' input argument}{future-work.0}
