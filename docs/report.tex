@@ -78,7 +78,6 @@ UCLA Department of Electrical Engineering}
 
 \maketitle
 
-
 %___________________________________________________________________________
 \pagebreak{}
 
@@ -963,7 +962,13 @@ The query string is the analogous of passing arguments to a function. Each argum
 
 \end{description}
 
-The following is a complete example of a possible URL that Cametrics supports: \texttt{http://cametrics.appspot.com/measure/public{\_}key/participant/visits/stats/weekday.gc?cht=bhs}. This will use the \texttt{participant.visits} namespace, and access the statistics (\texttt{stats}) calculated for all the datetime (defined in the statistic object, or the data) entries and return a stacked Google Chart's (\texttt{gc} an alias for \texttt{gchart}) bar graph of all the weekdays (Sunday through Saturday) that the participant has visited the website.
+The following is a complete example of a possible URL that Cametrics supports:
+\begin{quote}
+
+\texttt{http://cametrics.appspot.com/measure/public{\_}key/participant/visits/stats/weekday.gc?cht=bhs}
+\end{quote}
+
+This will use the \texttt{participant.visits} namespace, and access the statistics (\texttt{stats}) calculated for all the datetime (defined in the statistic object, or the data) entries and return a stacked Google Chart's (\texttt{gc} an alias for \texttt{gchart}) bar graph of all the weekdays (Sunday through Saturday) that the participant has visited the website.
 
 With exception of \texttt{path} and \texttt{query{\_}string}, Cametrics also uses the URI format to accept HTTP POST. For bulk uploads, Cametrics currently only accepts bulk uploads POSTs to an empty \texttt{namespace}.
 \begin{figure}[b]\hypertarget{id50}$^{22}$

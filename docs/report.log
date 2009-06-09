@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.9 (MiKTeX 2.7) (preloaded format=pdflatex 2009.6.7)  8 JUN 2009 16:25
+This is pdfTeX, Version 3.1415926-1.40.9 (MiKTeX 2.7) (preloaded format=pdflatex 2009.6.7)  8 JUN 2009 16:32
 entering extended mode
 **report.tex
 (report.tex
@@ -421,100 +421,99 @@ LaTeX Info: Redefining \pageref on input line 64.
  [1
 
 {C:/Users/Olmo/AppData/Local/MiKTeX/2.7/pdftex/config/pdftex.map}] [2] [3]
-LaTeX Font Info:    Try loading font information for T1+aett on input line 256.
+LaTeX Font Info:    Try loading font information for T1+aett on input line 255.
 
  ("C:\Program Files\MiKTeX\tex\latex\ae\t1aett.fd"
 File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
 ) [4] [5] [6]
-Underfull \hbox (badness 10000) in paragraph at lines 326--328
+Underfull \hbox (badness 10000) in paragraph at lines 325--327
 []|
  []
 
 
-Overfull \hbox (0.6432pt too wide) in paragraph at lines 326--328
+Overfull \hbox (0.6432pt too wide) in paragraph at lines 325--327
 \T1/aer/bx/n/10 ManyEyes| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 330--332
+Underfull \hbox (badness 10000) in paragraph at lines 329--331
 []| \T1/aer/bx/n/10 My-cro-
  []
 
 
-Overfull \hbox (17.28885pt too wide) in alignment at lines 321--340
+Overfull \hbox (17.28885pt too wide) in alignment at lines 320--339
  [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (17.28885pt too wide) in alignment at lines 340--501
+Overfull \hbox (17.28885pt too wide) in alignment at lines 339--500
  [] [] [] [] [] [] [] 
  []
 
 [7] [8] [9] [10] [11] [12]
 \c@listcnt0=\count120
  [13] [14] [15] [16]
-<system_overview.png, id=533, 775.89874pt x 420.57124pt>
+<system_overview.png, id=429, 775.89874pt x 420.57124pt>
 File: system_overview.png Graphic file (type png)
 
 <use system_overview.png> [17 <system_overview.png (PNG copy)>]
-Overfull \hbox (35.21114pt too wide) in paragraph at lines 961--963
+Overfull \hbox (35.21114pt too wide) in paragraph at lines 960--962
 \T1/aer/m/n/10 but as an ex-am-ple us-ing the \T1/aett/m/n/10 .gchart \T1/aer/m
 /n/10 for-mat and a \T1/aett/m/n/10 query_string \T1/aer/m/n/10 of: \T1/aett/m/
 n/10 ?cht=p3&chs=250x100&chco=054700
  []
 
 [18]
-Overfull \hbox (390.41748pt too wide) in paragraph at lines 966--967
-[]\T1/aer/m/n/10 The fol-low-ing is a com-plete ex-am-ple of a pos-si-ble URL t
-hat Ca-met-rics sup-ports: \T1/aett/m/n/10 http://cametrics.appspot.com/measure
-/public_key/participant/visits/stats/weekday.gc?cht=bhs\T1/aer/m/n/10 .
+Overfull \hbox (78.70822pt too wide) in paragraph at lines 968--969
+[]\T1/aett/m/n/10 http://cametrics.appspot.com/measure/public_key/participant/v
+isits/stats/weekday.gc?cht=bhs 
  []
 
-[19] [20] <gchart_example.png, id=581, 200.75pt x 140.525pt>
+[19] [20] <gchart_example.png, id=480, 200.75pt x 140.525pt>
 File: gchart_example.png Graphic file (type png)
 
-<use gchart_example.png> <gmap_example.png, id=584, 950.55125pt x 603.25375pt>
+<use gchart_example.png> <gmap_example.png, id=483, 950.55125pt x 603.25375pt>
 File: gmap_example.png Graphic file (type png)
 
 <use gmap_example.png>
-Overfull \hbox (27.14351pt too wide) in paragraph at lines 1058--1059
+Overfull \hbox (27.14351pt too wide) in paragraph at lines 1063--1064
  [][] 
  []
 
 [21 <gchart_example.png (PNG copy)>] [22 <gmap_example.png (PNG copy)>]
-<input_overview.png, id=607, 829.0975pt x 247.92625pt>
+<input_overview.png, id=508, 829.0975pt x 247.92625pt>
 File: input_overview.png Graphic file (type png)
 
 <use input_overview.png> [23]
-<send_to_datastore.png, id=621, 811.03pt x 273.02pt>
+<send_to_datastore.png, id=527, 811.03pt x 273.02pt>
 File: send_to_datastore.png Graphic file (type png)
 
 <use send_to_datastore.png> [24 <input_overview.png (PNG copy)>]
-<output_overview.png, id=628, 720.6925pt x 435.6275pt>
+<output_overview.png, id=534, 720.6925pt x 435.6275pt>
 File: output_overview.png Graphic file (type png)
 
 <use output_overview.png> [25 <send_to_datastore.png (PNG copy)>]
-LaTeX Font Info:    Try loading font information for OMS+aer on input line 1226
+LaTeX Font Info:    Try loading font information for OMS+aer on input line 1231
 .
 
 ("C:\Program Files\MiKTeX\tex\latex\ae\omsaer.fd"
 File: omsaer.fd 1999/12/27
 )
 LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 1226.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 1231.
 
- [26 <output_overview.png (PNG copy)>] [27] <rrt-chart.png, id=663, 702.625pt x
+ [26 <output_overview.png (PNG copy)>] [27] <rrt-chart.png, id=576, 702.625pt x
  301.125pt>
 File: rrt-chart.png Graphic file (type png)
 
-<use rrt-chart.png> <sts-chart.png, id=664, 702.625pt x 301.125pt>
+<use rrt-chart.png> <sts-chart.png, id=577, 702.625pt x 301.125pt>
 File: sts-chart.png Graphic file (type png)
 
 <use sts-chart.png> [28 <rrt-chart.png (PNG copy)>]
-<stats_example.png, id=670, 724.95844pt x 502.87875pt>
+<stats_example.png, id=583, 724.95844pt x 502.87875pt>
 File: stats_example.png Graphic file (type png)
  <use stats_example.png>
-<indv_stats_example.png, id=671, 724.95844pt x 644.4075pt>
+<indv_stats_example.png, id=584, 724.95844pt x 644.4075pt>
 File: indv_stats_example.png Graphic file (type png)
 
 <use indv_stats_example.png> [29 <sts-chart.png (PNG copy)>] [30 <stats_example
@@ -525,19 +524,15 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 6432 strings out of 95304
- 87264 string characters out of 1183208
- 192725 words of memory out of 1500000
- 9216 multiletter control sequences out of 110000
+ 6404 strings out of 95304
+ 86555 string characters out of 1183208
+ 191596 words of memory out of 1500000
+ 9189 multiletter control sequences out of 110000
  33732 words of font info for 72 fonts, out of 3000000 for 5000
  14 hyphenation exceptions out of 8191
  42i,8n,41p,2110b,498s stack positions out of 5000i,500n,10000p,200000b,50000s
 pdfTeX warning (dest): name{cametrics-a-novel-data-logger-aggregator-and-visu
 alizer-cloud-service} has been referenced but does not exist, replaced by a fix
-ed one
-
-pdfTeX warning (dest): name{cametrics-a-novel-data-logger-aggregator-and-visual
-izer-cloud-service.0} has been referenced but does not exist, replaced by a fix
 ed one
 
 <C:/Program Files/MiKTeX/fonts/type1/bluesky/cm/cmbx10.pfb><C:/Program Files/Mi
@@ -547,9 +542,9 @@ esky/cm/cmbx7.pfb><C:/Program Files/MiKTeX/fonts/type1/bluesky/cm/cmr10.pfb><C:
 /fonts/type1/bluesky/cm/cmr7.pfb><C:/Program Files/MiKTeX/fonts/type1/bluesky/c
 m/cmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/bluesky/cm/cmti10.pfb><C:/Pro
 gram Files/MiKTeX/fonts/type1/bluesky/cm/cmtt10.pfb>
-Output written on report.pdf (34 pages, 811762 bytes).
+Output written on report.pdf (34 pages, 805044 bytes).
 PDF statistics:
- 797 PDF objects out of 1000 (max. 8388607)
- 264 named destinations out of 1000 (max. 131072)
- 519 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 718 PDF objects out of 1000 (max. 8388607)
+ 263 named destinations out of 1000 (max. 131072)
+ 311 words of extra memory for PDF output out of 10000 (max. 10000000)
 
