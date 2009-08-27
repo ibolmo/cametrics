@@ -23,6 +23,9 @@ handlers:
   
 - url: /measure/.*
   script: measure.py
+  
+- url: /process/.*
+  script: measure.py
 
 - url: /.*
   script: common/appenginepatch/main.py

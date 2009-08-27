@@ -3,6 +3,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api.labs import taskqueue
 
 from django.utils import simplejson
 from myapp.models import Campaign, Storage, Statistics
@@ -39,6 +40,19 @@ class MainPage(webapp.RequestHandler):
   def post(self, key, path, format):
     if (not key):
       return self.error(500)
+      
+    process_url = self.request.path.replace('measure','process')
+    
+    
+    logging.debug("process_url = " + process_url)
+    
+    taskqueue.add(url=process_url, params=self.request.POST)
+    
+    self.response.headers['Content-Type'] = 'text/html'
+    self.response.out.write('Added to taskqueue.\n')
+    
+class Process(webapp.RequestHandler):
+  def post(self,key,path,format):  
     
     self.campaign = Campaign.all(keys_only = True).filter('__key__ = ', db.Key(key)).get()
     if (not self.campaign):
@@ -46,6 +60,9 @@ class MainPage(webapp.RequestHandler):
       return self.error(404)
       
     logging.debug("%s, %s, %s" % (key, path, format))
+    
+    for value in self.request.POST:
+			logging.info(value+": " + self.request.get(value))
     
     models = []
     error = False
@@ -60,7 +77,8 @@ class MainPage(webapp.RequestHandler):
     
     models += _Stats.values() + stat._Hists.values()
     send_to_datastore(models)
-    self.response.set_status(error and 304 or 201)
+    self.response.set_status(error and 304 or 200)
+
 
 def send_to_datastore(models):
   payload = [models]
@@ -108,7 +126,8 @@ def cleanup_relations(sender, **kwargs):
     logging.critical('Could not schedule a DELETE Campaign Task for Campaign (%s)' % campaign)
       
 application = webapp.WSGIApplication(debug = os.environ['SERVER_SOFTWARE'].startswith('Dev'), url_mapping = [
-  ('/measure/([^/]+)/([^\.]+)?(?:\.(.+))?', MainPage)
+  ('/measure/([^/]+)/([^\.]+)?(?:\.(.+))?', MainPage),
+  ('/process/([^/]+)/([^\.]+)?(?:\.(.+))?', Process)
 ])
  
 if __name__ == "__main__":  
